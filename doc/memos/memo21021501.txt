@@ -1,0 +1,12 @@
+
+das Terminal erhält beim nächsten Kassenschnitt die neue Konfiguration. Um diesen manuell zu starten finden sie auf der Rückseite zwei rote Knöpfe. Den roten Knopf, den man mit dem Finger drücken kann, drücken um ins Menü zu kommen. Im Punkt Aktion -> Kassenschluss kann dieser mit dem Passwort 99551 gestartet werden.
+
+ 
+
+Die Kommunikation mit dem Terminal erfolgt so, dass ZVT-Kommandos direkt an den Port (20007) des Terminal geschickt werden. Um die IP-Adresse des Terminals herauszufinden, kann man im Menü unter Service -> Systeminfo -> SysInfo Anzeigen auch mit dem Passwort 99551 nachschauen.
+
+ 
+
+Bitte bei Fragen die TID(Terminal-ID, 8-Stellige Zahl beginnt mit 29) mitsenden.
+
+ 

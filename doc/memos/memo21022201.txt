@@ -1,0 +1,13 @@
+es liegen hier drei unterschiedliche Probleme vor:
+
+1)      Das Terminal antwortet nicht auf die Serielle Schnittstelle: Ja das stimmt und ist richtig so. Wenn Sie wollen, dass das Terminal auf Serielle Kassenanbindung umgestellt wird, dann können wir das gerne machen. Da das Terminal aber immer nur entweder TCPIP oder Serielle Anbindung kann, würde ich für die Tests noch TCPIP eingestellt lassen.
+
+2)      Das Terminal antwortet nicht auf TCPIP Nachrichten. Aus dem Sourcecode konnte ich entnehmen, dass die Anmeldung korrekt gesendet wird, aber die Antworten des Terminals nicht ankommen. Da ich leider mit der Sprache Go nicht vertraut bin, kann ich hier keine konkreten Fehler feststellen. Nach meiner Recherche könnte man noch net.TCPConn statt net.Conn probieren. Das sollte jedoch keine Unterschiede machen. Des Weiteren würde ich Sie bitten mittels Wireshark (oder ähnlichen Programmen) die ankommende Verbindung zu prüfen, um einen Software- und/oder Terminalfehler auszuschließen.
+
+3)      Das Terminal zeigt den gesendeten Text nicht an. Das kann in diesem Zusammenhang 2 Gründe haben:
+
+a.       Das Terminal wartet auf die Bestätigung den Abschlusses, den Sie nicht sehen/bekommen haben
+
+b.       Das Terminal versteht den Befehl nicht, da ein Fehler passiert ist. Man muss die Länge jeder Zeile ,die angezeigt werden soll, nach der Zeilenangabe angeben. Also 10 Byte -> F1 F1F0; oder 12 Byte -> F1 F1F2. Damit ergibt sich folgender Befehl: 06E0 0DF1 F1F0 4861 6C6C 6F20 5765 6C74
+
+ 

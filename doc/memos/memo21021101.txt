@@ -1,0 +1,6 @@
+
+So wie Sie es beschreiben ist es leider nicht möglich. Das Terminal hat nur einen Ethernet-Anschluss und mit diesem muss es im Internet sein um Zahlungen zu autorisieren.
+
+ 
+
+Sie können jedoch das Terminal im Netzwerk mit dem Port 20007 direkt mit ZVT ansprechen. Wenn Sie das Ganze so austesten möchten senden Sie mir bitte die Terminal ID. Dann werde ich Ihnen das Gerät dementsprechend konfigurieren.

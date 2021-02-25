@@ -1,0 +1,39 @@
+Anbei übermittle ich Ihnen alle benötigten Informationen für die Kassenintegration im Auftrag von Hrn. Maurer:
+
+Unsere Terminals sprechen das ZVT-700 Protokoll, welches ich Ihnen angefügt habe. Ebenfalls angefügt ist unsere ZVT-Präzisierung, welche die von uns implementierten Erweiterungen und Änderungen zum ZVT-700 Protokoll spezifiziert.
+
+Der Ablauf der Integration sieht so aus, dass nach erfolgter Implementierung der Schnittstelle durch Sie ein gemeinsamer Abnahmetest in Form eines von uns übermittelten Testplans und Guide stattfindet, bei dem die Schnittstelle auf Ihre Funktionalität und Ausfallssicherheit getestet wird und die Funktionalität entsprechend dokumentiert wird. Dazu gibt es von uns einige Mindestanforderungen, welche im Falle einer „vollen“ Kassenintegration (Kasse übernimmt Druck und steuert alle Funktionen) implementiert sein müssen:
+
+ 
+
+Anmeldung / Registration (06 00)
+Einkauf / Authorization (06 01)
+Storno / Reversal (06 30)
+Belegnachdruck / Repeat receipt (006 20)
+Tagesende / End of day (06 50)
+Abort (06 B0)
+Belegdruck: über Kassenbondrucker via Blockdruck (06 D3, Configbyte BE, TLV Container muss dafür implementiert sein)
+Textanzeige der Abbrüche und Meldungen des Host (Mapping lt. ZVT Protokoll Error Codes 1-63) oder Anzeige des BMP 3C (kein mappen notwendig)
+Mögliche Anbindungen an das Kassensystem via serieller oder TCP/IP Schnittstelle
+ 
+
+Wenn Sie jedoch eine Kassenintegration zum Zwecke der reinen Betragsübergabe (ohne weitere Funktionen, Eingabe am Terminal ist möglich) implementieren, ist bitte außerdem folgendes zu beachten:
+
+Wenn der Belegdruck am Kassenseitigen Bondrucker durchgeführt werden soll, muss trotzdem der TLV Container implementiert werden, da andernfalls nur Zeilendruck stattfindet, was hinsichtlich der Performance nicht tragbar ist
+Wenn Sie den TLV-Container nicht implementieren, lassen Sie den Druck des Terminalbelegs am besten über den Terminaldrucker durchführen
+Mögliche Anmeldekommandos (06 00) bezüglich dieser beiden Optionen:
+Blockdruck über Kasse mit möglicher Eingabe am Terminal: (Configbyte 0x8E) 0600 0E12 3456 8E09 7806 0626 040A 0206 D3
+Druck aller Belege am Terminal: (Configbyte 08) hier ist kein TLV-Container notwendig, deshalb empfehle ich: 0600 0612 3456 0809 78
+Was jedenfalls auch in dieser Konstellation Anforderung bleibt und für den Abnahmetest relevant ist, ist die Textanzeige der Meldungen des Host bzw. die Anzeige des vom Terminal im Transaktionsergebnis übertragenen BMP 3C, wobei ich die Anzeige des BMP 3C empfehle, da hier nichts gemappt werden muss.
+ 
+
+Zum Zwecke Ihrer Entwicklungs- und Testarbeiten kann ich Ihnen ein Testterminal als Leihstellung zur Verfügung stellen. Herr Maurer erwähnte Sie haben Interesse an einen Valina Gerät. Wenn Sie mir Ihren Firmennamen + Adresse sowie Telefonnummer zukommen lassen werde ich den Versand beauftragen.
+
+ 
+
+Die Schnittstelle kann sowohl über TCP/IP als auch über die serielle Schnittstelle erfolgen.
+
+ 
+
+Falls sie Fragen oder Technische Hilfestellung brauchen sollten, stehen wir Ihnen gerne unter secondlevel@dcezahlungssysteme.at zur Verfügung.
+

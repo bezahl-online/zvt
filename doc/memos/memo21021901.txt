@@ -1,0 +1,32 @@
+
+das im Anmeldekommando verwendete Passwort „123456“ ist für unser Terminal ok und kann so eingestellt bleiben.
+
+ 
+
+Ja es  stimmt, dass man für gewisse Funktionen, wie etwa die Erw. Systemeinstellungen ein anderes Passwort benötigt. Dieses Passwort heißt Tagespasswort und ändert sich täglich. Es kann jederzeit telefonisch bei uns oder dem Helpdesk nachgefragt werden. Das Tagespasswort für die kommenden 5 Tage lautet:
+
+19.02.2021          04305
+
+20.02.2021          71187
+
+21.02.2021          75668
+
+22.02.2021          65790
+
+23.02.2021          66861
+
+ 
+
+Das Terminal antwortet auf das Anmeldekommando nicht, da sich hier ein Fehler im Währungscode eingeschlichen hat. Dieser ist 2 Byte groß und lautet 09 78 für Euro.
+
+Das richtige Anmeldekommando lautet dann: 06 00 0E 12 34 56 8E 09 78 06 06 26 04 0A 02 06 D3
+
+Mit diesem Anmeldekommando werden folgende Dinge eingestellt:
+
+·         Alle Transaktionsarten können auch vom Terminal aus gestartet werden
+
+·         Terminal druckt den Beleg, wenn die Transaktion vom Terminal aus gestartet wird
+
+·         Kasse druckt Beleg (Blockdruck), wenn die Transaktion von der Kasse gestartet wird
+
+ 

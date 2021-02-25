@@ -1,0 +1,50 @@
+Sehr geehrter Herr Eichelberger,
+
+ 
+
+da das Terminal für die Automatenintegration gedacht ist, wäre 06 00 0E 12 34 56 BE 09 78 06 06 26 04 0A 02 06 D3 eine bessere Anmeldung, da dann:
+
+·         Keine Transaktionen über das Terminal gestartet werden können
+
+·         Alle Kommandos von der Kasse kommen und diese Blockdruck druckt.
+
+Wenn Sie diesen Anmeldestring verwenden, dann sollte nur das Logo am Display (kein Menü mehr) sichtbar bleiben. Der Menü-Button kann mit einer Abmeldung wieder sichtbar gemacht werden. Sollte dies nicht der Fall sein, dann wartet das Terminal auf eine Confirmation (80 00) für den Abschluss (06 0F).
+
+ 
+
+Da das Terminal direkt auf die Nachricht antwortet und keine neue Verbindung zur Kasse herstellt, kann der Port der Kasse ein anderer sein, da dieser vom Betriebssystem ausgewählt wird. Unter Windows kann man in einer Eingabeaufforderung mit dem Befehl netstat –an alle offenen Ports bzw. hergestellte Verbindungen nachschauen.
+
+Der Verbindungsaufbau sollte in etwa so aussehen:
+
+ 
+
+Kasse (Port ?)                                    Terminal (Port 20007)
+
+(TCP)Verbindungsaufbau->
+
+                                               <-            (TCP)Verbindungsaufbau ok
+
+Anmeldung (0600)          ->
+
+                                               <-           Confirmation (8000)
+
+                                               <-           Abschluss (060F)
+
+Confirmation (8000)       ->
+
+
+ 
+
+Für weitere Fragen stehen wir gerne zur Verfügung.
+
+ 
+
+ 
+
+Mit freundlichen Grüßen
+
+ 
+
+Gregor Scharinger
+
+Second Level Support
