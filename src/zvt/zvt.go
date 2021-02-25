@@ -1,6 +1,7 @@
 package zvt
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"net"
@@ -108,4 +109,38 @@ func (p *PT) compileServiceByte(b []byte) ServiceByte {
 		sb += ServiceByte(v)
 	}
 	return sb
+}
+
+func (p *PT) compilePTConfig(c *PTConfig) []byte {
+	var b []byte = []byte{}
+	b = append(b, c.pwd[0], c.pwd[1], c.pwd[2])
+	b = append(b, byte(c.config))
+	b = append(b, ([2]byte(c.currency))[0])
+	b = append(b, ([2]byte(c.currency))[1])
+	b = append(b, 0x03, byte(c.service))
+	if c.tlv != nil {
+		b = append(b, p.marshalTLV(c.tlv)...)
+	}
+	return b
+}
+
+func (p *PT) marshalTLV(t *TLV) []byte {
+	var b []byte
+	b = append(b, t.BMP)
+	len := len(t.data)
+	var length []byte = []byte{0}
+	if len > 255 {
+		length[0] = 0x82
+		var l []byte = []byte{0, 0}
+		binary.BigEndian.PutUint16(l, uint16(len))
+		length = append(length, l...)
+	} else if len > 127 {
+		length[0] = 0x81
+		length = append(length, byte(len))
+	} else {
+		length[0] = byte(len)
+	}
+	b = append(b, length...)
+	b = append(b, t.data...)
+	return b
 }

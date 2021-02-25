@@ -20,9 +20,8 @@ type PT struct {
 
 // TLV is the type length value container
 type TLV struct {
-	BMP    byte
-	length [3]byte
-	data   []byte
+	BMP  byte
+	data []byte
 }
 
 // ServiceByte is the sructure of the ZVT service byte
@@ -60,9 +59,17 @@ const (
 	ECRusingPrintLinesForPrintout
 )
 
+// Currency the currency type
+type Currency [2]byte
+
+// EUR currency code
+var EUR Currency = Currency([2]byte{0x09, 0x97})
+
 // PTConfig ist the config struct
 type PTConfig struct {
-	config  ConfigByte
-	service byte
-	tlv     TLV
+	pwd      [3]byte
+	config   ConfigByte
+	currency Currency
+	service  ServiceByte
+	tlv      *TLV
 }
