@@ -93,3 +93,19 @@ func (p *PT) compileText(textarray []string) []byte {
 	}
 	return t
 }
+
+func (p *PT) compileConfigByte(b []byte) ConfigByte {
+	var cb ConfigByte = 0
+	for _, v := range b {
+		cb += ConfigByte(v)
+	}
+	return cb
+}
+
+func (p *PT) compileServiceByte(b []byte) ServiceByte {
+	var sb ServiceByte = 0
+	for _, v := range b {
+		sb += ServiceByte(v)
+	}
+	return sb
+}

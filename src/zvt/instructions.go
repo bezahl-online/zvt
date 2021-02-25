@@ -9,10 +9,10 @@ func (p *PT) DisplayText(text []string) error {
 	})
 }
 
-func (p *PT) Register(config *PTConfig) error {
-	return p.send(command{
-		Class: 0x06,
-		Inst:  0x00,
-		Data:  p.compileConfigBytes(config),
-	})
-}
+// func (p *PT) Register(config *PTConfig) error {
+// 	return p.send(command{
+// 		Class: 0x06,
+// 		Inst:  0x00,
+// 		Data:  p.compileRegistrationData(config),
+// 	})
+// }

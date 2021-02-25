@@ -14,3 +14,12 @@ func TestDisplayText(t *testing.T) {
 		"als wie zuvor."})
 	assert.NoError(t, err)
 }
+
+// func TestRegister(t *testing.T) {
+// 	err := ZVT.Register(&PTConfig{
+// 		config:  0,
+// 		service: 0,
+// 		tlv:     TLV{},
+// 	})
+// 	assert.NoError(t, err)
+// }

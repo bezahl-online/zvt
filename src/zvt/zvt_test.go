@@ -23,3 +23,27 @@ func TestCompileText(t *testing.T) {
 	got := ZVT.compileText([]string{"Test", "Array"})
 	assert.Equal(t, want, got)
 }
+
+func TestCompileConfigByte(t *testing.T) {
+	want := ConfigByte(0x8E)
+	got := ZVT.compileConfigByte([]byte{
+		PaymentReceiptPrintedByECR,
+		AdminReceiptPrintedByECR,
+		PTSendsIntermediateStatus,
+		ECRusingPrintLinesForPrintout,
+	})
+	assert.EqualValues(t, want, got)
+}
+
+func TestCompileServiceByte(t *testing.T) {
+	want := ServiceByte(0x03)
+	got := ZVT.compileServiceByte([]byte{
+		ServiceMenuNOTAssignedToFunctionKey,
+		DisplayTextsForCommandsAuthorisation,
+	})
+	assert.EqualValues(t, want, got)
+}
+
+func TestCompileRegistrationData(t *testing.T) {
+	// want:=[]byte{0x12,0x34,0x56,0x8E,}
+}
