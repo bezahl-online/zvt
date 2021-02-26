@@ -5,10 +5,19 @@ import (
 	"sync"
 )
 
-type command struct {
+// Command is the structur for a APDU
+type Command struct {
 	Class  byte
 	Inst   byte
 	Length byte
+	Data   []byte
+}
+
+// Response is the response from the PT
+type Response struct {
+	CCRC   byte
+	APRC   byte
+	Length int
 	Data   []byte
 }
 
@@ -69,7 +78,7 @@ var EUR Currency = Currency([2]byte{0x09, 0x97})
 type PTConfig struct {
 	pwd      [3]byte
 	config   ConfigByte
-	currency Currency
+	currency Currency // default EUR
 	service  ServiceByte
 	tlv      *TLV
 }

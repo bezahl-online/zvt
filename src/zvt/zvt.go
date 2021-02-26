@@ -13,6 +13,7 @@ import (
 
 // ZVT represents the driver
 var ZVT PT
+var zvtACK []byte = []byte{0x80, 0x00, 0x00}
 
 func init() {
 	var pt PT = PT{
@@ -45,7 +46,7 @@ func (p *PT) Open() error {
 }
 
 // convert command structure to byte array
-func (c command) getBytes() []byte {
+func (c Command) getBytes() []byte {
 	var b []byte = []byte{
 		c.Class,
 		c.Inst,
@@ -56,26 +57,23 @@ func (c command) getBytes() []byte {
 	return b
 }
 
-func (p *PT) send(c command) error {
+func (p *PT) send(c Command) (Response, error) {
 	nr, err := p.conn.Write(c.getBytes())
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("debug: %d bytes written:\n", nr)
 	fmt.Println(strings.ReplaceAll(fmt.Sprintf("%q\n", fmt.Sprintf("% #x", c.getBytes())), " ", ","))
-
-	var readBuf []byte = make([]byte, 3)
+	var resp Response
+	var readBuf []byte = make([]byte, 128)
 	p.conn.SetDeadline(time.Now().Add(5 * time.Second))
 	nr, err = p.conn.Read(readBuf)
 	if err != nil {
-		log.Fatal(err)
+		return resp, err
 	}
-	if nr == 3 && readBuf[0] == 0x80 {
-		p.conn.Write([]byte{0x80, 0, 0})
-	} else {
-		return fmt.Errorf("Error from PT: %x", readBuf)
-	}
-	return nil
+	resp, err = p.unmarshalAPDU(readBuf)
+	p.conn.Write(zvtACK)
+	return resp, err
 }
 
 func (p *PT) compileText(textarray []string) []byte {
@@ -143,4 +141,20 @@ func (p *PT) marshalTLV(t *TLV) []byte {
 	b = append(b, length...)
 	b = append(b, t.data...)
 	return b
+}
+
+func (p *PT) unmarshalAPDU(apduBytes []byte) (Response, error) {
+	var resp Response
+	if len(apduBytes) < 3 {
+		return resp, fmt.Errorf("APDU less than 3 bytes long")
+	}
+	resp = Response{
+		CCRC:   apduBytes[0],
+		APRC:   apduBytes[1],
+		Length: int(apduBytes[2]),
+	}
+	if len(apduBytes) >= int(apduBytes[2])+3 {
+		resp.Data = apduBytes[3 : apduBytes[2]+3]
+	}
+	return resp, nil
 }

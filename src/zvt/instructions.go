@@ -1,18 +1,21 @@
 package zvt
 
+var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}
+
 // DisplayText implements instr 06 E0
-func (p *PT) DisplayText(text []string) error {
-	return p.send(command{
+func (p *PT) DisplayText(text []string) (Response, error) {
+	return p.send(Command{
 		Class: 0x06,
 		Inst:  0xe0,
 		Data:  p.compileText(text),
 	})
 }
 
-// func (p *PT) Register(config *PTConfig) error {
-// 	return p.send(command{
-// 		Class: 0x06,
-// 		Inst:  0x00,
-// 		Data:  p.compileRegistrationData(config),
-// 	})
-// }
+// Register implements inst 06 00
+func (p *PT) Register(config *PTConfig) (Response, error) {
+	return p.send(Command{
+		Class: 0x06,
+		Inst:  0x00,
+		Data:  p.compilePTConfig(config),
+	})
+}
