@@ -1,0 +1,17 @@
+
+
+a) Was passiert wenn ich nun eine Testzahlung durchführe? Gibt es ein Sandbox system? Test Karten?
+
+b) Welche Möglichkeiten gibt es Fälle wie z.B. "Karte gesperrt" oder "Konto nicht gedeckt" zu testen?
+
+c) Gibt es eine Liste von möglichen Fehlern, welche eine erfolgreiche Zahlung vereiteln würden?
+
+ Im nachfolgenden werde ich die jeweiligen Fragen beantworten:
+
+a)       Da Sie ein Testterminal von uns bekommen haben, können Sie mit Ihrer privaten Kreditkarte bezahlen. Dabei wird kein Geld von Ihrem Konto abgebucht. Zu beachten ist, dass Zahlungen, die getätigt werden, das Tageslimit herabsetzen. Daher empfehlen wir Testzahlungen mit niedrigen Beträgen (0,01€) zu machen.
+
+b)      Leider gibt es keine Möglichkeit diese Fälle explizit zu testen, sofern Sie keine gesperrte Karte besitzen. Solche Tests sind für eine Abnahme von uns auch nicht vorgesehen. Wichtig ist dabei nur, dass der Result-Code bzw. ein Abort richtig verarbeitet wird.
+
+c)       Im Anhang F der ZVT-Präzisierung sind die Result-Codes, welche man z.B. bei einer Statusinformation oder einem Abort bekommt, mit dem jeweiligen anzuzeigenden Text aufgelistet.
+
+ 

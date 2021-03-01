@@ -12,6 +12,7 @@ func (p *PT) DisplayText(text []string) (Response, error) {
 }
 
 // Register implements inst 06 00
+// set up different configurations on the PT
 func (p *PT) Register(config *PTConfig) (Response, error) {
 	return p.send(Command{
 		Class: 0x06,
@@ -19,3 +20,13 @@ func (p *PT) Register(config *PTConfig) (Response, error) {
 		Data:  p.compilePTConfig(config),
 	})
 }
+
+// Authorisation implents 06 01
+// initiates a payment process
+// func (p *PT) Authorisation(data *AuthData) (Response, error) {
+// 	return p.send(Command{
+// 		Class: 0x06,
+// 		Inst:  0x01,
+// 		Data:  p.marshalAuthData(data),
+// 	})
+// }

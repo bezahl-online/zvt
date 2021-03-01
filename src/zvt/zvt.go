@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/albenik/bcd"
 )
 
 // ZVT represents the driver
@@ -93,39 +95,40 @@ func (p *PT) compileText(textarray []string) []byte {
 	return t
 }
 
-func (p *PT) compileConfigByte(b []byte) ConfigByte {
-	var cb ConfigByte = 0
-	for _, v := range b {
-		cb += ConfigByte(v)
-	}
-	return cb
-}
-
-func (p *PT) compileServiceByte(b []byte) ServiceByte {
-	var sb ServiceByte = 0
-	for _, v := range b {
-		sb += ServiceByte(v)
-	}
-	return sb
-}
-
 func (p *PT) compilePTConfig(c *PTConfig) []byte {
 	var b []byte = []byte{}
 	b = append(b, c.pwd[0], c.pwd[1], c.pwd[2])
 	b = append(b, byte(c.config))
-	b = append(b, ([2]byte(c.currency))[0])
-	b = append(b, ([2]byte(c.currency))[1])
+	b = append(b, bcd.FromUint(uint64(c.currency), 2)...)
 	b = append(b, 0x03, byte(c.service))
 	if c.tlv != nil {
-		b = append(b, p.marshalTLV(c.tlv)...)
+		b = append(b, p.marshalTLV(&c.tlv.Objects)...)
 	}
 	return b
 }
 
-func (p *PT) marshalTLV(t *TLV) []byte {
+func marshalDataObjects(dos *[]DataObject) []byte {
+	var data []byte
+	for _, obj := range *dos {
+		data = append(data, obj.TAG...)
+		data = append(data, compileLength(len(obj.data))...)
+		data = append(data, obj.data...)
+	}
+	return data
+}
+
+const tlvBMP = 0x06
+
+func (p *PT) marshalTLV(dos *[]DataObject) []byte {
 	var b []byte
-	b = append(b, t.BMP)
-	len := len(t.data)
+	b = append(b, tlvBMP)
+	data := marshalDataObjects(dos)
+	b = append(b, compileLength(len(data))...)
+	b = append(b, data...)
+	return b
+}
+
+func compileLength(len int) []byte {
 	var length []byte = []byte{0}
 	if len > 255 {
 		length[0] = 0x82
@@ -138,9 +141,7 @@ func (p *PT) marshalTLV(t *TLV) []byte {
 	} else {
 		length[0] = byte(len)
 	}
-	b = append(b, length...)
-	b = append(b, t.data...)
-	return b
+	return length
 }
 
 func (p *PT) unmarshalAPDU(apduBytes []byte) (Response, error) {
