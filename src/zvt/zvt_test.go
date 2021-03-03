@@ -3,6 +3,7 @@ package zvt
 import (
 	"testing"
 
+	"bezahl.online/zvt/src/zvt/payment"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +22,7 @@ func TestGetBytes(t *testing.T) {
 func TestCompileText(t *testing.T) {
 	want := []byte{0xf1, 0xf0, 0xf4, 0x54, 0x65, 0x73,
 		0x74, 0xf2, 0xf0, 0xf5, 0x41, 0x72, 0x72, 0x61, 0x79}
-	got := ZVT.compileText([]string{"Test", "Array"})
+	got := compileText([]string{"Test", "Array"})
 	assert.Equal(t, want, got)
 }
 
@@ -40,7 +41,10 @@ func TestCompileTLV(t *testing.T) {
 	*objects = append(*objects,
 		*listOfCommands,
 		*cardPollTimeout)
-	got := ZVT.marshalTLV(objects)
+	var tlv TLV = TLV{
+		Objects: *objects,
+	}
+	got := tlv.Marshal()
 	assert.EqualValues(t, want, got)
 }
 
@@ -55,7 +59,7 @@ func TestCompilePTConfig(t *testing.T) {
 		Objects: []DataObject{},
 	}
 	tlv.Objects = append(tlv.Objects, *listOfCommands)
-	got := ZVT.compilePTConfig(&PTConfig{
+	got := compilePTConfig(&PTConfig{
 		pwd:      [3]byte{0x12, 0x34, 0x56},
 		config:   0x8E,
 		currency: EUR,
@@ -79,21 +83,31 @@ func TestUnmarshalAPDU(t *testing.T) {
 	}
 }
 
-// func TestAuthData(t *testing.T){
-// 	want := []byte{0x040, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x19, 0x74, 0x0E,0x11,0x21,0x06,0x03,0x1F,0x5B,0x15}
-// 	data:=AuthData{
-// 		Amount:      0,
-// 		Currency:    new(int),
-// 		PaymentType: new(byte),
-// 		ExpiryDate:  &ExpiryDate{},
-// 		CardNumber:  new(int),
-// 		TLV:         &TLV{
-// 			BMP:  ,
-// 			data: []byte{},
-// 		},
-// 	}
-// 	got, err := ZVT.marshalAuthData(data)
-// 	if assert.NoError(t, err) {
-// 		assert.EqualValues(t, want, got)
-// 	}
-//
+func TestAuthData(t *testing.T) {
+	want := []byte{0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x49, 0x09, 0x97, 0x19, 0x75, 0x0E, 0x11, 0x21, 0x06, 0x04, 0x1F, 0x5B, 0x01, 0x05}
+	var cardPollTimeout *DataObject = &DataObject{
+		TAG:  []byte{0x1F, 0x5B},
+		data: []byte{0x05},
+	}
+	var objects *[]DataObject = &[]DataObject{}
+
+	*objects = append(*objects, *cardPollTimeout)
+	var paymentType byte = payment.PaymentIncludeGeldKarte + payment.PrinterReady + payment.GirocardTransaction
+	currency := EUR
+	var tlv *TLV = &TLV{
+		Objects: *objects,
+	}
+	config := AuthConfig{
+		Amount:      1,
+		Currency:    &currency,
+		PaymentType: &paymentType,
+		ExpiryDate: &ExpiryDate{
+			Month: 11,
+			Year:  21,
+		},
+		CardNumber: nil,
+		TLV:        tlv,
+	}
+	got := compileAuthConfig(&config)
+	assert.EqualValues(t, want, got)
+}

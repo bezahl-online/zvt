@@ -23,6 +23,12 @@ type Response struct {
 	Data   []byte
 }
 
+func (r *Response) Marshal() []byte {
+	var b []byte = []byte{r.CCRC, r.APRC, byte(r.Length)}
+	b = append(b, r.Data...)
+	return b
+}
+
 // PT is the class
 type PT struct {
 	lock *sync.RWMutex
@@ -54,7 +60,7 @@ const (
 )
 
 // EUR currency code
-const EUR = 997
+const EUR = 978
 
 // PTConfig is the config struct
 type PTConfig struct {
@@ -64,39 +70,6 @@ type PTConfig struct {
 	service  byte
 	tlv      *TLV
 }
-
-// PaymentType defines the mode of payment
-type PaymentType byte
-
-const (
-	// UseDataFromPreviousReadCard The PT should execute the payment using the data from the previous „Read Card“ command.
-	//If no card-data is available, the PT sets the corresponding return-code in the Status-Information.
-	UseDataFromPreviousReadCard = 2
-
-	// PrinterReady (mainly used for evaluation tests)
-	PrinterReady = 4
-
-	// TippableTransaction (since DCPOS 2.5: ignored for EMV tip/tippable transactions)
-	TippableTransaction = 8
-
-	// Geldkarte for GiroCard (ignored for DC POS realted or other cards)
-	Geldkarte = 16
-
-	// OnlineWithoutPIN (OLV or EuroELV, if only EuroELV is supported by PT)
-	// (ignored by DC POS related or other cards)
-	OnlineWithoutPIN = 32
-
-	// GirocardTransaction according to TA7.0 rules for TA 7.0 capable PTs
-	// DC POS transaction for capable PT's otherwise ignored or refused
-	// PIN based transaction for other cards
-	GirocardTransaction = 48
-
-	// PaymentExcludeGeldKarte Payment according to PTs decision excluding GeldKarte
-	PaymentExcludeGeldKarte = 64
-
-	// PaymentIncludeGeldKarte Payment according to PTs decision including GeldKarte
-	PaymentIncludeGeldKarte = 65
-)
 
 // type CardData struct {
 // 	ExpiryDate     ExpiryDate
@@ -111,22 +84,22 @@ type ExpiryDate struct {
 }
 
 func (e *ExpiryDate) getBCD() []byte {
-	var b []byte = bcd.FromUint(uint64(e.Month), 2)
-	b = append(b, bcd.FromUint(uint64(e.Year), 2)...)
+	var b []byte = bcd.FromUint(uint64(e.Month), 1)
+	b = append(b, bcd.FromUint(uint64(e.Year), 1)...)
 	return b
 }
 
-// AuthData is the auth data struct
-type AuthData struct {
+// AuthConfig is the auth data struct
+type AuthConfig struct {
 	Amount      int
 	Currency    *int
 	PaymentType *byte
 	ExpiryDate  *ExpiryDate
-	CardNumber  *int
+	CardNumber  *[]byte
 	TLV         *TLV
 }
 
-func (a *AuthData) marshal() {
+func (a *AuthConfig) marshal() {
 	var b []byte = []byte{0x04}
 	b = append(b, bcd.FromUint(uint64(a.Amount), 6)...)
 	if a.Currency != nil {
@@ -140,5 +113,4 @@ func (a *AuthData) marshal() {
 		b = append(b, 0x0e)
 		b = append(b, (*a.ExpiryDate).getBCD()...)
 	}
-	b = append(b)
 }

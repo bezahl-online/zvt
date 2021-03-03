@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"strings"
+	"reflect"
 	"sync"
 	"time"
 
@@ -15,7 +15,12 @@ import (
 
 // ZVT represents the driver
 var ZVT PT
-var zvtACK []byte = []byte{0x80, 0x00, 0x00}
+var zvtACK Response = Response{
+	CCRC:   0x80,
+	APRC:   0,
+	Length: 0,
+	Data:   []byte{},
+}
 
 func init() {
 	var pt PT = PT{
@@ -59,26 +64,51 @@ func (c Command) getBytes() []byte {
 	return b
 }
 
-func (p *PT) send(c Command) (Response, error) {
+// SendACK send ACK and return the response or error
+func (p *PT) SendACK(timeout time.Duration) (*Response, error) {
+	ack := zvtACK.Marshal()
+	nr, err := p.conn.Write(ack)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("ECR => PT (%3d):% X\n", nr, ack)
+	return p.readResponse(timeout)
+}
+
+func (p *PT) send(c Command) (*Response, error) {
+	var err error
 	nr, err := p.conn.Write(c.getBytes())
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("debug: %d bytes written:\n", nr)
-	fmt.Println(strings.ReplaceAll(fmt.Sprintf("%q\n", fmt.Sprintf("% #x", c.getBytes())), " ", ","))
-	var resp Response
-	var readBuf []byte = make([]byte, 128)
-	p.conn.SetDeadline(time.Now().Add(5 * time.Second))
-	nr, err = p.conn.Read(readBuf)
+	fmt.Printf("ECR => PT (%3d):% X\n", nr, c.getBytes())
+	// fmt.Println(strings.ReplaceAll(fmt.Sprintf("%q\n", fmt.Sprintf("% #x", c.getBytes())), " ", ","))
+	var resp *Response
+	resp, err = p.readResponse(5 * time.Second)
 	if err != nil {
 		return resp, err
 	}
-	resp, err = p.unmarshalAPDU(readBuf)
-	p.conn.Write(zvtACK)
+	if reflect.DeepEqual(*resp, zvtACK) {
+		resp, err = p.SendACK(5 * time.Second)
+	}
 	return resp, err
 }
 
-func (p *PT) compileText(textarray []string) []byte {
+func (p *PT) readResponse(timeout time.Duration) (*Response, error) {
+	var resp *Response
+	var err error
+	var readBuf []byte = make([]byte, 128)
+	p.conn.SetDeadline(time.Now().Add(timeout))
+	nr, err := p.conn.Read(readBuf)
+	if err != nil {
+		return resp, err
+	}
+	fmt.Printf("PT => ECR (%3d):% X\n", nr, readBuf[:nr])
+	resp, err = p.unmarshalAPDU(readBuf[:nr])
+	return resp, err
+}
+
+func compileText(textarray []string) []byte {
 	var t []byte = []byte{}
 	for i, text := range textarray {
 		fmt.Println(text)
@@ -95,18 +125,6 @@ func (p *PT) compileText(textarray []string) []byte {
 	return t
 }
 
-func (p *PT) compilePTConfig(c *PTConfig) []byte {
-	var b []byte = []byte{}
-	b = append(b, c.pwd[0], c.pwd[1], c.pwd[2])
-	b = append(b, byte(c.config))
-	b = append(b, bcd.FromUint(uint64(c.currency), 2)...)
-	b = append(b, 0x03, byte(c.service))
-	if c.tlv != nil {
-		b = append(b, p.marshalTLV(&c.tlv.Objects)...)
-	}
-	return b
-}
-
 func marshalDataObjects(dos *[]DataObject) []byte {
 	var data []byte
 	for _, obj := range *dos {
@@ -119,10 +137,11 @@ func marshalDataObjects(dos *[]DataObject) []byte {
 
 const tlvBMP = 0x06
 
-func (p *PT) marshalTLV(dos *[]DataObject) []byte {
+// Marshal retuns the byte array of the tlv
+func (t *TLV) Marshal() []byte {
 	var b []byte
 	b = append(b, tlvBMP)
-	data := marshalDataObjects(dos)
+	data := marshalDataObjects(&t.Objects)
 	b = append(b, compileLength(len(data))...)
 	b = append(b, data...)
 	return b
@@ -144,12 +163,12 @@ func compileLength(len int) []byte {
 	return length
 }
 
-func (p *PT) unmarshalAPDU(apduBytes []byte) (Response, error) {
-	var resp Response
+func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
+	var resp *Response
 	if len(apduBytes) < 3 {
 		return resp, fmt.Errorf("APDU less than 3 bytes long")
 	}
-	resp = Response{
+	resp = &Response{
 		CCRC:   apduBytes[0],
 		APRC:   apduBytes[1],
 		Length: int(apduBytes[2]),
@@ -158,4 +177,40 @@ func (p *PT) unmarshalAPDU(apduBytes []byte) (Response, error) {
 		resp.Data = apduBytes[3 : apduBytes[2]+3]
 	}
 	return resp, nil
+}
+
+func compilePTConfig(c *PTConfig) []byte {
+	var b []byte = []byte{}
+	b = append(b, c.pwd[0], c.pwd[1], c.pwd[2])
+	b = append(b, byte(c.config))
+	b = append(b, bcd.FromUint(uint64(c.currency), 2)...)
+	b = append(b, 0x03, byte(c.service))
+	if c.tlv != nil {
+		b = append(b, c.tlv.Marshal()...)
+	}
+	return b
+}
+
+func compileAuthConfig(c *AuthConfig) []byte {
+	var b []byte = []byte{0x04}
+	b = append(b, bcd.FromUint(uint64(c.Amount), 6)...)
+	if c.Currency != nil {
+		b = append(b, 0x49)
+		b = append(b, bcd.FromUint(uint64(*c.Currency), 2)...)
+	}
+	if c.PaymentType != nil {
+		b = append(b, 0x19, *c.PaymentType)
+	}
+	if c.CardNumber != nil {
+		b = append(b, 0x22)
+		b = append(b, *c.CardNumber...)
+	}
+	if c.ExpiryDate != nil {
+		b = append(b, 0x0E)
+		b = append(b, (*c.ExpiryDate).getBCD()...)
+	}
+	if c.TLV != nil {
+		b = append(b, c.TLV.Marshal()...)
+	}
+	return b
 }

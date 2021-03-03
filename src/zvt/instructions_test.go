@@ -2,6 +2,7 @@ package zvt
 
 import (
 	"testing"
+	"time"
 
 	"bezahl.online/zvt/src/zvt/config"
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,10 @@ func TestRegister(t *testing.T) {
 		config.ECRusingPrintLinesForPrintout
 	serviceByte := ServiceMenuNOTAssignedToFunctionKey +
 		DisplayTextsForCommandsAuthorisation
+	var msgSquID *DataObject = &DataObject{
+		TAG:  []byte{0x1F, 0x73},
+		data: []byte{0, 0, 0},
+	}
 
 	var listOfCommands *DataObject = &DataObject{
 		TAG:  []byte{0x26},
@@ -22,7 +27,7 @@ func TestRegister(t *testing.T) {
 	var tlv *TLV = &TLV{
 		Objects: []DataObject{},
 	}
-	tlv.Objects = append(tlv.Objects, *listOfCommands)
+	tlv.Objects = append(tlv.Objects, *listOfCommands, *msgSquID)
 	want := Response{
 		CCRC:   0x84,
 		APRC:   0x1E,
@@ -55,4 +60,43 @@ func TestDisplayText(t *testing.T) {
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, got)
 	}
+}
+
+func TestAuthorisation(t *testing.T) {
+	want := Response{
+		CCRC:   0x04,
+		APRC:   0xFF,
+		Length: 0x2E,
+		Data:   []byte{0x0A, 0x01, 0x06, 0x2A},
+	}
+	// var cardPollTimeout *DataObject = &DataObject{
+	// 	TAG:  []byte{0x1F, 0x5B},
+	// 	data: []byte{0x10},
+	// }
+	var msgSquID *DataObject = &DataObject{
+		TAG:  []byte{0x1F, 0x73},
+		data: []byte{0, 0, 0},
+	}
+	var objects *[]DataObject = &[]DataObject{}
+
+	*objects = append(*objects, *msgSquID)
+	// var paymentType byte = payment.PaymentIncludeGeldKarte + payment.PrinterReady + payment.GirocardTransaction
+	currency := EUR
+	var tlv *TLV = &TLV{
+		Objects: *objects,
+	}
+	config := &AuthConfig{
+		Amount:   1,
+		Currency: &currency,
+		// PaymentType: &paymentType,
+		TLV: tlv,
+	}
+	got, err := ZVT.Authorisation(config)
+	got.Data = got.Data[:4]
+	if assert.NoError(t, err) {
+		if assert.EqualValues(t, want, *got) {
+			ZVT.SendACK(5 * time.Second)
+		}
+	}
+
 }
