@@ -23,6 +23,7 @@ type Response struct {
 	Data   []byte
 }
 
+// Marshal returns the bytes of the Response structure
 func (r *Response) Marshal() []byte {
 	var b []byte = []byte{r.CCRC, r.APRC, byte(r.Length)}
 	b = append(b, r.Data...)

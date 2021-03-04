@@ -154,12 +154,57 @@ func (t *TLV) Unmarshal(data *[]byte) error {
 		if err != nil {
 			return err
 		}
-		if len(d)-sizeOfLenField == int(tlvLen) {
+		if uint16(len(d))-sizeOfLenField == tlvLen {
 			return fmt.Errorf("value in length field (%d) and length of data (%d) does not match", tlvLen, len(d))
 		}
-
+		// reduce data to data after TLV TAG (06) and length byte(s)
+		d = d[sizeOfLenField+1:]
+		if t.Objects == nil {
+			t.Objects = []DataObject{}
+		}
+		for {
+			obj, objLength, err := unmarshalDataObject(d)
+			if err != nil {
+				return err
+			}
+			t.Objects = append(t.Objects, obj)
+			if len(d) == int(objLength) {
+				break
+			}
+			d = d[objLength:]
+		}
 	}
 	return nil
+}
+
+func unmarshalDataObject(d []byte) (DataObject, uint16, error) {
+	tag, err := decompileTAG(&d)
+	if err != nil {
+		return DataObject{}, 0, err
+	}
+	tagLength := uint16(len(tag))
+	tagLengthData := d[tagLength:]
+	tagDataLength, tagLengthSize, err := decompileLength(&tagLengthData)
+	objectLength := tagLength + tagLengthSize + tagDataLength
+	d = d[tagLength+tagLengthSize:]
+	obj := DataObject{
+		TAG:  tag,
+		data: d[:tagDataLength],
+	}
+	return obj, objectLength, nil
+}
+
+func decompileTAG(data *[]byte) ([]byte, error) {
+	d := *data
+	if d[0]&0x1F == 0x1F {
+		// in theory it could by another byte long
+		// but it never happens
+		if len(d) < 2 {
+			return d[:1], fmt.Errorf("wrong TAG format: second byte expected")
+		}
+		return d[:2], nil
+	}
+	return d[:1], nil
 }
 
 func compileLength(len int) []byte {
@@ -178,7 +223,7 @@ func compileLength(len int) []byte {
 	return length
 }
 
-func decompileLength(data *[]byte) (uint16, int, error) {
+func decompileLength(data *[]byte) (uint16, uint16, error) {
 	l := *data
 	if l[0]&0x80 == 0x80 {
 		if l[0] == 0x82 && len(l) >= 3 {

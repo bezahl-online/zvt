@@ -49,7 +49,7 @@ func TestMarshalTLV(t *testing.T) {
 }
 
 func TestUnmarshalTLV(t *testing.T) {
-	data := []byte{0x06, 0x0a, 0x26, 0x04, 0x0A, 0x02, 0x06, 0xD3, 0x1f, 0x5B, 0x01, 0x05}
+	data := []byte{0x06, 0x0a, 0x26, 0x04, 0x0A, 0x02, 0x06, 0xD3, 0x1f, 0x5B, 0x01, 0x05, 0x45, 0x04, 0x02, 0x02, 0, 0}
 	var listOfCommands *DataObject = &DataObject{
 		TAG:  []byte{0x26},
 		data: []byte{0x0A, 0x02, 0x06, 0xD3},
@@ -58,19 +58,41 @@ func TestUnmarshalTLV(t *testing.T) {
 		TAG:  []byte{0x1F, 0x5B},
 		data: []byte{0x05},
 	}
+	var receiptParameter *DataObject = &DataObject{
+		TAG:  []byte{0x45},
+		data: []byte{0x02, 0x02, 0, 0},
+	}
 	var objects *[]DataObject = &[]DataObject{}
 	*objects = append(*objects,
 		*listOfCommands,
-		*cardPollTimeout)
+		*cardPollTimeout,
+		*receiptParameter,
+	)
 	want := TLV{
 		Objects: *objects,
 	}
 	var got TLV = TLV{}
-	err := got.Unmarshal(&data) // FIXME: test not done
+	err := got.Unmarshal(&data)
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, got)
 	}
 }
+func TestDecompileTAG(t *testing.T) {
+	want := []byte{0x49}
+	data := []byte{0x49, 0x5F, 0x1A}
+	got, err := decompileTAG(&data)
+	if assert.NoError(t, err) && assert.EqualValues(t, want, got) {
+		want = []byte{0x1F, 0x5B}
+		data = []byte{0x1F, 0x5B, 0x12, 0x45}
+		got, err = decompileTAG(&data)
+		if assert.NoError(t, err) && assert.EqualValues(t, want, got) {
+			data = []byte{0x1F}
+			_, err = decompileTAG(&data)
+			assert.Error(t, err)
+		}
+	}
+}
+
 func TestCompileLength(t *testing.T) {
 	want := []byte{0x27}
 	got := compileLength(39)
