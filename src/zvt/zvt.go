@@ -27,11 +27,10 @@ func init() {
 		lock: &sync.RWMutex{},
 		conn: nil,
 	}
-
-	err := pt.Open()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err := pt.Open()
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
 	ZVT = pt
 }
 
@@ -147,6 +146,22 @@ func (t *TLV) Marshal() []byte {
 	return b
 }
 
+// Unmarshal fills the structur with the given data
+func (t *TLV) Unmarshal(data *[]byte) error {
+	d := *data
+	if d[0] == 0x06 {
+		tlvLen, sizeOfLenField, err := decompileLength(data)
+		if err != nil {
+			return err
+		}
+		if len(d)-sizeOfLenField == int(tlvLen) {
+			return fmt.Errorf("value in length field (%d) and length of data (%d) does not match", tlvLen, len(d))
+		}
+
+	}
+	return nil
+}
+
 func compileLength(len int) []byte {
 	var length []byte = []byte{0}
 	if len > 255 {
@@ -161,6 +176,19 @@ func compileLength(len int) []byte {
 		length[0] = byte(len)
 	}
 	return length
+}
+
+func decompileLength(data *[]byte) (uint16, int, error) {
+	l := *data
+	if l[0]&0x80 == 0x80 {
+		if l[0] == 0x82 && len(l) >= 3 {
+			return binary.BigEndian.Uint16(l[1:3]), 3, nil
+		} else if l[0] == 0x81 && len(l) >= 2 {
+			return uint16(l[1]), 2, nil
+		}
+		return 0, 0, fmt.Errorf("invalid value")
+	}
+	return uint16(l[0] & 0x7F), 1, nil
 }
 
 func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
