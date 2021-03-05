@@ -86,13 +86,26 @@ const (
 // EUR currency code
 const EUR = 978
 
-// PTConfig is the config struct
-type PTConfig struct {
+// Config is the config struct
+type Config struct {
 	pwd      [3]byte
 	config   byte
 	currency int // default EUR
 	service  byte
 	tlv      *TLV
+}
+
+// CompileConfig return a compiled byte array of the configuration
+func (c *Config) CompileConfig() []byte {
+	var b []byte = []byte{}
+	b = append(b, c.pwd[0], c.pwd[1], c.pwd[2])
+	b = append(b, byte(c.config))
+	b = append(b, bcd.FromUint16(uint16(c.currency))...)
+	b = append(b, 0x03, byte(c.service))
+	if c.tlv != nil {
+		b = append(b, c.tlv.Marshal()...)
+	}
+	return b
 }
 
 // type CardData struct {

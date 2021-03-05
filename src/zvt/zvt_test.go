@@ -50,33 +50,47 @@ func TestMarshalTLV(t *testing.T) {
 }
 
 func TestUnmarshalTLV(t *testing.T) {
-	data := []byte{0x06, 0x0a, 0x26, 0x04, 0x0A, 0x02, 0x06, 0xD3, 0x1f, 0x5B, 0x01, 0x05, 0x45, 0x04, 0x02, 0x02, 0, 0}
-	var listOfCommands *DataObject = &DataObject{
-		TAG:  []byte{0x26},
-		data: []byte{0x0A, 0x02, 0x06, 0xD3},
-	}
-	var cardPollTimeout *DataObject = &DataObject{
-		TAG:  []byte{0x1F, 0x5B},
-		data: []byte{0x05},
-	}
-	var receiptParameter *DataObject = &DataObject{
-		TAG:  []byte{0x45},
-		data: []byte{0x02, 0x02, 0, 0},
-	}
-	var objects *[]DataObject = &[]DataObject{}
-	*objects = append(*objects,
-		*listOfCommands,
-		*cardPollTimeout,
-		*receiptParameter,
-	)
-	want := TLV{
-		Objects: *objects,
-	}
-	var got TLV = TLV{}
-	err := got.Unmarshal(&data)
-	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, got)
-	}
+	t.Run("simple TLV", func(t *testing.T) {
+		data := []byte{0x06, 0x0a, 0x26, 0x04, 0x0A, 0x02, 0x06, 0xD3, 0x1f, 0x5B, 0x01, 0x05, 0x45, 0x04, 0x02, 0x02, 0, 0}
+		var listOfCommands *DataObject = &DataObject{
+			TAG:  []byte{0x26},
+			data: []byte{0x0A, 0x02, 0x06, 0xD3},
+		}
+		var cardPollTimeout *DataObject = &DataObject{
+			TAG:  []byte{0x1F, 0x5B},
+			data: []byte{0x05},
+		}
+		var receiptParameter *DataObject = &DataObject{
+			TAG:  []byte{0x45},
+			data: []byte{0x02, 0x02, 0, 0},
+		}
+		var objects *[]DataObject = &[]DataObject{}
+		*objects = append(*objects,
+			*listOfCommands,
+			*cardPollTimeout,
+			*receiptParameter,
+		)
+		want := TLV{
+			Objects: *objects,
+		}
+		var got TLV = TLV{}
+		err := got.Unmarshal(&data)
+		if assert.NoError(t, err) {
+			assert.EqualValues(t, want, got)
+		}
+	})
+	// t.Run("from data file", func(t *testing.T) {
+	// 	testBytes, err := util.Load("dump/data051327012.bin")
+	// 	want := TLV{
+	// 		Objects: []DataObject{},
+	// 	}
+	// 	var got TLV = TLV{}
+	// 	tlvBytes := testBytes[5:]
+	// 	err = got.Unmarshal(&tlvBytes)
+	// 	if assert.NoError(t, err) {
+	// 		assert.EqualValues(t, want, got)
+	// 	}
+	// })
 }
 func TestDecompileTAG(t *testing.T) {
 	want := []byte{0x49}
@@ -147,13 +161,14 @@ func TestCompilePTConfig(t *testing.T) {
 		Objects: []DataObject{},
 	}
 	tlv.Objects = append(tlv.Objects, *listOfCommands)
-	got := compilePTConfig(&PTConfig{
+	config := Config{
 		pwd:      [3]byte{0x12, 0x34, 0x56},
 		config:   0x8E,
 		currency: EUR,
 		service:  0x03,
 		tlv:      tlv,
-	})
+	}
+	got := config.CompileConfig()
 	assert.EqualValues(t, want, got)
 }
 
@@ -173,7 +188,7 @@ func TestUnmarshalAPDU(t *testing.T) {
 
 func TestUnmarshalAPDUData(t *testing.T) {
 	t.Run("from data files", func(t *testing.T) {
-		testBytes, _ := util.Load("data050730027.bin")
+		testBytes, _ := util.Load("dump/data050730027.bin")
 		want := Response{
 			CCRC:    0x04,
 			APRC:    0xFF,
@@ -195,19 +210,23 @@ func TestUnmarshalAPDUData(t *testing.T) {
 		}
 	})
 	// t.Run("from data files", func(t *testing.T) {
-	// 	testBytes, err := util.Load("data050730029.bin")
+	// 	testBytes, err := util.Load("dump/data051327012.bin")
 	// 	if !assert.NoError(t, err) {
 	// 		return
 	// 	}
 	// 	want := Response{
-	// 		CCRC:    0x04,
-	// 		APRC:    0xFF,
-	// 		Length:  0x2E,
-	// 		IStatus: 0x0A,
-	// 		Data:    testBytes[3:],
+	// 		CCRC:    0x06,
+	// 		APRC:    0xD3,
+	// 		Length:  0xFF,
+	// 		IStatus: 0,
+	// 		Data:    testBytes,
 	// 		TLV: TLV{
 	// 			Objects: []DataObject{},
 	// 		},
+	// 	}
+	// 	if len(testBytes) < 9 {
+	// 		fmt.Printf("% X", testBytes)
+	// 		return
 	// 	}
 	// 	want.TLV.Objects = append(want.TLV.Objects, DataObject{
 	// 		TAG:  []byte{0x24},

@@ -95,7 +95,7 @@ func (p *PT) send(c Command) (*Response, error) {
 func (p *PT) readResponse(timeout time.Duration) (*Response, error) {
 	var resp *Response
 	var err error
-	var readBuf []byte = make([]byte, 128)
+	var readBuf []byte = make([]byte, 1024)
 	p.conn.SetDeadline(time.Now().Add(timeout))
 	nr, err := p.conn.Read(readBuf)
 	util.Save(&readBuf, nr)
@@ -148,7 +148,8 @@ func (t *TLV) Marshal() []byte {
 func (t *TLV) Unmarshal(data *[]byte) error {
 	d := *data
 	if d[0] == bmp.TLV {
-		tlvLen, sizeOfLenField, err := decompileLength(data)
+		lenData := d[1:5]
+		tlvLen, sizeOfLenField, err := decompileLength(&lenData)
 		if err != nil {
 			return err
 		}
@@ -245,11 +246,15 @@ func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
 		Length: int(apduBytes[2]),
 	}
 	if len(apduBytes) >= int(apduBytes[2])+3 {
+
 		resp.Data = apduBytes[3 : apduBytes[2]+3]
 	}
 	if apduBytes[0] == 0x04 {
 		if apduBytes[1] == 0xFF {
 			resp.IStatus = apduBytes[3]
+			if len(apduBytes) < 5 {
+				return &resp, nil
+			}
 			d := resp.Data[4:]
 			var dataStart, dataEnd, tagDataLength int
 			tagNr := d[:2]
@@ -270,18 +275,6 @@ func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
 		}
 	}
 	return &resp, nil
-}
-
-func compilePTConfig(c *PTConfig) []byte {
-	var b []byte = []byte{}
-	b = append(b, c.pwd[0], c.pwd[1], c.pwd[2])
-	b = append(b, byte(c.config))
-	b = append(b, bcd.FromUint(uint64(c.currency), 2)...)
-	b = append(b, 0x03, byte(c.service))
-	if c.tlv != nil {
-		b = append(b, c.tlv.Marshal()...)
-	}
-	return b
 }
 
 func compileAuthConfig(c *AuthConfig) []byte {

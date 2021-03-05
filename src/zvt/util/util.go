@@ -12,7 +12,7 @@ var fileNr int = 0
 func Save(data *[]byte, length int) (string, error) {
 	_, _, d := time.Now().Date()
 	m, s, ms := time.Now().Clock()
-	fileName := fmt.Sprintf("data%02d%02d%02d%03d.bin", d, m, s, ms)
+	fileName := fmt.Sprintf("dump/data%02d%02d%02d%03d.hex", d, m, s, ms)
 	err := ioutil.WriteFile(fileName, (*data)[:length], 0644)
 	if err != nil {
 		return "", err

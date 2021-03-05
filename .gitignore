@@ -3,3 +3,4 @@ vendor
 zvtserver
 ./zvt
 data*.bin
+data*.hex
