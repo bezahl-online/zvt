@@ -188,25 +188,34 @@ func TestUnmarshalAPDU(t *testing.T) {
 
 func TestUnmarshalAPDUData(t *testing.T) {
 	t.Run("from data files", func(t *testing.T) {
-		testBytes, _ := util.Load("dump/data050730027.bin")
-		want := Response{
-			CCRC:    0x04,
-			APRC:    0xFF,
-			Length:  0x2E,
-			IStatus: 0x0A,
-			Data:    testBytes[3:],
-			TLV: TLV{
-				Objects: []DataObject{},
-			},
+		testBytes, err := util.Load("dump/data050730027.bin")
+		if !assert.NoError(t, err) {
+			return
 		}
-		want.TLV.Objects = append(want.TLV.Objects, DataObject{
-			TAG:  []byte{0x24},
-			data: testBytes[9:],
-		})
+		want := Response{
+			CCRC:   0x04,
+			APRC:   0xFF,
+			Length: 0x2E,
+			Data:   testBytes[3:],
+		}
+
 		var got *Response
-		got, err := ZVT.unmarshalAPDU(testBytes)
+		got, err = ZVT.unmarshalAPDU(testBytes)
 		if assert.NoError(t, err) {
-			assert.EqualValues(t, want, *got)
+			if assert.EqualValues(t, want, *got) {
+				want := TLV{
+					Objects: []DataObject{},
+				}
+				want.Objects = append(want.Objects, DataObject{
+					TAG:  []byte{0x24},
+					data: testBytes[9:],
+				})
+				got, err := (*got).GetTLV()
+				if assert.NoError(t, err) {
+					assert.EqualValues(t, want, *got)
+				}
+			}
+
 		}
 	})
 	// t.Run("from data files", func(t *testing.T) {

@@ -1,9 +1,5 @@
 package tag
 
-import (
-	"fmt"
-)
-
 // Info is the TAG info structure
 type Info struct {
 	Name       string
@@ -13,8 +9,10 @@ type Info struct {
 }
 
 const (
+	// NONE no legth (tag has no data)
+	NONE = iota
 	// BINARY legth binary coded
-	BINARY = iota
+	BINARY
 	// LL length 0xFx,0xFy -> BCD coded (10x+y)
 	LL
 	// LLL length 0xFx,0xFy,0xFz -> BCD coded (100x+10y+z)
@@ -36,6 +34,7 @@ func init() {
 
 func (m *IMaps) initInfoMap() {
 	m.InfoMap[0x24] = Info{"text message", BINARY, 1, 1}
+	m.InfoMap[0x6F] = Info{"incorrect currency", NONE, 0, 1}
 }
 
 func (m *IMaps) initInfoMapE() {
@@ -49,13 +48,13 @@ type IMaps struct {
 
 // GetInfoMap returns the Info depending on the
 // first one or two bytes of the given data
-func (m *IMaps) GetInfoMap(nr []byte) Info {
+func (m *IMaps) GetInfoMap(nr []byte) (Info, bool) {
 	var info Info
-	fmt.Printf("%v", InfoMaps)
+	var found bool
 	if nr[0]&0x1F == 0x1F {
-		info = m.InfoMapE[[2]byte{nr[0], nr[1]}]
+		info, found = m.InfoMapE[[2]byte{nr[0], nr[1]}]
 	} else {
-		info = m.InfoMap[nr[0]]
+		info, found = m.InfoMap[nr[0]]
 	}
-	return info
+	return info, found
 }

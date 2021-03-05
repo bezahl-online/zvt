@@ -1,6 +1,7 @@
 package zvt
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"bezahl.online/zvt/src/zvt/bmp"
-	"bezahl.online/zvt/src/zvt/tag"
 	"bezahl.online/zvt/src/zvt/util"
 	"github.com/albenik/bcd"
 )
@@ -147,7 +147,9 @@ func (t *TLV) Marshal() []byte {
 // Unmarshal fills the structur with the given data
 func (t *TLV) Unmarshal(data *[]byte) error {
 	d := *data
-	if d[0] == bmp.TLV {
+	idx := bytes.IndexByte(d, 0x06)
+	if idx >= 0 && len(d) > 3 {
+		d = d[idx:]
 		lenData := d[1:5]
 		tlvLen, sizeOfLenField, err := decompileLength(&lenData)
 		if err != nil {
@@ -245,35 +247,41 @@ func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
 		APRC:   apduBytes[1],
 		Length: int(apduBytes[2]),
 	}
-	if len(apduBytes) >= int(apduBytes[2])+3 {
-
-		resp.Data = apduBytes[3 : apduBytes[2]+3]
+	dataStartsAt := 3
+	if resp.Length == 0xff {
+		resp.Length = int(binary.LittleEndian.Uint16(apduBytes[3:4]))
+		dataStartsAt = 5
 	}
-	if apduBytes[0] == 0x04 {
-		if apduBytes[1] == 0xFF {
-			resp.IStatus = apduBytes[3]
-			if len(apduBytes) < 5 {
-				return &resp, nil
-			}
-			d := resp.Data[4:]
-			var dataStart, dataEnd, tagDataLength int
-			tagNr := d[:2]
-			tagInfo := tag.InfoMaps.GetInfoMap(tagNr)
-			switch tagInfo.LengthType {
-			case tag.BINARY:
-				tagDataLength = int(d[tagInfo.TAGNrLen])
-			}
-			dataStart = tagInfo.TAGNrLen + tagInfo.Length
-			dataEnd = dataStart + int(tagDataLength)
-			resp.TLV = TLV{
-				Objects: []DataObject{},
-			}
-			resp.TLV.Objects = append(resp.TLV.Objects, DataObject{
-				TAG:  []byte{0x24},
-				data: d[dataStart:dataEnd],
-			})
-		}
+	if len(apduBytes) >= int(apduBytes[2])+dataStartsAt {
+		resp.Data = apduBytes[dataStartsAt : apduBytes[2]+byte(dataStartsAt)]
 	}
+	// // instInfo := inst.InfoMaps.GetInfoMap(resp)
+	// d := resp.Data
+	// var dataStart, dataEnd, tagDataLength int
+	// tagNr := d[:2]
+	// tagInfo, found := tag.InfoMaps.GetInfoMap(tagNr)
+	// if !found {
+	// 	var tNr []byte = tagNr
+	// 	if tagNr[0]&0x1F != 0x1F {
+	// 		tNr = []byte{tagNr[0]}
+	// 	}
+	// 	return &resp, fmt.Errorf("TAG '% X' not found", tNr)
+	// }
+	// switch tagInfo.LengthType {
+	// case tag.BINARY:
+	// 	tagDataLength = int(d[tagInfo.TAGNrLen])
+	// }
+	// if tagDataLength > 0 {
+	// 	dataStart = tagInfo.TAGNrLen + tagInfo.Length
+	// 	dataEnd = dataStart + int(tagDataLength)
+	// 	resp.TLV = TLV{
+	// 		Objects: []DataObject{},
+	// 	}
+	// 	resp.TLV.Objects = append(resp.TLV.Objects, DataObject{
+	// 		TAG:  []byte{0x24},
+	// 		data: d[dataStart:dataEnd],
+	// 	})
+	// }
 	return &resp, nil
 }
 

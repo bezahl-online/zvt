@@ -23,12 +23,10 @@ type BMP struct {
 
 // Response is the response from the PT
 type Response struct {
-	CCRC    byte
-	APRC    byte
-	Length  int
-	Data    []byte
-	IStatus byte
-	TLV     TLV
+	CCRC   byte
+	APRC   byte
+	Length int
+	Data   []byte
 }
 
 // Marshal returns the bytes of the Response structure
@@ -48,9 +46,18 @@ func (r *Response) IsIntermediate() bool {
 	return r.CCRC == 0x04 && r.APRC == 0xFF
 }
 
-// IsStatus returns true if the response is in fact a ACK
+// IsStatus returns true if the response has a status byte
 func (r *Response) IsStatus() bool {
 	return r.CCRC == 0x04 && r.APRC == 0x0F
+}
+
+// GetTLV return a TLV or an error
+func (r *Response) GetTLV() (*TLV, error) {
+	var tlv TLV = TLV{
+		Objects: []DataObject{},
+	}
+	err := tlv.Unmarshal(&r.Data)
+	return &tlv, err
 }
 
 // PT is the class

@@ -12,6 +12,7 @@ func TestAuthorisation(t *testing.T) {
 	// 	TAG:  []byte{0x1F, 0x5B},
 	// 	data: []byte{0x10},
 	// }
+	return
 	var msgSquID *DataObject = &DataObject{
 		TAG:  []byte{0x1F, 0x73},
 		data: []byte{0, 0, 0},
