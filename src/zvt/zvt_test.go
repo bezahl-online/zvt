@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"bezahl.online/zvt/src/zvt/payment"
+	"bezahl.online/zvt/src/zvt/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -108,24 +109,24 @@ func TestCompileLength(t *testing.T) {
 }
 
 func TestDecompileLength(t *testing.T) {
-	want := 43
+	want := uint16(43)
 	var b []byte = []byte{0x2B, 0x1F, 0x5B}
 	got, size, err := decompileLength(&b)
 	if assert.NoError(t, err) {
-		if assert.Equal(t, want, int(got)) && assert.Equal(t, 1, size) {
+		if assert.Equal(t, want, got) && assert.Equal(t, uint16(1), size) {
 			b = []byte{0xFA, 0x1F, 0x5B}
 			got, size, err = decompileLength(&b)
-			if assert.Error(t, err) && assert.Equal(t, 0, size) {
-				want = 250
+			if assert.Error(t, err) && assert.Equal(t, uint16(0), size) {
+				want = uint16(250)
 				b = []byte{0x81, 0xFA, 0x1F, 0x5B}
 				got, size, err = decompileLength(&b)
-				if assert.NoError(t, err) && assert.Equal(t, 2, size) {
-					if assert.Equal(t, want, int(got)) {
+				if assert.NoError(t, err) && assert.Equal(t, uint16(2), size) {
+					if assert.Equal(t, want, got) {
 						want = 43981
 						b = []byte{0x82, 0xab, 0xcd, 0x1F, 0x5B}
 						got, size, err = decompileLength(&b)
-						if assert.NoError(t, err) && assert.Equal(t, 3, size) {
-							assert.Equal(t, want, int(got))
+						if assert.NoError(t, err) && assert.Equal(t, uint16(3), size) {
+							assert.Equal(t, want, got)
 
 						}
 					}
@@ -136,7 +137,7 @@ func TestDecompileLength(t *testing.T) {
 }
 
 func TestCompilePTConfig(t *testing.T) {
-	want := []byte{0x12, 0x34, 0x56, 0x8E, 0x9, 0x97, 0x3,
+	want := []byte{0x12, 0x34, 0x56, 0x8E, 0x9, 0x78, 0x3,
 		0x3, 0x6, 0x6, 0x26, 0x4, 0xa, 0x2, 0x6, 0xd3}
 	var listOfCommands *DataObject = &DataObject{
 		TAG:  []byte{0x26},
@@ -166,12 +167,63 @@ func TestUnmarshalAPDU(t *testing.T) {
 	}
 	got, err := ZVT.unmarshalAPDU(testBytes)
 	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, got)
+		assert.EqualValues(t, want, *got)
 	}
 }
 
+func TestUnmarshalAPDUData(t *testing.T) {
+	t.Run("from data files", func(t *testing.T) {
+		testBytes, _ := util.Load("data050730027.bin")
+		want := Response{
+			CCRC:    0x04,
+			APRC:    0xFF,
+			Length:  0x2E,
+			IStatus: 0x0A,
+			Data:    testBytes[3:],
+			TLV: TLV{
+				Objects: []DataObject{},
+			},
+		}
+		want.TLV.Objects = append(want.TLV.Objects, DataObject{
+			TAG:  []byte{0x24},
+			data: testBytes[9:],
+		})
+		var got *Response
+		got, err := ZVT.unmarshalAPDU(testBytes)
+		if assert.NoError(t, err) {
+			assert.EqualValues(t, want, *got)
+		}
+	})
+	// t.Run("from data files", func(t *testing.T) {
+	// 	testBytes, err := util.Load("data050730029.bin")
+	// 	if !assert.NoError(t, err) {
+	// 		return
+	// 	}
+	// 	want := Response{
+	// 		CCRC:    0x04,
+	// 		APRC:    0xFF,
+	// 		Length:  0x2E,
+	// 		IStatus: 0x0A,
+	// 		Data:    testBytes[3:],
+	// 		TLV: TLV{
+	// 			Objects: []DataObject{},
+	// 		},
+	// 	}
+	// 	want.TLV.Objects = append(want.TLV.Objects, DataObject{
+	// 		TAG:  []byte{0x24},
+	// 		data: testBytes[9:],
+	// 	})
+	// 	var got *Response
+	// 	got, err = ZVT.unmarshalAPDU(testBytes)
+	// 	if assert.NoError(t, err) {
+	// 		assert.EqualValues(t, want, *got)
+	// 	}
+	// })
+}
+
 func TestAuthData(t *testing.T) {
-	want := []byte{0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x49, 0x09, 0x97, 0x19, 0x75, 0x0E, 0x11, 0x21, 0x06, 0x04, 0x1F, 0x5B, 0x01, 0x05}
+	want := []byte{0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x49, 0x09,
+		0x78, 0x19, 0x75, 0x0E, 0x11, 0x21, 0x06, 0x04, 0x1F, 0x5B, 0x01, 0x05}
 	var cardPollTimeout *DataObject = &DataObject{
 		TAG:  []byte{0x1F, 0x5B},
 		data: []byte{0x05},
@@ -196,5 +248,5 @@ func TestAuthData(t *testing.T) {
 		TLV:        tlv,
 	}
 	got := compileAuthConfig(&config)
-	assert.EqualValues(t, want, got)
+	assert.Equal(t, want, got)
 }

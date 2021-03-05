@@ -6,10 +6,12 @@ import (
 	"log"
 	"net"
 	"os"
-	"reflect"
 	"sync"
 	"time"
 
+	"bezahl.online/zvt/src/zvt/bmp"
+	"bezahl.online/zvt/src/zvt/tag"
+	"bezahl.online/zvt/src/zvt/util"
 	"github.com/albenik/bcd"
 )
 
@@ -27,10 +29,10 @@ func init() {
 		lock: &sync.RWMutex{},
 		conn: nil,
 	}
-	// err := pt.Open()
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
+	err := pt.Open()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	ZVT = pt
 }
 
@@ -87,9 +89,6 @@ func (p *PT) send(c Command) (*Response, error) {
 	if err != nil {
 		return resp, err
 	}
-	if reflect.DeepEqual(*resp, zvtACK) {
-		resp, err = p.SendACK(5 * time.Second)
-	}
 	return resp, err
 }
 
@@ -99,6 +98,7 @@ func (p *PT) readResponse(timeout time.Duration) (*Response, error) {
 	var readBuf []byte = make([]byte, 128)
 	p.conn.SetDeadline(time.Now().Add(timeout))
 	nr, err := p.conn.Read(readBuf)
+	util.Save(&readBuf, nr)
 	if err != nil {
 		return resp, err
 	}
@@ -134,12 +134,10 @@ func marshalDataObjects(dos *[]DataObject) []byte {
 	return data
 }
 
-const tlvBMP = 0x06
-
 // Marshal retuns the byte array of the tlv
 func (t *TLV) Marshal() []byte {
 	var b []byte
-	b = append(b, tlvBMP)
+	b = append(b, bmp.TLV)
 	data := marshalDataObjects(&t.Objects)
 	b = append(b, compileLength(len(data))...)
 	b = append(b, data...)
@@ -149,7 +147,7 @@ func (t *TLV) Marshal() []byte {
 // Unmarshal fills the structur with the given data
 func (t *TLV) Unmarshal(data *[]byte) error {
 	d := *data
-	if d[0] == 0x06 {
+	if d[0] == bmp.TLV {
 		tlvLen, sizeOfLenField, err := decompileLength(data)
 		if err != nil {
 			return err
@@ -237,11 +235,11 @@ func decompileLength(data *[]byte) (uint16, uint16, error) {
 }
 
 func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
-	var resp *Response
+	var resp Response
 	if len(apduBytes) < 3 {
-		return resp, fmt.Errorf("APDU less than 3 bytes long")
+		return &resp, fmt.Errorf("APDU less than 3 bytes long")
 	}
-	resp = &Response{
+	resp = Response{
 		CCRC:   apduBytes[0],
 		APRC:   apduBytes[1],
 		Length: int(apduBytes[2]),
@@ -249,7 +247,29 @@ func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
 	if len(apduBytes) >= int(apduBytes[2])+3 {
 		resp.Data = apduBytes[3 : apduBytes[2]+3]
 	}
-	return resp, nil
+	if apduBytes[0] == 0x04 {
+		if apduBytes[1] == 0xFF {
+			resp.IStatus = apduBytes[3]
+			d := resp.Data[4:]
+			var dataStart, dataEnd, tagDataLength int
+			tagNr := d[:2]
+			tagInfo := tag.InfoMaps.GetInfoMap(tagNr)
+			switch tagInfo.LengthType {
+			case tag.BINARY:
+				tagDataLength = int(d[tagInfo.TAGNrLen])
+			}
+			dataStart = tagInfo.TAGNrLen + tagInfo.Length
+			dataEnd = dataStart + int(tagDataLength)
+			resp.TLV = TLV{
+				Objects: []DataObject{},
+			}
+			resp.TLV.Objects = append(resp.TLV.Objects, DataObject{
+				TAG:  []byte{0x24},
+				data: d[dataStart:dataEnd],
+			})
+		}
+	}
+	return &resp, nil
 }
 
 func compilePTConfig(c *PTConfig) []byte {
