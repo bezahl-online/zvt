@@ -15,8 +15,8 @@ func TestRegister(t *testing.T) {
 		config.AdminReceiptPrintedByECR +
 		config.PTSendsIntermediateStatus +
 		config.ECRusingPrintLinesForPrintout
-	serviceByte := ServiceMenuNOTAssignedToFunctionKey +
-		DisplayTextsForCommandsAuthorisation
+	serviceByte := config.ServiceMenuNOTAssignedToFunctionKey +
+		config.DisplayTextsForCommandsAuthorisation
 	var msgSquID *tlv.DataObject = &tlv.DataObject{
 		TAG:  []byte{0x1F, 0x73},
 		Data: []byte{0, 0, 0},

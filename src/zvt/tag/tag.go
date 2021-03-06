@@ -1,5 +1,7 @@
 package tag
 
+import "bezahl.online/zvt/src/zvt/length"
+
 // Info is the TAG info structure
 type Info struct {
 	Name       string
@@ -8,20 +10,7 @@ type Info struct {
 	TAGNrLen   int
 }
 
-const (
-	// NONE no legth (tag has no data)
-	NONE = iota
-	// BINARY legth binary coded
-	BINARY
-	// LL length 0xFx,0xFy -> BCD coded (10x+y)
-	LL
-	// LLL length 0xFx,0xFy,0xFz -> BCD coded (100x+10y+z)
-	LLL
-	// BCD fixed length depending on TAG BCD coded
-	BCD
-)
-
-// InfoMap is the TAG info map
+// InfoMaps is the TAG info maps collection
 var InfoMaps *IMaps = &IMaps{
 	InfoMap:  make(map[byte]Info),
 	InfoMapE: make(map[[2]byte]Info),
@@ -33,12 +22,12 @@ func init() {
 }
 
 func (m *IMaps) initInfoMap() {
-	m.InfoMap[0x24] = Info{"text message", BINARY, 1, 1}
-	m.InfoMap[0x6F] = Info{"incorrect currency", NONE, 0, 1}
+	m.InfoMap[0x24] = Info{"text message", length.BINARY, 1, 1}
+	m.InfoMap[0x6F] = Info{"incorrect currency", length.NONE, 0, 1}
 }
 
 func (m *IMaps) initInfoMapE() {
-	m.InfoMapE[[2]byte{0x1F, 0x5B}] = Info{"timeout", BINARY, 1, 2}
+	m.InfoMapE[[2]byte{0x1F, 0x5B}] = Info{"timeout", length.BINARY, 1, 2}
 }
 
 type IMaps struct {

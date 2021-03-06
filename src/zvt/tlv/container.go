@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"bezahl.online/zvt/src/zvt/bmp"
+	"bezahl.online/zvt/src/apdu/bmp"
 )
 
 // Container is the type length value container
@@ -15,14 +15,17 @@ type Container struct {
 // Marshal retuns the byte array of the tlv
 func (t *Container) Marshal() []byte {
 	var b []byte
-	b = append(b, bmp.TLV)
-	data := MarshalDataObjects(&t.Objects)
-	b = append(b, CompileLength(len(data))...)
-	b = append(b, data...)
+	if len(t.Objects) > 0 {
+		b = append(b, bmp.TLV)
+		data := MarshalDataObjects(&t.Objects)
+		b = append(b, CompileLength(len(data))...)
+		b = append(b, data...)
+	}
 	return b
 }
 
 // Unmarshal fills the structur with the given data
+// data must include TLV BMP/TAG 0x06
 func (t *Container) Unmarshal(data *[]byte) error {
 	d := *data
 	idx := bytes.IndexByte(d, 0x06)

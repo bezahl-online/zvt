@@ -86,3 +86,36 @@ const (
 	// 2 byte BCD
 	Currency = 0x49
 )
+
+const (
+	// NONE no legth (tag has no data)
+	NONE = iota
+	// BINARY legth binary coded
+	BINARY
+	// LL length 0xFx,0xFy -> BCD coded (10x+y)
+	LL
+	// LLL length 0xFx,0xFy,0xFz -> BCD coded (100x+10y+z)
+	LLL
+	// BCD fixed length depending on TAG BCD coded
+	BCD
+)
+
+// Info is the TAG info structure
+type Info struct {
+	Name       string
+	LengthType int
+	FixLen     int
+}
+
+// InfoMap maps all used BMPs
+var InfoMap map[byte]Info = make(map[byte]Info)
+
+func init() {
+	//                    Name      LenType      FixLen
+	InfoMap[0x04] = Info{"amount in cent", NONE, 6}
+	InfoMap[0x05] = Info{"pump number", NONE, 1}
+	InfoMap[0xF1] = Info{"Text1 line 1", LL, 0}
+	InfoMap[0xF2] = Info{"Text1 line 2", LL, 0}
+	InfoMap[0xF3] = Info{"Text1 line 3", LL, 0}
+	InfoMap[0xF4] = Info{"Text1 line 4", LL, 0}
+}

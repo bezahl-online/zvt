@@ -27,7 +27,6 @@ func (p *PT) Abort() (*Response, error) {
 	return p.send(Command{
 		Class: 0x06,
 		Inst:  0xB0,
-		Data:  []byte{},
 	})
 }
 
@@ -53,6 +52,5 @@ func (p *PT) LogOff() (*Response, error) {
 	return p.send(Command{
 		Class: 0x06,
 		Inst:  0x02,
-		Data:  []byte{},
 	})
 }

@@ -20,3 +20,11 @@ const (
 	// ECRusingPrintLinesForPrintout ECR print-type
 	ECRusingPrintLinesForPrintout
 )
+
+const (
+	// ServiceMenuNOTAssignedToFunctionKey prevents PT from assigning the service menu to the function key
+	ServiceMenuNOTAssignedToFunctionKey = 1 << iota
+
+	// DisplayTextsForCommandsAuthorisation Pre-initialisation and Reversal will be displayed in capitals
+	DisplayTextsForCommandsAuthorisation
+)

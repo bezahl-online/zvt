@@ -4,16 +4,16 @@ import (
 	"net"
 	"sync"
 
+	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/albenik/bcd"
 )
 
 // Command is the structur for a APDU
 type Command struct {
-	Class  byte
-	Inst   byte
-	Length byte
-	Data   []byte
+	Class byte
+	Inst  byte
+	Data  apdu.DataUnit
 }
 
 // BMP structure
@@ -67,14 +67,6 @@ type PT struct {
 	conn net.Conn
 }
 
-const (
-	// ServiceMenuNOTAssignedToFunctionKey prevents PT from assigning the service menu to the function key
-	ServiceMenuNOTAssignedToFunctionKey = 1 << iota
-
-	// DisplayTextsForCommandsAuthorisation Pre-initialisation and Reversal will be displayed in capitals
-	DisplayTextsForCommandsAuthorisation
-)
-
 // EUR currency code
 const EUR = 978
 
@@ -88,16 +80,16 @@ type Config struct {
 }
 
 // CompileConfig return a compiled byte array of the configuration
-func (c *Config) CompileConfig() []byte {
+func (c *Config) CompileConfig() apdu.DataUnit {
+	var dataUnit apdu.DataUnit = apdu.DataUnit{}
 	var b []byte = []byte{}
 	b = append(b, c.pwd[0], c.pwd[1], c.pwd[2])
 	b = append(b, byte(c.config))
 	b = append(b, bcd.FromUint16(uint16(c.currency))...)
 	b = append(b, 0x03, byte(c.service))
-	if (*c).tlvContainer != nil {
-		b = append(b, c.tlvContainer.Marshal()...)
-	}
-	return b
+	dataUnit.Data = b
+	dataUnit.TLVContainer = *c.tlvContainer
+	return dataUnit
 }
 
 // type CardData struct {

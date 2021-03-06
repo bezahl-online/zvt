@@ -3,12 +3,14 @@ package zvt
 import (
 	"encoding/binary"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"sync"
 	"time"
 
+	"bezahl.online/zvt/src/apdu"
+	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/zvt/length"
 	"bezahl.online/zvt/src/zvt/util"
 	"github.com/albenik/bcd"
 )
@@ -52,15 +54,18 @@ func (p *PT) Open() error {
 }
 
 // convert command structure to byte array
-func (c Command) compile() []byte {
+func (c *Command) compile() ([]byte, error) {
 	var b []byte = []byte{
 		c.Class,
 		c.Inst,
-		c.Length,
 	}
-	b[2] = byte(len(c.Data))
-	b = append(b, c.Data...)
-	return b
+	data, err := c.Data.Marshal()
+	if err != nil {
+		return b, err
+	}
+	b = append(b, length.Format(uint16(len(data)), length.BINARY)...)
+	b = append(b, data...)
+	return b, nil
 }
 
 // SendACK send ACK and return the response or error
@@ -76,12 +81,16 @@ func (p *PT) SendACK(timeout time.Duration) (*Response, error) {
 
 func (p *PT) send(c Command) (*Response, error) {
 	var err error
-	nr, err := p.conn.Write(c.compile())
+	b, err := c.compile()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	fmt.Printf("ECR => PT (%3d):% X\n", nr, c.compile())
-	// fmt.Println(strings.ReplaceAll(fmt.Sprintf("%q\n", fmt.Sprintf("% #x", c.getBytes())), " ", ","))
+	fmt.Printf("% X", b)
+	_, err = p.conn.Write(b)
+	if err != nil {
+		return nil, err
+	}
+
 	var resp *Response
 	resp, err = p.readResponse(5 * time.Second)
 	if err != nil {
@@ -105,21 +114,28 @@ func (p *PT) readResponse(timeout time.Duration) (*Response, error) {
 	return resp, err
 }
 
-func compileText(textarray []string) []byte {
-	var t []byte = []byte{}
-	for i, text := range textarray {
-		fmt.Println(text)
-		te := []byte{0xf0 + byte(i+1), 0x0, 0x0}
-		t1 := []byte(text)
-		l := uint8(len(t1))
-		lz := uint8(l / 10)
-		le := uint8(l - uint8(10*lz))
-		te[1] = 0xf0 + lz
-		te[2] = 0xf0 + le
-		te = append(te, t1...)
-		t = append(t, te...)
+func compileText(textarray []string) apdu.DataUnit {
+	dataUnit := apdu.DataUnit{
+		BMPOBJs: []bmp.OBJ{},
 	}
-	return t
+	for i, text := range textarray {
+		bmp := bmp.OBJ{
+			ID:   0xf0 + byte(i+1),
+			Data: []byte{},
+		}
+		bmp.Data = append(bmp.Data, []byte(text)...) // append bytes of text line
+		dataUnit.BMPOBJs = append(dataUnit.BMPOBJs, bmp)
+	}
+	return dataUnit
+}
+
+func compileLL(l uint8) []byte {
+	var b []byte = make([]byte, 2)
+	lz := uint8(l / 10)           // value of tens
+	le := uint8(l - uint8(10*lz)) // value of unit position
+	b[0] = 0xF0 + lz              // code into 0xFx (tens) (BCD)
+	b[1] = 0xF0 + le              // code into 0xFy (unit) (BCD)
+	return b
 }
 
 func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
@@ -170,26 +186,11 @@ func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
 	return &resp, nil
 }
 
-func compileAuthConfig(c *AuthConfig) []byte {
-	var b []byte = []byte{0x04}
-	b = append(b, bcd.FromUint(uint64(c.Amount), 6)...)
-	if c.Currency != nil {
-		b = append(b, 0x49)
-		b = append(b, bcd.FromUint(uint64(*c.Currency), 2)...)
+func compileAuthConfig(c *AuthConfig) apdu.DataUnit {
+	return apdu.DataUnit{
+		BMPOBJs: []bmp.OBJ{
+			{ID: 0x49, Data: bcd.FromUint16(uint16(*c.Currency))},
+			{ID: 0x19, Data: []byte{*c.PaymentType}},
+		},
 	}
-	if c.PaymentType != nil {
-		b = append(b, 0x19, *c.PaymentType)
-	}
-	if c.CardNumber != nil {
-		b = append(b, 0x22)
-		b = append(b, *c.CardNumber...)
-	}
-	if c.ExpiryDate != nil {
-		b = append(b, 0x0E)
-		b = append(b, (*c.ExpiryDate).getBCD()...)
-	}
-	if c.TLV != nil {
-		b = append(b, c.TLV.Marshal()...)
-	}
-	return b
 }
