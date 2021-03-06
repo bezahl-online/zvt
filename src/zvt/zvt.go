@@ -1,7 +1,6 @@
 package zvt
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
@@ -10,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"bezahl.online/zvt/src/zvt/bmp"
 	"bezahl.online/zvt/src/zvt/util"
 	"github.com/albenik/bcd"
 )
@@ -54,7 +52,7 @@ func (p *PT) Open() error {
 }
 
 // convert command structure to byte array
-func (c Command) getBytes() []byte {
+func (c Command) compile() []byte {
 	var b []byte = []byte{
 		c.Class,
 		c.Inst,
@@ -78,11 +76,11 @@ func (p *PT) SendACK(timeout time.Duration) (*Response, error) {
 
 func (p *PT) send(c Command) (*Response, error) {
 	var err error
-	nr, err := p.conn.Write(c.getBytes())
+	nr, err := p.conn.Write(c.compile())
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("ECR => PT (%3d):% X\n", nr, c.getBytes())
+	fmt.Printf("ECR => PT (%3d):% X\n", nr, c.compile())
 	// fmt.Println(strings.ReplaceAll(fmt.Sprintf("%q\n", fmt.Sprintf("% #x", c.getBytes())), " ", ","))
 	var resp *Response
 	resp, err = p.readResponse(5 * time.Second)
@@ -122,119 +120,6 @@ func compileText(textarray []string) []byte {
 		t = append(t, te...)
 	}
 	return t
-}
-
-func marshalDataObjects(dos *[]DataObject) []byte {
-	var data []byte
-	for _, obj := range *dos {
-		data = append(data, obj.TAG...)
-		data = append(data, compileLength(len(obj.data))...)
-		data = append(data, obj.data...)
-	}
-	return data
-}
-
-// Marshal retuns the byte array of the tlv
-func (t *TLV) Marshal() []byte {
-	var b []byte
-	b = append(b, bmp.TLV)
-	data := marshalDataObjects(&t.Objects)
-	b = append(b, compileLength(len(data))...)
-	b = append(b, data...)
-	return b
-}
-
-// Unmarshal fills the structur with the given data
-func (t *TLV) Unmarshal(data *[]byte) error {
-	d := *data
-	idx := bytes.IndexByte(d, 0x06)
-	if idx >= 0 && len(d) > 3 {
-		d = d[idx:]
-		lenData := d[1:5]
-		tlvLen, sizeOfLenField, err := decompileLength(&lenData)
-		if err != nil {
-			return err
-		}
-		if uint16(len(d))-sizeOfLenField == tlvLen {
-			return fmt.Errorf("value in length field (%d) and length of data (%d) does not match", tlvLen, len(d))
-		}
-		// reduce data to data after TLV TAG (06) and length byte(s)
-		d = d[sizeOfLenField+1:]
-		if t.Objects == nil {
-			t.Objects = []DataObject{}
-		}
-		for {
-			obj, objLength, err := unmarshalDataObject(d)
-			if err != nil {
-				return err
-			}
-			t.Objects = append(t.Objects, obj)
-			if len(d) == int(objLength) {
-				break
-			}
-			d = d[objLength:]
-		}
-	}
-	return nil
-}
-
-func unmarshalDataObject(d []byte) (DataObject, uint16, error) {
-	tag, err := decompileTAG(&d)
-	if err != nil {
-		return DataObject{}, 0, err
-	}
-	tagLength := uint16(len(tag))
-	tagLengthData := d[tagLength:]
-	tagDataLength, tagLengthSize, err := decompileLength(&tagLengthData)
-	objectLength := tagLength + tagLengthSize + tagDataLength
-	d = d[tagLength+tagLengthSize:]
-	obj := DataObject{
-		TAG:  tag,
-		data: d[:tagDataLength],
-	}
-	return obj, objectLength, nil
-}
-
-func decompileTAG(data *[]byte) ([]byte, error) {
-	d := *data
-	if d[0]&0x1F == 0x1F {
-		// in theory it could by another byte long
-		// but it never happens
-		if len(d) < 2 {
-			return d[:1], fmt.Errorf("wrong TAG format: second byte expected")
-		}
-		return d[:2], nil
-	}
-	return d[:1], nil
-}
-
-func compileLength(len int) []byte {
-	var length []byte = []byte{0}
-	if len > 255 {
-		length[0] = 0x82
-		var l []byte = []byte{0, 0}
-		binary.BigEndian.PutUint16(l, uint16(len))
-		length = append(length, l...)
-	} else if len > 127 {
-		length[0] = 0x81
-		length = append(length, byte(len))
-	} else {
-		length[0] = byte(len)
-	}
-	return length
-}
-
-func decompileLength(data *[]byte) (uint16, uint16, error) {
-	l := *data
-	if l[0]&0x80 == 0x80 {
-		if l[0] == 0x82 && len(l) >= 3 {
-			return binary.BigEndian.Uint16(l[1:3]), 3, nil
-		} else if l[0] == 0x81 && len(l) >= 2 {
-			return uint16(l[1]), 2, nil
-		}
-		return 0, 0, fmt.Errorf("invalid value")
-	}
-	return uint16(l[0] & 0x7F), 1, nil
 }
 
 func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {

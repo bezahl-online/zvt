@@ -4,6 +4,7 @@ import (
 	"net"
 	"sync"
 
+	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/albenik/bcd"
 )
 
@@ -52,9 +53,9 @@ func (r *Response) IsStatus() bool {
 }
 
 // GetTLV return a TLV or an error
-func (r *Response) GetTLV() (*TLV, error) {
-	var tlv TLV = TLV{
-		Objects: []DataObject{},
+func (r *Response) GetTLV() (*tlv.Container, error) {
+	var tlv tlv.Container = tlv.Container{
+		Objects: []tlv.DataObject{},
 	}
 	err := tlv.Unmarshal(&r.Data)
 	return &tlv, err
@@ -64,22 +65,6 @@ func (r *Response) GetTLV() (*TLV, error) {
 type PT struct {
 	lock *sync.RWMutex
 	conn net.Conn
-}
-
-// TAG is the TAG structure
-type TAG struct {
-	Data []byte
-}
-
-// DataObject is part of a TLV
-type DataObject struct {
-	TAG  []byte
-	data []byte
-}
-
-// TLV is the type length value container
-type TLV struct {
-	Objects []DataObject
 }
 
 const (
@@ -95,11 +80,11 @@ const EUR = 978
 
 // Config is the config struct
 type Config struct {
-	pwd      [3]byte
-	config   byte
-	currency int // default EUR
-	service  byte
-	tlv      *TLV
+	pwd          [3]byte
+	config       byte
+	currency     int // default EUR
+	service      byte
+	tlvContainer *tlv.Container
 }
 
 // CompileConfig return a compiled byte array of the configuration
@@ -109,8 +94,8 @@ func (c *Config) CompileConfig() []byte {
 	b = append(b, byte(c.config))
 	b = append(b, bcd.FromUint16(uint16(c.currency))...)
 	b = append(b, 0x03, byte(c.service))
-	if c.tlv != nil {
-		b = append(b, c.tlv.Marshal()...)
+	if (*c).tlvContainer != nil {
+		b = append(b, c.tlvContainer.Marshal()...)
 	}
 	return b
 }
@@ -141,7 +126,7 @@ type AuthConfig struct {
 	PaymentType *byte
 	ExpiryDate  *ExpiryDate
 	CardNumber  *[]byte
-	TLV         *TLV
+	TLV         *tlv.Container
 }
 
 func (a *AuthConfig) marshal() {

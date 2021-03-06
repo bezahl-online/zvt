@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"bezahl.online/zvt/src/zvt/config"
+	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,19 +17,19 @@ func TestRegister(t *testing.T) {
 		config.ECRusingPrintLinesForPrintout
 	serviceByte := ServiceMenuNOTAssignedToFunctionKey +
 		DisplayTextsForCommandsAuthorisation
-	var msgSquID *DataObject = &DataObject{
+	var msgSquID *tlv.DataObject = &tlv.DataObject{
 		TAG:  []byte{0x1F, 0x73},
-		data: []byte{0, 0, 0},
+		Data: []byte{0, 0, 0},
 	}
 
-	var listOfCommands *DataObject = &DataObject{
+	var listOfCommands *tlv.DataObject = &tlv.DataObject{
 		TAG:  []byte{0x26},
-		data: []byte{0x0A, 0x02, 0x06, 0xD3},
+		Data: []byte{0x0A, 0x02, 0x06, 0xD3},
 	}
-	var tlv *TLV = &TLV{
-		Objects: []DataObject{},
+	var tlvContainer *tlv.Container = &tlv.Container{
+		Objects: []tlv.DataObject{},
 	}
-	tlv.Objects = append(tlv.Objects, *listOfCommands, *msgSquID)
+	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands, *msgSquID)
 	want := Response{
 		CCRC:   0x80,
 		APRC:   0x00,
@@ -36,11 +37,11 @@ func TestRegister(t *testing.T) {
 		Data:   []byte{},
 	}
 	got, err := ZVT.Register(&Config{
-		pwd:      fixedPassword,
-		config:   byte(configByte),
-		currency: EUR,
-		service:  byte(serviceByte),
-		tlv:      tlv,
+		pwd:          fixedPassword,
+		config:       byte(configByte),
+		currency:     EUR,
+		service:      byte(serviceByte),
+		tlvContainer: tlvContainer,
 	})
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)

@@ -4,25 +4,26 @@ import (
 	"testing"
 	"time"
 
+	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthorisation(t *testing.T) {
-	// var cardPollTimeout *DataObject = &DataObject{
+	// var cardPollTimeout *tlv.DataObject = &tlv.DataObject{
 	// 	TAG:  []byte{0x1F, 0x5B},
 	// 	data: []byte{0x10},
 	// }
 	return
-	var msgSquID *DataObject = &DataObject{
+	var msgSquID *tlv.DataObject = &tlv.DataObject{
 		TAG:  []byte{0x1F, 0x73},
-		data: []byte{0, 0, 0},
+		Data: []byte{0, 0, 0},
 	}
-	var objects *[]DataObject = &[]DataObject{}
+	var objects *[]tlv.DataObject = &[]tlv.DataObject{}
 
 	*objects = append(*objects, *msgSquID)
 	// var paymentType byte = payment.PrinterReady + payment.GirocardTransaction
 	currency := EUR
-	var tlv *TLV = &TLV{
+	var tlv *tlv.Container = &tlv.Container{
 		Objects: *objects,
 	}
 	config := &AuthConfig{
