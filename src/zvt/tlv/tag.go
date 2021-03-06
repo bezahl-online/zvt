@@ -2,11 +2,6 @@ package tlv
 
 import "fmt"
 
-// TAG is the TAG structure
-type TAG struct {
-	Data []byte
-}
-
 // DecompileTAG retrieves the TAG number and data from the
 // TLV data objects according to the ZTV protocol
 func DecompileTAG(data *[]byte) ([]byte, error) {

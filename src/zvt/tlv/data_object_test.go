@@ -31,7 +31,8 @@ func TestUnmarshalDataObject(t *testing.T) {
 		TAG:  []byte{0x26},
 		Data: []byte{0x0A, 0x02, 0x06, 0xD3},
 	}
-	got, size, err := UnmarshalDataObject(data)
+	var got DataObject = DataObject{}
+	size, err := got.Unmarshal(data)
 	if assert.NoError(t, err) && assert.Equal(t, uint16(6), size) {
 		if assert.Equal(t, want, got) {
 			data = []byte{0x1f, 0x5B, 0x01, 0x05}
@@ -39,7 +40,7 @@ func TestUnmarshalDataObject(t *testing.T) {
 				TAG:  []byte{0x1F, 0x5B},
 				Data: []byte{0x05},
 			}
-			got, size, err = UnmarshalDataObject(data)
+			size, err := got.Unmarshal(data)
 			if assert.NoError(t, err) && assert.Equal(t, uint16(4), size) {
 				assert.Equal(t, want, got)
 			}

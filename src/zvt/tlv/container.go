@@ -42,7 +42,8 @@ func (t *Container) Unmarshal(data *[]byte) error {
 			t.Objects = []DataObject{}
 		}
 		for {
-			obj, objLength, err := UnmarshalDataObject(d)
+			var obj DataObject = DataObject{}
+			objLength, err := obj.Unmarshal(d)
 			if err != nil {
 				return err
 			}
