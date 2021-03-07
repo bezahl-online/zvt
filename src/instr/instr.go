@@ -2,10 +2,12 @@ package instr
 
 import "bezahl.online/zvt/src/apdu/bmp/blen"
 
+// CtrlField is
 type CtrlField struct {
-	Class  byte
-	Instr  byte
-	Length blen.Length
+	Class         byte
+	Instr         byte
+	Length        blen.Length
+	RawDataLength int
 }
 
 // Marshal is
@@ -16,25 +18,53 @@ func (c *CtrlField) Marshal(dataLength uint16) []byte {
 	return b
 }
 
+// Find searches for Class and Instr in the Map
+func Find(command *[]byte) *CtrlField {
+	for key := range Map {
+		if Map[key].Class == (*command)[0] &&
+			Map[key].Instr == (*command)[1] {
+			c := Map[key]
+			return &c
+		}
+	}
+	return nil
+}
+
 // Map maps all used Commands
 var Map map[string]CtrlField = make(map[string]CtrlField)
 
 func init() {
-	x := CtrlField{
+	Map["Registration"] = CtrlField{
 		Class: byte(0x06),
 		Instr: byte(0x00),
 		Length: blen.Length{
 			Kind: byte(blen.BINARY),
 		},
 	}
-	x.Marshal(uint16(1))
-	Map["Registration"] = x
 	Map["Authorisation"] = CtrlField{
 		Class: byte(0x06),
 		Instr: byte(0x01),
 		Length: blen.Length{
 			Kind: byte(blen.BINARY),
 		},
+	}
+	Map["ACK"] = CtrlField{
+		Class: byte(0x80),
+		Instr: byte(0x00),
+	}
+	Map["Completion"] = CtrlField{
+		Class: byte(0x06),
+		Instr: byte(0x0F),
+		Length: blen.Length{
+			Kind:  blen.BINARY,
+			Value: 0,
+		},
+	}
+	Map["Intermediate"] = CtrlField{
+		Class:         byte(0x04),
+		Instr:         byte(0xFF),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 2,
 	}
 
 }

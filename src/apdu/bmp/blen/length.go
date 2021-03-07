@@ -1,6 +1,8 @@
 package blen
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 const (
 	// NONE no legth (tag has no data)
@@ -15,8 +17,10 @@ const (
 	BCD
 )
 
+// Length is the length
 type Length struct {
 	Kind  byte
+	Size  byte
 	Value uint16
 }
 
@@ -48,4 +52,31 @@ func (l *Length) Format() []byte {
 		}
 	}
 	return []byte{}
+}
+
+// Unmarshal it
+func (l *Length) Unmarshal(d []byte) error {
+	switch l.Kind {
+	case BINARY:
+		if d[0] == 0xff {
+			l.Size = 3
+			l.Value = binary.LittleEndian.Uint16(d[1:3])
+		} else {
+			l.Size = 1
+			l.Value = uint16(d[0])
+		}
+	case LLL:
+		l.Size = 3
+		h := (d[0] & 0x0F)
+		z := (d[1] & 0x0F)
+		e := (d[2] & 0x0F)
+		l.Value = uint16(100*h + 10*z + e)
+	case LL:
+		l.Size = 2
+		z := (d[0] & 0x0F)
+		e := (d[1] & 0x0F)
+		l.Value = uint16(10*z + e)
+	}
+	return nil
+
 }

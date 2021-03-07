@@ -9,6 +9,7 @@ import (
 	"bezahl.online/zvt/src/instr"
 	"bezahl.online/zvt/src/zvt/payment"
 	"bezahl.online/zvt/src/zvt/tlv"
+	"bezahl.online/zvt/src/zvt/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -78,64 +79,76 @@ func TestUnmarshalAPDU(t *testing.T) {
 	// }
 }
 
-// func TestUnmarshalAPDUData(t *testing.T) {
-// 	t.Run("from data files", func(t *testing.T) {
-// 		testBytes, err := util.Load("dump/data050730027.bin")
-// 		if !assert.NoError(t, err) {
-// 			return
-// 		}
-// 		want := Response{
-// 			CCRC:   0x04,
-// 			APRC:   0xFF,
-// 			Length: 0x2E,
-// 			Data:   testBytes[3:],
-// 		}
+func TestCommandUnmarshal(t *testing.T) {
+	t.Run("from data files", func(t *testing.T) {
+		testBytes, err := util.Load("dump/data050730027.bin")
+		if !assert.NoError(t, err) {
+			return
+		}
+		want := Command{
+			Instr: instr.CtrlField{
+				Class: 0x04,
+				Instr: 0xFF,
+				Length: blen.Length{
+					Kind: blen.BINARY,
+				},
+				RawDataLength: 2,
+			},
+			Data: apdu.DataUnit{
+				Data:    []byte{0x0A, 0x01},
+				BMPOBJs: []bmp.OBJ{},
+				TLVContainer: tlv.Container{
+					Objects: []tlv.DataObject{
+						{TAG: []byte{0x24}, Data: testBytes[9:]},
+					},
+				},
+			},
+		}
+		var got Command = Command{}
+		err = got.Unmarshal(&testBytes)
+		if assert.NoError(t, err) {
+			if assert.EqualValues(t, want, got) {
+				// want := tlv.Container{
+				// 	Objects: []tlv.DataObject{},
+				// }
+				// want.Objects = append(want.Objects, tlv.DataObject{
+				// 	TAG:  []byte{0x24},
+				// 	Data: testBytes[9:],
+				// })
+				// got, err := (*got).GetTLV()
+				// if assert.NoError(t, err) {
+				// 	assert.EqualValues(t, want, *got)
+				// }
+			}
 
-// 		var got *Response
-// 		got, err = ZVT.unmarshalAPDU(testBytes)
-// 		if assert.NoError(t, err) {
-// 			if assert.EqualValues(t, want, *got) {
-// 				want := tlv.Container{
-// 					Objects: []tlv.DataObject{},
-// 				}
-// 				want.Objects = append(want.Objects, tlv.DataObject{
-// 					TAG:  []byte{0x24},
-// 					Data: testBytes[9:],
-// 				})
-// 				got, err := (*got).GetTLV()
-// 				if assert.NoError(t, err) {
-// 					assert.EqualValues(t, want, *got)
-// 				}
-// 			}
-
-// 		}
-// 	})
-// t.Run("from data files", func(t *testing.T) {
-// 	testBytes, err := util.Load("dump/data051327012.bin")
-// 	if !assert.NoError(t, err) {
-// 		return
-// 	}
-// 	want := Response{
-// 		CCRC:   0x06,
-// 		APRC:   0xD3,
-// 		Length: 0,
-// 		Data:   []byte{},
-// 	}
-// 	if len(testBytes) < 9 {
-// 		fmt.Printf("% X", testBytes)
-// 		return
-// 	}
-// 	want.TLV.Objects = append(want.TLV.Objects, DataObject{
-// 		TAG:  []byte{0x24},
-// 		data: testBytes[9:],
-// 	})
-// 	var got *Response
-// 	got, err = ZVT.unmarshalAPDU(testBytes)
-// 	if assert.NoError(t, err) {
-// 		assert.EqualValues(t, want, *got)
-// 	}
-// })
-// }
+		}
+	})
+	// t.Run("from data files", func(t *testing.T) {
+	// 	testBytes, err := util.Load("dump/data051327012.bin")
+	// 	if !assert.NoError(t, err) {
+	// 		return
+	// 	}
+	// 	want := Response{
+	// 		CCRC:   0x06,
+	// 		APRC:   0xD3,
+	// 		Length: 0,
+	// 		Data:   []byte{},
+	// 	}
+	// 	if len(testBytes) < 9 {
+	// 		fmt.Printf("% X", testBytes)
+	// 		return
+	// 	}
+	// 	want.TLV.Objects = append(want.TLV.Objects, DataObject{
+	// 		TAG:  []byte{0x24},
+	// 		data: testBytes[9:],
+	// 	})
+	// 	var got *Response
+	// 	got, err = ZVT.unmarshalAPDU(testBytes)
+	// 	if assert.NoError(t, err) {
+	// 		assert.EqualValues(t, want, *got)
+	// 	}
+	// })
+}
 
 func TestAuthData(t *testing.T) {
 	want := []byte{0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x49, 0x09,

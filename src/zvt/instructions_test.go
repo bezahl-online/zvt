@@ -4,6 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"bezahl.online/zvt/src/apdu"
+	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/apdu/bmp/blen"
+	"bezahl.online/zvt/src/instr"
 	"bezahl.online/zvt/src/zvt/config"
 	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
@@ -30,11 +34,11 @@ func TestRegister(t *testing.T) {
 		Objects: []tlv.DataObject{},
 	}
 	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands, *msgSquID)
-	want := Response{
-		CCRC:   0x80,
-		APRC:   0x00,
-		Length: 0x00,
-		Data:   []byte{},
+	want := Command{
+		Instr: instr.CtrlField{
+			Class: 0x80,
+			Instr: 0x00,
+		},
 	}
 	got, err := ZVT.Register(&Config{
 		pwd:          fixedPassword,
@@ -46,12 +50,25 @@ func TestRegister(t *testing.T) {
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 		// completion
-		want = Response{
-			CCRC:   0x06,
-			APRC:   0x0F,
-			Length: 0x0a,
-			Data:   []byte{0x19, 0x0, 0x29, 0x29, 0x0, 0x10, 0x6, 0x49, 0x9, 0x78},
+		want := Command{
+			Instr: instr.CtrlField{
+				Class: 0x06,
+				Instr: 0x0F,
+				Length: blen.Length{
+					Kind:  blen.BINARY,
+					Value: uint16(10),
+				},
+			},
+			Data: apdu.DataUnit{
+				Data: []byte{},
+				BMPOBJs: []bmp.OBJ{
+					{ID: 0x19, Data: []byte{0x00}},
+					{ID: 0x29, Data: []byte{0x00, 0x10, 0x6, 0x49}},
+					{ID: 0x49, Data: []byte{0x9, 0x78}},
+				},
+			},
 		}
+
 		got, err = ZVT.readResponse(5 * time.Second)
 		if assert.NoError(t, err) {
 			assert.EqualValues(t, want, *got)
@@ -61,48 +78,48 @@ func TestRegister(t *testing.T) {
 
 }
 
-func TestDisplayText(t *testing.T) {
-	want := Response{
-		CCRC:   0x80,
-		APRC:   0x00,
-		Length: 0x00,
-		Data:   []byte{},
-	}
-	got, err := ZVT.DisplayText([]string{
-		"Da steh ich nun,",
-		"ich armer Tor,",
-		"Und bin so klug",
-		"als wie zuvor."})
-	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, *got)
-	}
-}
+// func TestDisplayText(t *testing.T) {
+// 	want := aprc.Response{
+// 		CCRC:   0x80,
+// 		APRC:   0x00,
+// 		Length: 0x00,
+// 		Data:   []byte{},
+// 	}
+// 	got, err := ZVT.DisplayText([]string{
+// 		"Da steh ich nun,",
+// 		"ich armer Tor,",
+// 		"Und bin so klug",
+// 		"als wie zuvor."})
+// 	if assert.NoError(t, err) {
+// 		assert.EqualValues(t, want, *got)
+// 	}
+// }
 
-func TestAbort(t *testing.T) {
-	want := Response{
-		CCRC:   0x80,
-		APRC:   0x00,
-		Length: 0x00,
-		Data:   []byte{},
-	}
-	got, err := ZVT.Abort()
-	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, *got)
-	}
-}
+// func TestAbort(t *testing.T) {
+// 	want := aprc.Response{
+// 		CCRC:   0x80,
+// 		APRC:   0x00,
+// 		Length: 0x00,
+// 		Data:   []byte{},
+// 	}
+// 	got, err := ZVT.Abort()
+// 	if assert.NoError(t, err) {
+// 		assert.EqualValues(t, want, *got)
+// 	}
+// }
 
-func TestLogOff(t *testing.T) {
-	want := Response{
-		CCRC:   0x80,
-		APRC:   0x00,
-		Length: 0x00,
-		Data:   []byte{},
-	}
-	got, err := ZVT.LogOff()
-	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, *got)
-	}
-}
+// func TestLogOff(t *testing.T) {
+// 	want := aprc.Response{
+// 		CCRC:   0x80,
+// 		APRC:   0x00,
+// 		Length: 0x00,
+// 		Data:   []byte{},
+// 	}
+// 	got, err := ZVT.LogOff()
+// 	if assert.NoError(t, err) {
+// 		assert.EqualValues(t, want, *got)
+// 	}
+// }
 
 // FIXME: getting error "0x83 function not possible" from PT
 // func TestChangPassword(t *testing.T) {

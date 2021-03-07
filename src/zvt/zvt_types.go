@@ -15,45 +15,6 @@ type BMP struct {
 	data []byte
 }
 
-// Response is the response from the PT
-type Response struct {
-	CCRC   byte
-	APRC   byte
-	Length int
-	Data   []byte
-}
-
-// Marshal returns the bytes of the Response structure
-func (r *Response) Marshal() []byte {
-	var b []byte = []byte{r.CCRC, r.APRC, byte(r.Length)}
-	b = append(b, r.Data...)
-	return b
-}
-
-// IsACK returns true if the response is in fact a ACK
-func (r *Response) IsACK() bool {
-	return r.CCRC == 0x80 || (r.CCRC == 0x84 && r.APRC == 0)
-}
-
-// IsIntermediate returns true if the response is in fact a ACK
-func (r *Response) IsIntermediate() bool {
-	return r.CCRC == 0x04 && r.APRC == 0xFF
-}
-
-// IsStatus returns true if the response has a status byte
-func (r *Response) IsStatus() bool {
-	return r.CCRC == 0x04 && r.APRC == 0x0F
-}
-
-// GetTLV return a TLV or an error
-func (r *Response) GetTLV() (*tlv.Container, error) {
-	var tlv tlv.Container = tlv.Container{
-		Objects: []tlv.DataObject{},
-	}
-	err := tlv.Unmarshal(&r.Data)
-	return &tlv, err
-}
-
 // PT is the class
 type PT struct {
 	lock *sync.RWMutex

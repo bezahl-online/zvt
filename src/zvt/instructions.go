@@ -3,7 +3,7 @@ package zvt
 var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}
 
 // DisplayText implements instr 06 E0
-func (p *PT) DisplayText(text []string) (*Response, error) {
+func (p *PT) DisplayText(text []string) (*Command, error) {
 	return p.send(Command{
 		// Class: 0x06,
 		// Inst:  0xe0,
@@ -13,7 +13,7 @@ func (p *PT) DisplayText(text []string) (*Response, error) {
 
 // Register implements inst 06 00
 // set up different configurations on the PT
-func (p *PT) Register(config *Config) (*Response, error) {
+func (p *PT) Register(config *Config) (*Command, error) {
 	return p.send(Command{
 		// Class: 0x06,
 		// Inst:  0x00,
@@ -23,7 +23,7 @@ func (p *PT) Register(config *Config) (*Response, error) {
 
 // Abort implements inst 06 B0
 // ECR can instruct the PT to abort execution of a command
-func (p *PT) Abort() (*Response, error) {
+func (p *PT) Abort() (*Command, error) {
 	return p.send(Command{
 		// Class: 0x06,
 		// Inst:  0xB0,
@@ -48,7 +48,7 @@ func (p *PT) Abort() (*Response, error) {
 // with following consequences:
 // the PT resets the Registrationconfig-byte to ‘86’
 // and the PT may not send any more TLV-containers
-func (p *PT) LogOff() (*Response, error) {
+func (p *PT) LogOff() (*Command, error) {
 	return p.send(Command{
 		// Class: 0x06,
 		// Inst:  0x02,

@@ -1,7 +1,6 @@
 package zvt
 
 import (
-	"encoding/binary"
 	"fmt"
 	"net"
 	"os"
@@ -11,17 +10,12 @@ import (
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
 	"bezahl.online/zvt/src/instr"
+	"bezahl.online/zvt/src/zvt/tlv"
 	"bezahl.online/zvt/src/zvt/util"
 )
 
 // ZVT represents the driver
 var ZVT PT
-var zvtACK Response = Response{
-	CCRC:   0x80,
-	APRC:   0,
-	Length: 0,
-	Data:   []byte{},
-}
 
 func init() {
 	var pt PT = PT{
@@ -53,15 +47,53 @@ func (c *Command) Marshal() ([]byte, error) {
 	return b, nil
 }
 
-// SendACK send ACK and return the response or error
-func (p *PT) SendACK(timeout time.Duration) (*Response, error) {
-	ack := zvtACK.Marshal()
-	nr, err := p.conn.Write(ack)
-	if err != nil {
-		return nil, err
+// Unmarshal is
+func (c *Command) Unmarshal(data *[]byte) error {
+	i := instr.Find(data)
+	if i == nil {
+		return fmt.Errorf("APRC % X not found", (*data)[:2])
 	}
-	fmt.Printf("ECR => PT (%3d):% X\n", nr, ack)
-	return p.readResponse(timeout)
+	c.Instr = *i
+	dstart := 3
+	if (*data)[3] == 0xff {
+		dstart = 5
+	}
+	dend := dstart + i.RawDataLength
+	raw := (*data)[dstart:dend]
+	objs := []bmp.OBJ{}
+	for {
+		if len(*data) <= dend || (*data)[dend] == bmp.TLV {
+			break
+		}
+		o := bmp.OBJ{}
+		err := o.Unmarshal(((*data)[dend:]))
+		if err != nil {
+			return err
+		}
+		objs = append(objs, o)
+		dend += o.Size
+	}
+	tlv := tlv.Container{}
+	tlvData := (*data)[dend:]
+	tlv.Unmarshal(&tlvData)
+	c.Data = apdu.DataUnit{
+		Data:         raw,
+		BMPOBJs:      objs,
+		TLVContainer: tlv,
+	}
+	return nil
+}
+
+// SendACK send ACK and return the response or error
+func (p *PT) SendACK(timeout time.Duration) error {
+	i := instr.Map["ACK"]
+	_, err := p.send(Command{
+		Instr: i,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // FIXME: create comm package!
@@ -83,7 +115,7 @@ func (p *PT) Open() error {
 	return nil
 }
 
-func (p *PT) send(c Command) (*Response, error) {
+func (p *PT) send(c Command) (*Command, error) {
 	var err error
 	b, err := c.Marshal()
 	if err != nil {
@@ -95,7 +127,7 @@ func (p *PT) send(c Command) (*Response, error) {
 		return nil, err
 	}
 
-	var resp *Response
+	var resp *Command
 	resp, err = p.readResponse(5 * time.Second)
 	if err != nil {
 		return resp, err
@@ -103,8 +135,8 @@ func (p *PT) send(c Command) (*Response, error) {
 	return resp, err
 }
 
-func (p *PT) readResponse(timeout time.Duration) (*Response, error) {
-	var resp *Response
+func (p *PT) readResponse(timeout time.Duration) (*Command, error) {
+	var resp *Command
 	var err error
 	var readBuf []byte = make([]byte, 1024)
 	p.conn.SetDeadline(time.Now().Add(timeout))
@@ -114,7 +146,7 @@ func (p *PT) readResponse(timeout time.Duration) (*Response, error) {
 		return resp, err
 	}
 	fmt.Printf("PT => ECR (%3d):% X\n", nr, readBuf[:nr])
-	resp, err = p.unmarshalAPDU(readBuf[:nr])
+	// resp, err = resp.Unmarshal(readBuf[:nr])
 	return resp, err
 }
 
@@ -140,52 +172,4 @@ func compileLL(l uint8) []byte {
 	b[0] = 0xF0 + lz              // code into 0xFx (tens) (BCD)
 	b[1] = 0xF0 + le              // code into 0xFy (unit) (BCD)
 	return b
-}
-
-func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
-	var resp Response
-	if len(apduBytes) < 3 {
-		return &resp, fmt.Errorf("APDU less than 3 bytes long")
-	}
-	resp = Response{
-		CCRC:   apduBytes[0],
-		APRC:   apduBytes[1],
-		Length: int(apduBytes[2]),
-	}
-	dataStartsAt := 3
-	if resp.Length == 0xff {
-		resp.Length = int(binary.LittleEndian.Uint16(apduBytes[3:4]))
-		dataStartsAt = 5
-	}
-	if len(apduBytes) >= int(apduBytes[2])+dataStartsAt {
-		resp.Data = apduBytes[dataStartsAt : apduBytes[2]+byte(dataStartsAt)]
-	}
-	// // instInfo := inst.InfoMaps.GetInfoMap(resp)
-	// d := resp.Data
-	// var dataStart, dataEnd, tagDataLength int
-	// tagNr := d[:2]
-	// tagInfo, found := tag.InfoMaps.GetInfoMap(tagNr)
-	// if !found {
-	// 	var tNr []byte = tagNr
-	// 	if tagNr[0]&0x1F != 0x1F {
-	// 		tNr = []byte{tagNr[0]}
-	// 	}
-	// 	return &resp, fmt.Errorf("TAG '% X' not found", tNr)
-	// }
-	// switch tagInfo.LengthType {
-	// case tag.BINARY:
-	// 	tagDataLength = int(d[tagInfo.TAGNrLen])
-	// }
-	// if tagDataLength > 0 {
-	// 	dataStart = tagInfo.TAGNrLen + tagInfo.Length
-	// 	dataEnd = dataStart + int(tagDataLength)
-	// 	resp.TLV = TLV{
-	// 		Objects: []DataObject{},
-	// 	}
-	// 	resp.TLV.Objects = append(resp.TLV.Objects, DataObject{
-	// 		TAG:  []byte{0x24},
-	// 		data: d[dataStart:dataEnd],
-	// 	})
-	// }
-	return &resp, nil
 }
