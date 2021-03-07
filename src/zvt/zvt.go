@@ -10,9 +10,8 @@ import (
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/zvt/length"
+	"bezahl.online/zvt/src/instr"
 	"bezahl.online/zvt/src/zvt/util"
-	"github.com/albenik/bcd"
 )
 
 // ZVT represents the driver
@@ -36,6 +35,37 @@ func init() {
 	ZVT = pt
 }
 
+// Command is the structur for a APDU
+type Command struct {
+	Instr instr.CtrlField
+	Data  apdu.DataUnit
+}
+
+// Marshal marshal every thing to final command
+func (c *Command) Marshal() ([]byte, error) {
+	var b []byte = []byte{}
+	data, err := c.Data.Marshal()
+	if err != nil {
+		return b, err
+	}
+	b = append(b, c.Instr.Marshal(uint16(len(data)))...)
+	b = append(b, data...)
+	return b, nil
+}
+
+// SendACK send ACK and return the response or error
+func (p *PT) SendACK(timeout time.Duration) (*Response, error) {
+	ack := zvtACK.Marshal()
+	nr, err := p.conn.Write(ack)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("ECR => PT (%3d):% X\n", nr, ack)
+	return p.readResponse(timeout)
+}
+
+// FIXME: create comm package!
+
 // Open opens a connection to the PT
 func (p *PT) Open() error {
 	var url string
@@ -53,35 +83,9 @@ func (p *PT) Open() error {
 	return nil
 }
 
-// convert command structure to byte array
-func (c *Command) compile() ([]byte, error) {
-	var b []byte = []byte{
-		c.Class,
-		c.Inst,
-	}
-	data, err := c.Data.Marshal()
-	if err != nil {
-		return b, err
-	}
-	b = append(b, length.Format(uint16(len(data)), length.BINARY)...)
-	b = append(b, data...)
-	return b, nil
-}
-
-// SendACK send ACK and return the response or error
-func (p *PT) SendACK(timeout time.Duration) (*Response, error) {
-	ack := zvtACK.Marshal()
-	nr, err := p.conn.Write(ack)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("ECR => PT (%3d):% X\n", nr, ack)
-	return p.readResponse(timeout)
-}
-
 func (p *PT) send(c Command) (*Response, error) {
 	var err error
-	b, err := c.compile()
+	b, err := c.Marshal()
 	if err != nil {
 		return nil, err
 	}
@@ -184,13 +188,4 @@ func (p *PT) unmarshalAPDU(apduBytes []byte) (*Response, error) {
 	// 	})
 	// }
 	return &resp, nil
-}
-
-func compileAuthConfig(c *AuthConfig) apdu.DataUnit {
-	return apdu.DataUnit{
-		BMPOBJs: []bmp.OBJ{
-			{ID: 0x49, Data: bcd.FromUint16(uint16(*c.Currency))},
-			{ID: 0x19, Data: []byte{*c.PaymentType}},
-		},
-	}
 }

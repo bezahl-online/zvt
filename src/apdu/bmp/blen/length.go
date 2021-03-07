@@ -1,4 +1,4 @@
-package length
+package blen
 
 import "encoding/binary"
 
@@ -15,27 +15,32 @@ const (
 	BCD
 )
 
+type Length struct {
+	Kind  byte
+	Value uint16
+}
+
 // Format returns a byte representation of the specific length type
-func Format(l uint16, t int) []byte {
-	switch t {
+func (l *Length) Format() []byte {
+	switch l.Kind {
 	case NONE:
 		return []byte{}
 	case BINARY:
-		if l > 254 {
+		if l.Value > 254 {
 			var b []byte = []byte{0, 0}
-			binary.LittleEndian.PutUint16(b, l)
+			binary.LittleEndian.PutUint16(b, l.Value)
 			return b
 		}
-		return []byte{byte(l)}
+		return []byte{byte(l.Value)}
 	case LL:
 		return []byte{
-			0xf0 | byte(l/10),
-			0xf0 | byte(l-uint16(l/10)*10),
+			0xf0 | byte(l.Value/10),
+			0xf0 | byte(l.Value-uint16(l.Value/10)*10),
 		}
 	case LLL:
-		z1 := l / 100
-		z2 := uint16(uint16(l-z1*100) / 10)
-		z3 := uint16(uint16(l - z1*100 - z2*10))
+		z1 := l.Value / 100
+		z2 := uint16(uint16(l.Value-z1*100) / 10)
+		z3 := uint16(uint16(l.Value - z1*100 - z2*10))
 		return []byte{
 			0xf0 | byte(z1),
 			0xf0 | byte(z2),

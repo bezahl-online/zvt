@@ -5,9 +5,9 @@ var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}
 // DisplayText implements instr 06 E0
 func (p *PT) DisplayText(text []string) (*Response, error) {
 	return p.send(Command{
-		Class: 0x06,
-		Inst:  0xe0,
-		Data:  compileText(text),
+		// Class: 0x06,
+		// Inst:  0xe0,
+		// Data:  compileText(text),
 	})
 }
 
@@ -15,9 +15,9 @@ func (p *PT) DisplayText(text []string) (*Response, error) {
 // set up different configurations on the PT
 func (p *PT) Register(config *Config) (*Response, error) {
 	return p.send(Command{
-		Class: 0x06,
-		Inst:  0x00,
-		Data:  (*config).CompileConfig(),
+		// Class: 0x06,
+		// Inst:  0x00,
+		Data: (*config).CompileConfig(),
 	})
 }
 
@@ -25,12 +25,12 @@ func (p *PT) Register(config *Config) (*Response, error) {
 // ECR can instruct the PT to abort execution of a command
 func (p *PT) Abort() (*Response, error) {
 	return p.send(Command{
-		Class: 0x06,
-		Inst:  0xB0,
+		// Class: 0x06,
+		// Inst:  0xB0,
 	})
 }
 
-// FIXME: getting error "0x83 function not possible" from PT
+// // FIXME: getting error "0x83 function not possible" from PT
 // // ChangePassword (06 95)
 // // change the merchant password required for some ZVT commands to the PT
 // func (p *PT) ChangePassword(old, new *[3]byte) (*Response, error) {
@@ -38,9 +38,9 @@ func (p *PT) Abort() (*Response, error) {
 // 	data = append(data, (*old)[0:3]...)
 // 	data = append(data, (*new)[0:3]...)
 // 	return p.send(Command{
-// 		Class: 0x06,
-// 		Inst:  0x95,
-// 		Data:  data,
+// 		// Class: 0x06,
+// 		// Inst:  0x95,
+// 		// Data:  data,
 // 	})
 // }
 
@@ -50,7 +50,7 @@ func (p *PT) Abort() (*Response, error) {
 // and the PT may not send any more TLV-containers
 func (p *PT) LogOff() (*Response, error) {
 	return p.send(Command{
-		Class: 0x06,
-		Inst:  0x02,
+		// Class: 0x06,
+		// Inst:  0x02,
 	})
 }

@@ -1,4 +1,4 @@
-package length
+package blen
 
 import (
 	"testing"
@@ -8,15 +8,19 @@ import (
 
 func TestLengthFormat(t *testing.T) {
 	want := []byte{}
-	got := Format(123, NONE)
+	l := Length{Kind: NONE, Value: uint16(123)}
+	got := l.Format()
 	assert.Equal(t, want, got)
 	want = []byte{123}
-	got = Format(123, BINARY)
+	l = Length{Kind: BINARY, Value: uint16(123)}
+	got = l.Format()
 	assert.Equal(t, want, got)
 	want = []byte{0xF3, 0xF8}
-	got = Format(38, LL)
+	l = Length{Kind: LL, Value: uint16(38)}
+	got = l.Format()
 	assert.Equal(t, want, got)
 	want = []byte{0xF3, 0xF8, 0xF7}
-	got = Format(387, LLL)
+	l = Length{Kind: LLL, Value: uint16(387)}
+	got = l.Format()
 	assert.Equal(t, want, got)
 }

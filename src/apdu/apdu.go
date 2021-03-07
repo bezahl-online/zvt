@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/zvt/length"
+	"bezahl.online/zvt/src/apdu/bmp/blen"
 	"bezahl.online/zvt/src/zvt/tlv"
 )
 
@@ -50,10 +50,10 @@ func (a *DataUnit) Unmarshal(data *[]byte) error {
 		}
 		d = d[1:]
 		var bmpLen uint16 = 0
-		switch info.LengthType {
-		case length.NONE:
-			bmpLen = uint16(info.FixLen)
-		case length.BINARY:
+		switch info.Length.Kind {
+		case blen.NONE:
+			bmpLen = uint16(info.Length.Value)
+		case blen.BINARY:
 			if d[0] == 0xFF {
 				if len(d) < 2 {
 					return fmt.Errorf("wrong BMP length")
@@ -63,14 +63,14 @@ func (a *DataUnit) Unmarshal(data *[]byte) error {
 			} else {
 				d = d[1:]
 			}
-		case length.LL:
+		case blen.LL:
 			if len(d) < 2 {
 				return fmt.Errorf("wrong BMP length")
 			}
 			bmpLen = uint16(10*(d[1]&0x0F)) +
 				uint16(d[2]&0x0F)
 			d = d[2:]
-		case length.LLL:
+		case blen.LLL:
 			if len(d) < 3 {
 				return fmt.Errorf("wrong BMP length")
 			}

@@ -52,8 +52,8 @@ func TestUnmarshal(t *testing.T) {
 	data := []byte{0x04, 0, 0, 0, 1, 0, 0, 0x05, 0x02, 0x06, 0x0C, 0x06, 0x06, 0x26, 0x4, 0xa, 0x2, 0x6, 0xd3, 0x1F, 0x04, 0x01, 0x02}
 	want := DataUnit{
 		BMPOBJs: []bmp.OBJ{
-			{0x04, []byte{0, 0, 0, 1, 0, 0}},
-			{0x05, []byte{2}},
+			{ID: 0x04, Data: []byte{0, 0, 0, 1, 0, 0}},
+			{ID: 0x05, Data: []byte{2}},
 		},
 		TLVContainer: tlv.Container{
 			Objects: []tlv.DataObject{

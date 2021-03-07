@@ -9,13 +9,6 @@ import (
 	"github.com/albenik/bcd"
 )
 
-// Command is the structur for a APDU
-type Command struct {
-	Class byte
-	Inst  byte
-	Data  apdu.DataUnit
-}
-
 // BMP structure
 type BMP struct {
 	bmp  byte

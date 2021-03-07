@@ -1,6 +1,8 @@
 package tag
 
-import "bezahl.online/zvt/src/zvt/length"
+import (
+	"bezahl.online/zvt/src/apdu/bmp/blen"
+)
 
 // Info is the TAG info structure
 type Info struct {
@@ -22,12 +24,12 @@ func init() {
 }
 
 func (m *IMaps) initInfoMap() {
-	m.InfoMap[0x24] = Info{"text message", length.BINARY, 1, 1}
-	m.InfoMap[0x6F] = Info{"incorrect currency", length.NONE, 0, 1}
+	m.InfoMap[0x24] = Info{"text message", blen.BINARY, 1, 1}
+	m.InfoMap[0x6F] = Info{"incorrect currency", blen.NONE, 0, 1}
 }
 
 func (m *IMaps) initInfoMapE() {
-	m.InfoMapE[[2]byte{0x1F, 0x5B}] = Info{"timeout", length.BINARY, 1, 2}
+	m.InfoMapE[[2]byte{0x1F, 0x5B}] = Info{"timeout", blen.BINARY, 1, 2}
 }
 
 type IMaps struct {
