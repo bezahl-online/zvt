@@ -18,7 +18,10 @@ func init() {
 	InfoMap[0x04] = Info{"amount in cent", blen.Length{Kind: blen.NONE, Value: 6}}
 	InfoMap[0x05] = Info{"pump number", blen.Length{Kind: blen.NONE, Value: 1}}
 	// InfoMap[0x06] = Info{"TLV", blen.Length{Kind: blen.BINARY, Value: 1}} // dont MAP TLV is a PSEUDO BITMAP!
-	InfoMap[0x0E] = Info{"Exp.Date", blen.Length{Kind: blen.NONE, Size: 2}}
+	InfoMap[0x19] = Info{"Status/PaymentType/CardType", blen.Length{Kind: blen.NONE, Value: 1}}
+	InfoMap[0x29] = Info{"Terminal ID", blen.Length{Kind: blen.NONE, Value: 4}}
+	InfoMap[0x49] = Info{"Currency", blen.Length{Kind: blen.NONE, Value: 2}}
+	InfoMap[0x0E] = Info{"Exp.Date", blen.Length{Kind: blen.NONE, Value: 2}}
 	InfoMap[0xF1] = Info{"Text1 line 1", blen.Length{Kind: blen.LL}}
 	InfoMap[0xF2] = Info{"Text1 line 2", blen.Length{Kind: blen.LL}}
 	InfoMap[0xF3] = Info{"Text1 line 3", blen.Length{Kind: blen.LL}}

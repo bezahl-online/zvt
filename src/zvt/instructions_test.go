@@ -6,26 +6,24 @@ import (
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/apdu/bmp/blen"
 	"bezahl.online/zvt/src/instr"
+	"bezahl.online/zvt/src/zvt/config"
 	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRegister(t *testing.T) {
 	// start
-	configByte := 0
-	// config.PaymentReceiptPrintedByECR +
-	// 	config.AdminReceiptPrintedByECR +
-	// 	config.PTSendsIntermediateStatus +
-	// 	config.ECRusingPrintLinesForPrintout
-	serviceByte := 0
-	// config.ServiceMenuNOTAssignedToFunctionKey +
-	// 	config.DisplayTextsForCommandsAuthorisation
-	// var msgSquID *tlv.DataObject = &tlv.DataObject{
-	// 	TAG:  []byte{0x1F, 0x73},
-	// 	Data: []byte{0, 0, 0},
-	// }
+	configByte := config.PaymentReceiptPrintedByECR +
+		config.AdminReceiptPrintedByECR +
+		config.PTSendsIntermediateStatus +
+		config.ECRusingPrintLinesForPrintout
+	serviceByte := config.ServiceMenuNOTAssignedToFunctionKey +
+		config.DisplayTextsForCommandsAuthorisation
+	var msgSquID *tlv.DataObject = &tlv.DataObject{
+		TAG:  []byte{0x1F, 0x73},
+		Data: []byte{0, 0, 0},
+	}
 
 	var listOfCommands *tlv.DataObject = &tlv.DataObject{
 		TAG:  []byte{0x26},
@@ -34,45 +32,45 @@ func TestRegister(t *testing.T) {
 	var tlvContainer *tlv.Container = &tlv.Container{
 		Objects: []tlv.DataObject{},
 	}
-	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands) //, *msgSquID)
+	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands, *msgSquID)
+	i := instr.Map["ACK"]
 	want := Command{
-		Instr: instr.CtrlField{
-			Class: 0x80,
-			Instr: 0x00,
+		Instr: i,
+		Data: apdu.DataUnit{
+			Data:         []byte{},
+			BMPOBJs:      []bmp.OBJ{},
+			TLVContainer: tlv.Container{},
 		},
 	}
-	got, err := ZVT.Register(&Config{
+	err := ZVT.Register(&Config{
 		pwd:          fixedPassword,
 		config:       byte(configByte),
 		currency:     EUR,
 		service:      byte(serviceByte),
 		tlvContainer: tlvContainer,
 	})
+	got, err := ZVT.ReadResponse(time.Second * 5)
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 		// completion
+		i := instr.Map["Completion"]
 		want := Command{
-			Instr: instr.CtrlField{
-				Class: 0x06,
-				Instr: 0x0F,
-				Length: blen.Length{
-					Kind:  blen.BINARY,
-					Value: uint16(10),
-				},
-			},
+			Instr: i,
 			Data: apdu.DataUnit{
 				Data: []byte{},
 				BMPOBJs: []bmp.OBJ{
-					{ID: 0x19, Data: []byte{0x00}},
-					{ID: 0x29, Data: []byte{0x00, 0x10, 0x6, 0x49}},
-					{ID: 0x49, Data: []byte{0x9, 0x78}},
+					{ID: 0x19, Data: []byte{0}, Size: 2},
+					{ID: 0x29, Data: []byte{0x29, 0x00, 0x10, 0x06}, Size: 5},
+					{ID: 0x49, Data: []byte{0x09, 0x78}, Size: 3},
 				},
+				TLVContainer: tlv.Container{},
 			},
 		}
-
-		got, err = ZVT.readResponse(5 * time.Second)
+		got, err = ZVT.ReadResponse(5 * time.Second)
 		if assert.NoError(t, err) {
-			assert.EqualValues(t, want, *got)
+			if assert.EqualValues(t, want, *got) {
+				ZVT.SendACK()
+			}
 		}
 
 	}
@@ -100,25 +98,35 @@ func TestAbort(t *testing.T) {
 	i := instr.Map["ACK"]
 	want := Command{
 		Instr: i,
+		Data: apdu.DataUnit{
+			Data:         []byte{},
+			BMPOBJs:      []bmp.OBJ{},
+			TLVContainer: tlv.Container{},
+		},
 	}
-	got, err := ZVT.Abort()
+	err := ZVT.Abort()
+	got, err := ZVT.ReadResponse(time.Second * 5)
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 	}
 }
 
-// func TestLogOff(t *testing.T) {
-// 	want := aprc.Response{
-// 		CCRC:   0x80,
-// 		APRC:   0x00,
-// 		Length: 0x00,
-// 		Data:   []byte{},
-// 	}
-// 	got, err := ZVT.LogOff()
-// 	if assert.NoError(t, err) {
-// 		assert.EqualValues(t, want, *got)
-// 	}
-// }
+func TestLogOff(t *testing.T) {
+	i := instr.Map["ACK"]
+	want := Command{
+		Instr: i,
+		Data: apdu.DataUnit{
+			Data:         []byte{},
+			BMPOBJs:      []bmp.OBJ{},
+			TLVContainer: tlv.Container{},
+		},
+	}
+	err := ZVT.LogOff()
+	got, err := ZVT.ReadResponse(time.Second * 5)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, *got)
+	}
+}
 
 // FIXME: getting error "0x83 function not possible" from PT
 // func TestChangPassword(t *testing.T) {

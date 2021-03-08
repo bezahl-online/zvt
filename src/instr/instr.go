@@ -48,9 +48,31 @@ func init() {
 			Kind: byte(blen.BINARY),
 		},
 	}
+	Map["LogOff"] = CtrlField{
+		Class: byte(0x06),
+		Instr: byte(0x02),
+		Length: blen.Length{
+			Kind:  byte(blen.BINARY),
+			Value: 0,
+		},
+	}
+	Map["Abort"] = CtrlField{
+		Class: byte(0x06),
+		Instr: byte(0xB0),
+		Length: blen.Length{
+			Kind:  byte(blen.BINARY),
+			Value: 0,
+		},
+	}
 	Map["ACK"] = CtrlField{
 		Class: byte(0x80),
 		Instr: byte(0x00),
+		Length: blen.Length{
+			Kind:  blen.BINARY,
+			Size:  0,
+			Value: 0,
+		},
+		RawDataLength: 0,
 	}
 	Map["Completion"] = CtrlField{
 		Class: byte(0x06),
@@ -81,7 +103,7 @@ func init() {
 	Map["NotSupported"] = CtrlField{
 		Class:         byte(0x84),
 		Instr:         byte(0x83),
-		Length:        blen.Length{Kind: blen.NONE, Value: 0},
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 0,
 	}
 

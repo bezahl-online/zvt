@@ -4,6 +4,9 @@ package zvt
 // 	"testing"
 // 	"time"
 
+// 	"bezahl.online/zvt/src/apdu"
+// 	"bezahl.online/zvt/src/apdu/bmp"
+// 	"bezahl.online/zvt/src/instr"
 // 	"bezahl.online/zvt/src/zvt/payment"
 // 	"bezahl.online/zvt/src/zvt/tlv"
 // 	"github.com/stretchr/testify/assert"
@@ -14,7 +17,6 @@ package zvt
 // 	// 	TAG:  []byte{0x1F, 0x5B},
 // 	// 	data: []byte{0x10},
 // 	// }
-// 	return // FIXME: total überarbeiten!
 // 	var msgSquID *tlv.DataObject = &tlv.DataObject{
 // 		TAG:  []byte{0x1F, 0x73},
 // 		Data: []byte{0, 0, 0},
@@ -24,24 +26,33 @@ package zvt
 // 	*objects = append(*objects, *msgSquID)
 // 	var paymentType byte = payment.PrinterReady + payment.GirocardTransaction
 // 	currency := EUR
-// 	var tlv *tlv.Container = &tlv.Container{
+// 	var tlvContainer *tlv.Container = &tlv.Container{
 // 		Objects: *objects,
+// 	}
+// 	i := instr.Map["ACK"]
+// 	want := Command{
+// 		Instr: i,
+// 		Data: apdu.DataUnit{
+// 			Data:         []byte{},
+// 			BMPOBJs:      []bmp.OBJ{},
+// 			TLVContainer: tlv.Container{},
+// 		},
 // 	}
 // 	config := &AuthConfig{
 // 		Amount:      1,
 // 		Currency:    &currency,
 // 		PaymentType: &paymentType,
-// 		TLV:         tlv,
+// 		TLV:         tlvContainer,
 // 	}
-// 	got, err := ZVT.Authorisation(config)
-// 	got.Data = got.Data[:4]
+// 	err := ZVT.Authorisation(config)
+// 	got, err := ZVT.ReadResponse(time.Second * 5)
 // 	if assert.NoError(t, err) {
-// 		if assert.Equal(t, true, got.IsACK()) {
+// 		if assert.Equal(t, want, got) {
 // 			for {
-// 				got, err = ZVT.readResponse(5 * time.Second)
+// 				got, err = ZVT.ReadResponse(5 * time.Second)
 // 				if assert.NoError(t, err) {
 // 					// if assert.Equal(t, true, got.IsStatus() || got.IsIntermediate()) {
-// 					ZVT.SendACK(5 * time.Second)
+// 					ZVT.SendACK()
 // 					// }
 // 				}
 // 			}

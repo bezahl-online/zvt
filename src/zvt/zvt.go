@@ -49,6 +49,7 @@ func (c *Command) Marshal() ([]byte, error) {
 
 // Unmarshal is
 func (c *Command) Unmarshal(data *[]byte) error {
+	fmt.Println("unmarshal command object")
 	i := instr.Find(data)
 	if i == nil {
 		return fmt.Errorf("APRC %0X not found", (*data)[:2])
@@ -61,7 +62,8 @@ func (c *Command) Unmarshal(data *[]byte) error {
 	dend := dstart + i.RawDataLength
 	raw := (*data)[dstart:dend]
 	objs := []bmp.OBJ{}
-	for {
+	x := 100
+	for ; x > 0; x-- {
 		if len(*data) <= dend || (*data)[dend] == tlv.BMPTLV {
 			break
 		}
@@ -72,6 +74,9 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		}
 		objs = append(objs, o)
 		dend += o.Size
+	}
+	if x < 1 {
+		return fmt.Errorf("loop exceeded 100 iterations while unmashalling data objects")
 	}
 	tlv := tlv.Container{}
 	tlvData := (*data)[dend:]
@@ -88,9 +93,9 @@ func (c *Command) Unmarshal(data *[]byte) error {
 }
 
 // SendACK send ACK and return the response or error
-func (p *PT) SendACK(timeout time.Duration) error {
+func (p *PT) SendACK() error {
 	i := instr.Map["ACK"]
-	_, err := p.send(Command{
+	err := p.send(Command{
 		Instr: i,
 	})
 	if err != nil {
@@ -118,27 +123,21 @@ func (p *PT) Open() error {
 	return nil
 }
 
-func (p *PT) send(c Command) (*Command, error) {
+func (p *PT) send(c Command) error {
 	var err error
 	b, err := c.Marshal()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	// fmt.Printf("% X", b)
 	_, err = p.conn.Write(b)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	var resp *Command
-	resp, err = p.readResponse(5 * time.Second)
-	if err != nil {
-		return resp, err
-	}
-	return resp, err
+	return nil
 }
 
-func (p *PT) readResponse(timeout time.Duration) (*Command, error) {
+// ReadResponse reads from the connection to the PT
+func (p *PT) ReadResponse(timeout time.Duration) (*Command, error) {
 	var resp *Command = &Command{}
 	var err error
 	var readBuf []byte = make([]byte, 1024)

@@ -5,7 +5,7 @@ import "bezahl.online/zvt/src/instr"
 var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}
 
 // DisplayText implements instr 06 E0
-func (p *PT) DisplayText(text []string) (*Command, error) {
+func (p *PT) DisplayText(text []string) error {
 	return p.send(Command{
 		// Class: 0x06,
 		// Inst:  0xe0,
@@ -15,17 +15,17 @@ func (p *PT) DisplayText(text []string) (*Command, error) {
 
 // Register implements inst 06 00
 // set up different configurations on the PT
-func (p *PT) Register(config *Config) (*Command, error) {
+func (p *PT) Register(config *Config) error {
+	i := instr.Map["Registration"]
 	return p.send(Command{
-		// Class: 0x06,
-		// Inst:  0x00,
-		Data: (*config).CompileConfig(),
+		Instr: i,
+		Data:  (*config).CompileConfig(),
 	})
 }
 
 // Abort implements inst 06 B0
 // ECR can instruct the PT to abort execution of a command
-func (p *PT) Abort() (*Command, error) {
+func (p *PT) Abort() error {
 	i := instr.Map["Abort"]
 	return p.send(Command{
 		Instr: i,
@@ -50,9 +50,9 @@ func (p *PT) Abort() (*Command, error) {
 // with following consequences:
 // the PT resets the Registrationconfig-byte to ‘86’
 // and the PT may not send any more TLV-containers
-func (p *PT) LogOff() (*Command, error) {
+func (p *PT) LogOff() error {
+	i := instr.Map["LogOff"]
 	return p.send(Command{
-		// Class: 0x06,
-		// Inst:  0x02,
+		Instr: i,
 	})
 }

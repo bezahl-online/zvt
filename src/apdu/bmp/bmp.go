@@ -7,7 +7,7 @@ import (
 // OBJ is
 type OBJ struct {
 	ID   byte
-	Size int // length of the Lenght
+	Size int // length of the Length
 	Data []byte
 }
 
@@ -38,7 +38,7 @@ func (o *OBJ) Unmarshal(data []byte) error {
 	err = info.Length.Unmarshal(data[1:])
 	if err == nil {
 		start := info.Length.Size + 1
-		o.Size = int(info.Length.Size)
+		o.Size = int(info.Length.Value + uint16(info.Length.Size+1))
 		o.Data = data[start : info.Length.Value+uint16(start)]
 	}
 	return err
