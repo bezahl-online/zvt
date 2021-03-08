@@ -51,18 +51,18 @@ func (c *Command) Marshal() ([]byte, error) {
 func (c *Command) Unmarshal(data *[]byte) error {
 	i := instr.Find(data)
 	if i == nil {
-		return fmt.Errorf("APRC % X not found", (*data)[:2])
+		return fmt.Errorf("APRC %0X not found", (*data)[:2])
 	}
 	c.Instr = *i
 	dstart := 3
-	if (*data)[3] == 0xff {
+	if (*data)[2] == 0xff {
 		dstart = 5
 	}
 	dend := dstart + i.RawDataLength
 	raw := (*data)[dstart:dend]
 	objs := []bmp.OBJ{}
 	for {
-		if len(*data) <= dend || (*data)[dend] == bmp.TLV {
+		if len(*data) <= dend || (*data)[dend] == tlv.BMPTLV {
 			break
 		}
 		o := bmp.OBJ{}
@@ -75,7 +75,10 @@ func (c *Command) Unmarshal(data *[]byte) error {
 	}
 	tlv := tlv.Container{}
 	tlvData := (*data)[dend:]
-	tlv.Unmarshal(&tlvData)
+	err := tlv.Unmarshal(&tlvData)
+	if err != nil {
+		return err
+	}
 	c.Data = apdu.DataUnit{
 		Data:         raw,
 		BMPOBJs:      objs,
@@ -121,7 +124,7 @@ func (p *PT) send(c Command) (*Command, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("% X", b)
+	// fmt.Printf("% X", b)
 	_, err = p.conn.Write(b)
 	if err != nil {
 		return nil, err
@@ -136,7 +139,7 @@ func (p *PT) send(c Command) (*Command, error) {
 }
 
 func (p *PT) readResponse(timeout time.Duration) (*Command, error) {
-	var resp *Command
+	var resp *Command = &Command{}
 	var err error
 	var readBuf []byte = make([]byte, 1024)
 	p.conn.SetDeadline(time.Now().Add(timeout))
@@ -146,7 +149,11 @@ func (p *PT) readResponse(timeout time.Duration) (*Command, error) {
 		return resp, err
 	}
 	fmt.Printf("PT => ECR (%3d):% X\n", nr, readBuf[:nr])
-	// resp, err = resp.Unmarshal(readBuf[:nr])
+	data := readBuf[:nr]
+	if nr == 1 && data[0] == 0x15 { // incorrect password
+		return nil, fmt.Errorf("Incorrect Password")
+	}
+	err = resp.Unmarshal(&data)
 	return resp, err
 }
 

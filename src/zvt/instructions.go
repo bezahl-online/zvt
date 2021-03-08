@@ -1,5 +1,7 @@
 package zvt
 
+import "bezahl.online/zvt/src/instr"
+
 var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}
 
 // DisplayText implements instr 06 E0
@@ -24,9 +26,9 @@ func (p *PT) Register(config *Config) (*Command, error) {
 // Abort implements inst 06 B0
 // ECR can instruct the PT to abort execution of a command
 func (p *PT) Abort() (*Command, error) {
+	i := instr.Map["Abort"]
 	return p.send(Command{
-		// Class: 0x06,
-		// Inst:  0xB0,
+		Instr: i,
 	})
 }
 

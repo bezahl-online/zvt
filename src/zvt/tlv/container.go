@@ -3,9 +3,10 @@ package tlv
 import (
 	"bytes"
 	"fmt"
-
-	"bezahl.online/zvt/src/apdu/bmp"
 )
+
+// BMPTLV is 0x06
+const BMPTLV = byte(6)
 
 // Container is the type length value container
 type Container struct {
@@ -16,7 +17,7 @@ type Container struct {
 func (t *Container) Marshal() []byte {
 	var b []byte
 	if len(t.Objects) > 0 {
-		b = append(b, bmp.TLV)
+		b = append(b, BMPTLV)
 		data := MarshalDataObjects(&t.Objects)
 		b = append(b, CompileLength(len(data))...)
 		b = append(b, data...)
@@ -36,8 +37,9 @@ func (t *Container) Unmarshal(data *[]byte) error {
 		if err != nil {
 			return err
 		}
-		if uint16(len(d))-sizeOfLenField == tlvLen {
-			return fmt.Errorf("value in length field (%d) and length of data (%d) does not match", tlvLen, len(d))
+		realLen := uint16(len(d)) - sizeOfLenField - 1
+		if realLen != tlvLen {
+			return fmt.Errorf("value in length field (%d) and length of data (%d) does not match", tlvLen, realLen)
 		}
 		// reduce data to data after TLV TAG (06) and length byte(s)
 		d = d[sizeOfLenField+1:]

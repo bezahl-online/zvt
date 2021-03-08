@@ -66,5 +66,23 @@ func init() {
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 2,
 	}
+	Map["AccountBalance"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0x03),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 0,
+	}
+	Map["PrintTextBlock"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0xD3),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 0,
+	}
+	Map["NotSupported"] = CtrlField{
+		Class:         byte(0x84),
+		Instr:         byte(0x83),
+		Length:        blen.Length{Kind: blen.NONE, Value: 0},
+		RawDataLength: 0,
+	}
 
 }

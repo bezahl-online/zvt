@@ -90,8 +90,11 @@ func (a *DataUnit) Unmarshal(data *[]byte) error {
 		d = d[bmpLen:]
 		a.BMPOBJs = append(a.BMPOBJs, bmpObj)
 	}
-	if d[0] == bmp.TLV {
-		a.TLVContainer.Unmarshal(&d)
+	if d[0] == tlv.BMPTLV {
+		err := a.TLVContainer.Unmarshal(&d)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

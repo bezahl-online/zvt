@@ -26,6 +26,7 @@ func CompileLength(len int) []byte {
 // DecompileLength retrieves the length from the coded length
 // in the TLV data object data structure byte(s) according
 // to the ZVT protocol
+// returns (dataLength(uint16), tagLengthSize(uint16) error)
 func DecompileLength(data *[]byte) (uint16, uint16, error) {
 	l := *data
 	if l[0]&0x80 == 0x80 {

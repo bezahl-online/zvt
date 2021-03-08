@@ -8,23 +8,24 @@ import (
 	"bezahl.online/zvt/src/apdu/bmp"
 	"bezahl.online/zvt/src/apdu/bmp/blen"
 	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/config"
 	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRegister(t *testing.T) {
 	// start
-	configByte := config.PaymentReceiptPrintedByECR +
-		config.AdminReceiptPrintedByECR +
-		config.PTSendsIntermediateStatus +
-		config.ECRusingPrintLinesForPrintout
-	serviceByte := config.ServiceMenuNOTAssignedToFunctionKey +
-		config.DisplayTextsForCommandsAuthorisation
-	var msgSquID *tlv.DataObject = &tlv.DataObject{
-		TAG:  []byte{0x1F, 0x73},
-		Data: []byte{0, 0, 0},
-	}
+	configByte := 0
+	// config.PaymentReceiptPrintedByECR +
+	// 	config.AdminReceiptPrintedByECR +
+	// 	config.PTSendsIntermediateStatus +
+	// 	config.ECRusingPrintLinesForPrintout
+	serviceByte := 0
+	// config.ServiceMenuNOTAssignedToFunctionKey +
+	// 	config.DisplayTextsForCommandsAuthorisation
+	// var msgSquID *tlv.DataObject = &tlv.DataObject{
+	// 	TAG:  []byte{0x1F, 0x73},
+	// 	Data: []byte{0, 0, 0},
+	// }
 
 	var listOfCommands *tlv.DataObject = &tlv.DataObject{
 		TAG:  []byte{0x26},
@@ -33,7 +34,7 @@ func TestRegister(t *testing.T) {
 	var tlvContainer *tlv.Container = &tlv.Container{
 		Objects: []tlv.DataObject{},
 	}
-	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands, *msgSquID)
+	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands) //, *msgSquID)
 	want := Command{
 		Instr: instr.CtrlField{
 			Class: 0x80,
@@ -95,18 +96,16 @@ func TestRegister(t *testing.T) {
 // 	}
 // }
 
-// func TestAbort(t *testing.T) {
-// 	want := aprc.Response{
-// 		CCRC:   0x80,
-// 		APRC:   0x00,
-// 		Length: 0x00,
-// 		Data:   []byte{},
-// 	}
-// 	got, err := ZVT.Abort()
-// 	if assert.NoError(t, err) {
-// 		assert.EqualValues(t, want, *got)
-// 	}
-// }
+func TestAbort(t *testing.T) {
+	i := instr.Map["ACK"]
+	want := Command{
+		Instr: i,
+	}
+	got, err := ZVT.Abort()
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, *got)
+	}
+}
 
 // func TestLogOff(t *testing.T) {
 // 	want := aprc.Response{

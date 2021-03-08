@@ -1,5 +1,12 @@
 package tlv
 
+import (
+	"fmt"
+
+	"bezahl.online/zvt/src/apdu/bmp/blen"
+	"bezahl.online/zvt/src/zvt/tag"
+)
+
 // DataObject is part of a TLV
 type DataObject struct {
 	TAG  []byte
@@ -28,16 +35,31 @@ func (obj *DataObject) Marshal() []byte {
 // Unmarshal retrieves a TAG with its optional data
 // from the bytes of a TLV data object
 func (obj *DataObject) Unmarshal(d []byte) (uint16, error) {
-	tag, err := DecompileTAG(&d)
+	tagNr, err := tag.Decompile(&d)
 	if err != nil {
 		return 0, err
 	}
-	tagLength := uint16(len(tag))
-	tagLengthData := d[tagLength:]
-	tagDataLength, tagLengthSize, err := DecompileLength(&tagLengthData)
+	info, found := tag.InfoMaps.GetInfoMap(tagNr)
+	if !found {
+		return 0, fmt.Errorf("TAG '%04X' not found", tagNr)
+	}
+	tagLength := uint16(len(tagNr))
+	tagLengthSize := uint16(0)
+	tagDataLength := uint16(info.Length)
 	objectLength := tagLength + tagLengthSize + tagDataLength
+	tagLengthData := d[tagLength:]
+	switch info.LengthType {
+	case blen.BINARY:
+		tagDataLength, tagLengthSize, err = DecompileLength(&tagLengthData)
+		if err != nil {
+			return 0, err
+		}
+		objectLength = tagLength + tagLengthSize + tagDataLength
+		// case blen.BCD:
+		// 	tagDataLength = uint16(info.Length)
+	}
 	d = d[tagLength+tagLengthSize:]
-	(*obj).TAG = tag
 	(*obj).Data = d[:tagDataLength]
+	(*obj).TAG = tagNr
 	return objectLength, nil
 }

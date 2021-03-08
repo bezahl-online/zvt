@@ -64,90 +64,67 @@ func TestCompileText(t *testing.T) {
 // 	assert.EqualValues(t, want, got)
 // }
 
-func TestUnmarshalAPDU(t *testing.T) {
-	// testBytes := []byte{0x84, 0x1E, 0x03, 0x6F, 0x09, 0x97}
-	// want := Response{
-	// 	CCRC:   0x84,
-	// 	APRC:   0x1E,
-	// 	Length: 0x03,
-	// 	Data:   []byte{0x6F, 0x09, 0x97},
-	// }
-	//FIXME:
-	//  got, err := ZVT.unmarshalAPDU(testBytes)
-	// if assert.NoError(t, err) {
-	// 	assert.EqualValues(t, want, *got)
-	// }
+func TestCommandUnmarshal1(t *testing.T) {
+	testBytes, err := util.Load("dump/data050730027.bin")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := Command{
+		Instr: instr.CtrlField{
+			Class: 0x04,
+			Instr: 0xFF,
+			Length: blen.Length{
+				Kind: blen.BINARY,
+			},
+			RawDataLength: 2,
+		},
+		Data: apdu.DataUnit{
+			Data:    []byte{0x0A, 0x01},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{
+					{TAG: []byte{0x24}, Data: testBytes[9:]},
+				},
+			},
+		},
+	}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
 }
 
-func TestCommandUnmarshal(t *testing.T) {
-	t.Run("from data files", func(t *testing.T) {
-		testBytes, err := util.Load("dump/data050730027.bin")
-		if !assert.NoError(t, err) {
-			return
-		}
-		want := Command{
-			Instr: instr.CtrlField{
-				Class: 0x04,
-				Instr: 0xFF,
-				Length: blen.Length{
-					Kind: blen.BINARY,
-				},
-				RawDataLength: 2,
+func TestCommandUnmarshal2(t *testing.T) {
+	testBytes, err := util.Load("dump/data051327012.bin")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := Command{
+		Instr: instr.CtrlField{
+			Class: 0x06,
+			Instr: 0xD3,
+			Length: blen.Length{
+				Kind: blen.BINARY,
 			},
-			Data: apdu.DataUnit{
-				Data:    []byte{0x0A, 0x01},
-				BMPOBJs: []bmp.OBJ{},
-				TLVContainer: tlv.Container{
-					Objects: []tlv.DataObject{
-						{TAG: []byte{0x24}, Data: testBytes[9:]},
-					},
+			RawDataLength: 0,
+		},
+		Data: apdu.DataUnit{
+			Data:    []byte{},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{
+					{TAG: []byte{0x1F, 0x07}, Data: testBytes[11:12]},
+					{TAG: []byte{0x25}, Data: testBytes[17:]},
 				},
 			},
-		}
-		var got Command = Command{}
-		err = got.Unmarshal(&testBytes)
-		if assert.NoError(t, err) {
-			if assert.EqualValues(t, want, got) {
-				// want := tlv.Container{
-				// 	Objects: []tlv.DataObject{},
-				// }
-				// want.Objects = append(want.Objects, tlv.DataObject{
-				// 	TAG:  []byte{0x24},
-				// 	Data: testBytes[9:],
-				// })
-				// got, err := (*got).GetTLV()
-				// if assert.NoError(t, err) {
-				// 	assert.EqualValues(t, want, *got)
-				// }
-			}
-
-		}
-	})
-	// t.Run("from data files", func(t *testing.T) {
-	// 	testBytes, err := util.Load("dump/data051327012.bin")
-	// 	if !assert.NoError(t, err) {
-	// 		return
-	// 	}
-	// 	want := Response{
-	// 		CCRC:   0x06,
-	// 		APRC:   0xD3,
-	// 		Length: 0,
-	// 		Data:   []byte{},
-	// 	}
-	// 	if len(testBytes) < 9 {
-	// 		fmt.Printf("% X", testBytes)
-	// 		return
-	// 	}
-	// 	want.TLV.Objects = append(want.TLV.Objects, DataObject{
-	// 		TAG:  []byte{0x24},
-	// 		data: testBytes[9:],
-	// 	})
-	// 	var got *Response
-	// 	got, err = ZVT.unmarshalAPDU(testBytes)
-	// 	if assert.NoError(t, err) {
-	// 		assert.EqualValues(t, want, *got)
-	// 	}
-	// })
+		},
+	}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
 }
 
 func TestAuthData(t *testing.T) {

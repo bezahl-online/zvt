@@ -16,7 +16,7 @@ func (o *OBJ) Marshal() ([]byte, error) {
 	var b []byte = []byte{o.ID}
 	info, found := InfoMap[o.ID]
 	if !found {
-		return b, fmt.Errorf("BMP with ID % X not found", o.ID)
+		return b, fmt.Errorf("BMP '%04X' not found", o.ID)
 	}
 	info.Length.Value = uint16(len(o.Data))
 	b = append(b, info.Length.Format()...)
@@ -33,7 +33,7 @@ func (o *OBJ) Unmarshal(data []byte) error {
 	o.ID = data[0]
 	info, found := InfoMap[o.ID]
 	if !found {
-		return fmt.Errorf("BMP % X not found", data[0])
+		return fmt.Errorf("BMP '%04X' not found", data[0])
 	}
 	err = info.Length.Unmarshal(data[1:])
 	if err == nil {
