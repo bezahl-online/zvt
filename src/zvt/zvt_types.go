@@ -64,29 +64,3 @@ func (e *ExpiryDate) getBCD() []byte {
 	b = append(b, bcd.FromUint(uint64(e.Year), 1)...)
 	return b
 }
-
-// AuthConfig is the auth data struct
-type AuthConfig struct {
-	Amount      int
-	Currency    *int
-	PaymentType *byte
-	ExpiryDate  *ExpiryDate
-	CardNumber  *[]byte
-	TLV         *tlv.Container
-}
-
-func (a *AuthConfig) marshal() {
-	var b []byte = []byte{0x04}
-	b = append(b, bcd.FromUint(uint64(a.Amount), 6)...)
-	if a.Currency != nil {
-		b = append(b, byte(0x49))
-		b = append(b, bcd.FromUint(uint64(*a.Currency), 2)...)
-	}
-	if a.PaymentType != nil {
-		b = append(b, 0x19, *a.PaymentType)
-	}
-	if a.ExpiryDate != nil {
-		b = append(b, 0x0e)
-		b = append(b, (*a.ExpiryDate).getBCD()...)
-	}
-}

@@ -49,7 +49,6 @@ func (c *Command) Marshal() ([]byte, error) {
 
 // Unmarshal is
 func (c *Command) Unmarshal(data *[]byte) error {
-	fmt.Println("unmarshal command object")
 	i := instr.Find(data)
 	if i == nil {
 		return fmt.Errorf("APRC %0X not found", (*data)[:2])
@@ -60,6 +59,9 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		dstart = 5
 	}
 	dend := dstart + i.RawDataLength
+	if (*data)[2] < byte(i.RawDataLength) {
+		dend = dstart + int((*data)[2])
+	}
 	raw := (*data)[dstart:dend]
 	objs := []bmp.OBJ{}
 	x := 100
@@ -78,7 +80,12 @@ func (c *Command) Unmarshal(data *[]byte) error {
 	if x < 1 {
 		return fmt.Errorf("loop exceeded 100 iterations while unmashalling data objects")
 	}
-	tlv := tlv.Container{}
+	tlv := tlv.Container{
+		Objects: []tlv.DataObject{},
+	}
+	if len(*data) < dend {
+		return nil
+	}
 	tlvData := (*data)[dend:]
 	err := tlv.Unmarshal(&tlvData)
 	if err != nil {

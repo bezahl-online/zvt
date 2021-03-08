@@ -64,7 +64,7 @@ func TestCompileText(t *testing.T) {
 // }
 
 func TestCommandUnmarshal1(t *testing.T) {
-	testBytes, err := util.Load("dump/data050730027.bin")
+	testBytes, err := util.Load("testdata/data050730027.hex")
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -95,7 +95,7 @@ func TestCommandUnmarshal1(t *testing.T) {
 }
 
 func TestCommandUnmarshal2(t *testing.T) {
-	testBytes, err := util.Load("dump/data051327012.bin")
+	testBytes, err := util.Load("testdata/data051327012.hex")
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -126,32 +126,121 @@ func TestCommandUnmarshal2(t *testing.T) {
 	}
 }
 
-// func TestAuthData(t *testing.T) {
-// 	want := []byte{0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x49, 0x09,
-// 		0x78, 0x19, 0x75, 0x0E, 0x11, 0x21, 0x06, 0x04, 0x1F, 0x5B, 0x01, 0x05}
-// 	var cardPollTimeout *tlv.DataObject = &tlv.DataObject{
-// 		TAG:  []byte{0x1F, 0x5B},
-// 		Data: []byte{0x05},
-// 	}
-// 	var objects *[]tlv.DataObject = &[]tlv.DataObject{}
+func TestCommandUnmarshal3(t *testing.T) {
+	testBytes, err := util.Load("testdata/data081537024.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := Command{
+		Instr: instr.CtrlField{
+			Class: 0x04,
+			Instr: 0xFF,
+			Length: blen.Length{
+				Kind: blen.BINARY,
+			},
+			RawDataLength: 2,
+		},
+		Data: apdu.DataUnit{
+			Data:    []byte{0x0A, 0x01},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{
+					{TAG: []byte{0x24}, Data: testBytes[9:]},
+				},
+			},
+		},
+	}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
+}
 
-// 	*objects = append(*objects, *cardPollTimeout)
-// 	var paymentType byte = payment.PaymentIncludeGeldKarte + payment.PrinterReady + payment.GirocardTransaction
-// 	currency := EUR
-// 	var tlv *tlv.Container = &tlv.Container{
-// 		Objects: *objects,
-// 	}
-// 	config := AuthConfig{
-// 		Amount:      1,
-// 		Currency:    &currency,
-// 		PaymentType: &paymentType,
-// 		ExpiryDate: &ExpiryDate{
-// 			Month: 11,
-// 			Year:  21,
-// 		},
-// 		CardNumber: nil,
-// 		TLV:        tlv,
-// 	}
-// 	got := compileAuthConfig(&config)
-// 	assert.Equal(t, want, got)
-// }
+func TestCommandUnmarshal4(t *testing.T) {
+	testBytes, err := util.Load("testdata/data081537039.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := Command{
+		Instr: instr.CtrlField{
+			Class: 0x04,
+			Instr: 0x0F,
+			Length: blen.Length{
+				Kind: blen.BINARY,
+			},
+			RawDataLength: 0,
+		},
+		Data: apdu.DataUnit{
+			Data: []byte{},
+			BMPOBJs: []bmp.OBJ{
+				{ID: 0x27, Data: []byte{0x6C}, Size: 2},
+				{ID: 0x29, Data: []byte{0x29, 0, 0x10, 0x6}, Size: 5},
+			},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{},
+			},
+		},
+	}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
+}
+func TestCommandUnmarshal5(t *testing.T) {
+	testBytes, err := util.Load("testdata/data081621025.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := Command{
+		Instr: instr.CtrlField{
+			Class: 0x04,
+			Instr: 0xFF,
+			Length: blen.Length{
+				Kind: blen.BINARY,
+			},
+			RawDataLength: 2,
+		},
+		Data: apdu.DataUnit{
+			Data:    []byte{0x0E},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{},
+			},
+		},
+	}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
+}
+func TestCommandUnmarshal6(t *testing.T) {
+	testBytes, err := util.Load("testdata/data081649050.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := Command{
+		Instr: instr.CtrlField{
+			Class: 0x04,
+			Instr: 0xFF,
+			Length: blen.Length{
+				Kind: blen.BINARY,
+			},
+			RawDataLength: 2,
+		},
+		Data: apdu.DataUnit{
+			Data:    []byte{0x0E},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{},
+			},
+		},
+	}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
+}

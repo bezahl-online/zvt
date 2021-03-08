@@ -32,7 +32,10 @@ func (m *IMaps) initInfoMap() {
 	m.InfoMap[0x24] = Info{"text message", blen.BINARY, 1, 1}
 	m.InfoMap[0x25] = Info{"print-texts", blen.BINARY, 0, 1}
 	m.InfoMap[0x26] = Info{"List  of  permitted  ZVT-commands", blen.BINARY, 0, 1}
+	m.InfoMap[0x43] = Info{"application-ID (RID+PIX)", blen.BINARY, 0, 1}
 	m.InfoMap[0x45] = Info{"receipt-parameter", blen.BINARY, 4, 1}
+	m.InfoMap[0x46] = Info{"EMV-print-data (customer-receipt)", blen.BINARY, 0, 1}
+	m.InfoMap[0x47] = Info{"EMV-print-data (merchant-receipt)", blen.BINARY, 0, 1}
 	m.InfoMap[0x6F] = Info{"incorrect currency", blen.NONE, 0, 1}
 }
 
@@ -42,6 +45,8 @@ func (m *IMaps) initInfoMapE() {
 	// 0x03 administration-receipt
 	m.InfoMapE[[2]byte{0x1F, 0x04}] = Info{"receipt-parameter", blen.BINARY, 1, 2}
 	m.InfoMapE[[2]byte{0x1F, 0x07}] = Info{"receipt-type", blen.BINARY, 1, 2}
+	m.InfoMapE[[2]byte{0x1F, 0x10}] = Info{"cardholder authentication", blen.BINARY, 1, 2}
+	m.InfoMapE[[2]byte{0x1F, 0x12}] = Info{"card-technology", blen.BINARY, 1, 2}
 	m.InfoMapE[[2]byte{0x1F, 0x5B}] = Info{"timeout", blen.BINARY, 1, 2}
 }
 

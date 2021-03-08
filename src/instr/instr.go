@@ -88,6 +88,12 @@ func init() {
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 2,
 	}
+	Map["StatusInformation"] = CtrlField{
+		Class:         byte(0x04),
+		Instr:         byte(0x0F),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 0,
+	}
 	Map["AccountBalance"] = CtrlField{
 		Class:         byte(0x06),
 		Instr:         byte(0x03),

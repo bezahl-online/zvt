@@ -37,9 +37,11 @@ func TestRegister(t *testing.T) {
 	want := Command{
 		Instr: i,
 		Data: apdu.DataUnit{
-			Data:         []byte{},
-			BMPOBJs:      []bmp.OBJ{},
-			TLVContainer: tlv.Container{},
+			Data:    []byte{},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{},
+			},
 		},
 	}
 	err := ZVT.Register(&Config{
@@ -63,7 +65,9 @@ func TestRegister(t *testing.T) {
 					{ID: 0x29, Data: []byte{0x29, 0x00, 0x10, 0x06}, Size: 5},
 					{ID: 0x49, Data: []byte{0x09, 0x78}, Size: 3},
 				},
-				TLVContainer: tlv.Container{},
+				TLVContainer: tlv.Container{
+					Objects: []tlv.DataObject{},
+				},
 			},
 		}
 		got, err = ZVT.ReadResponse(5 * time.Second)
@@ -99,9 +103,11 @@ func TestAbort(t *testing.T) {
 	want := Command{
 		Instr: i,
 		Data: apdu.DataUnit{
-			Data:         []byte{},
-			BMPOBJs:      []bmp.OBJ{},
-			TLVContainer: tlv.Container{},
+			Data:    []byte{},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{},
+			},
 		},
 	}
 	err := ZVT.Abort()
@@ -116,9 +122,11 @@ func TestLogOff(t *testing.T) {
 	want := Command{
 		Instr: i,
 		Data: apdu.DataUnit{
-			Data:         []byte{},
-			BMPOBJs:      []bmp.OBJ{},
-			TLVContainer: tlv.Container{},
+			Data:    []byte{},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{},
+			},
 		},
 	}
 	err := ZVT.LogOff()
