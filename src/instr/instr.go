@@ -76,6 +76,12 @@ func init() {
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 1,
 	}
+	Map["PrintLine"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0xD1),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 0,
+	}
 	Map["PrintTextBlock"] = CtrlField{
 		Class:         byte(0x06),
 		Instr:         byte(0xD3),
@@ -87,6 +93,12 @@ func init() {
 		Instr:         byte(0xB0),
 		Length:        blen.Length{Kind: byte(blen.BINARY), Value: 0},
 		RawDataLength: 0,
+	}
+	Map["DisplayText"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0xE0),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 1,
 	}
 	Map["ACK"] = CtrlField{
 		Class:         byte(0x80),

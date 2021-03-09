@@ -39,27 +39,26 @@ func (obj *DataObject) Unmarshal(d []byte) (uint16, error) {
 	if err != nil {
 		return 0, err
 	}
-	info, found := tag.InfoMaps.GetInfoMap(tagNr)
+	info, found := tag.InfoMap[tagNr]
 	if !found {
 		return 0, fmt.Errorf("TAG '%04X' not found", tagNr)
 	}
-	tagLength := uint16(len(tagNr))
 	tagLengthSize := uint16(0)
 	tagDataLength := uint16(info.Length)
-	objectLength := tagLength + tagLengthSize + tagDataLength
-	tagLengthData := d[tagLength:]
+	objectLength := uint16(info.TAGNrLen) + tagLengthSize + tagDataLength
+	tagLengthData := d[info.TAGNrLen:]
 	switch info.LengthType {
 	case blen.BINARY:
 		tagDataLength, tagLengthSize, err = DecompileLength(&tagLengthData)
 		if err != nil {
 			return 0, err
 		}
-		objectLength = tagLength + tagLengthSize + tagDataLength
+		objectLength = uint16(info.TAGNrLen) + tagLengthSize + tagDataLength
 		// case blen.BCD:
 		// 	tagDataLength = uint16(info.Length)
 	}
-	d = d[tagLength+tagLengthSize:]
+	d = d[info.TAGNrLen+int(tagLengthSize):]
 	(*obj).Data = d[:tagDataLength]
-	(*obj).TAG = tagNr
+	(*obj).TAG = tagNr[:]
 	return objectLength, nil
 }

@@ -14,7 +14,7 @@ import (
 func TestAuthorisation(t *testing.T) {
 	i := instr.Map["ACK"]
 	want := Command{
-		Instr: i,
+		CtrlField: i,
 		Data: apdu.DataUnit{
 			Data:    []byte{},
 			BMPOBJs: []bmp.OBJ{},
@@ -33,14 +33,14 @@ func TestAuthorisation(t *testing.T) {
 			for {
 				got, err = ZVT.ReadResponse()
 				if assert.NoError(t, err) {
-					if got.Instr.Class == 0x06 && got.Instr.Instr == 0x1E {
+					if got.CtrlField.Class == 0x06 && got.CtrlField.Instr == 0x1E {
 						if got.Data.Data[0] == 0x6C {
 							fmt.Println("Transaction aborted")
 							// ZVT.SendACK()
 							break
 						}
 					}
-					if got.Instr.Class == 0x06 && got.Instr.Instr == 0x0F {
+					if got.CtrlField.Class == 0x06 && got.CtrlField.Instr == 0x0F {
 						fmt.Println("Transaction successfull")
 						ZVT.SendACK()
 						break

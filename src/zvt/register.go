@@ -1,28 +1,11 @@
 package zvt
 
 import (
-	"net"
-	"sync"
-
 	"bezahl.online/zvt/src/apdu"
+	"bezahl.online/zvt/src/instr"
 	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/albenik/bcd"
 )
-
-// BMP structure
-type BMP struct {
-	bmp  byte
-	data []byte
-}
-
-// PT is the class
-type PT struct {
-	lock *sync.RWMutex
-	conn net.Conn
-}
-
-// EUR currency code
-const EUR = 978
 
 // Config is the config struct
 type Config struct {
@@ -31,6 +14,16 @@ type Config struct {
 	currency     int // default EUR
 	service      byte
 	tlvContainer *tlv.Container
+}
+
+// Register implements inst 06 00
+// set up different configurations on the PT
+func (p *PT) Register(config *Config) error {
+	i := instr.Map["Registration"]
+	return p.send(Command{
+		CtrlField: i,
+		Data:      (*config).CompileConfig(),
+	})
 }
 
 // CompileConfig return a compiled byte array of the configuration
@@ -44,23 +37,4 @@ func (c *Config) CompileConfig() apdu.DataUnit {
 	dataUnit.Data = b
 	dataUnit.TLVContainer = *c.tlvContainer
 	return dataUnit
-}
-
-// type CardData struct {
-// 	ExpiryDate     ExpiryDate
-// 	SequenceNumber SequenceNumber
-// 	EFID           EFID
-// 	CardType       CardType
-// }
-
-// ExpiryDate structur
-type ExpiryDate struct {
-	Month int
-	Year  int
-}
-
-func (e *ExpiryDate) getBCD() []byte {
-	var b []byte = bcd.FromUint(uint64(e.Month), 1)
-	b = append(b, bcd.FromUint(uint64(e.Year), 1)...)
-	return b
 }

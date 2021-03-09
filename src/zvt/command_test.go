@@ -41,35 +41,13 @@ func TestCompileText(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
-// func TestCompilePTConfig(t *testing.T) {
-// 	want := []byte{0x12, 0x34, 0x56, 0x8E, 0x9, 0x78, 0x3,
-// 		0x3, 0x6, 0x6, 0x26, 0x4, 0xa, 0x2, 0x6, 0xd3}
-// 	var listOfCommands *tlv.DataObject = &tlv.DataObject{
-// 		TAG:  []byte{0x26},
-// 		Data: []byte{0x0A, 0x02, 0x06, 0xD3},
-// 	}
-// 	var tlvContainer *tlv.Container = &tlv.Container{
-// 		Objects: []tlv.DataObject{},
-// 	}
-// 	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands)
-// 	config := Config{
-// 		pwd:          [3]byte{0x12, 0x34, 0x56},
-// 		config:       0x8E,
-// 		currency:     EUR,
-// 		service:      0x03,
-// 		tlvContainer: tlvContainer,
-// 	}
-// 	got := config.CompileConfig()
-// 	assert.EqualValues(t, want, got)
-// }
-
 func TestCommandUnmarshal1(t *testing.T) {
 	testBytes, err := util.Load("testdata/data050730027.hex")
 	if !assert.NoError(t, err) {
 		return
 	}
 	want := Command{
-		Instr: instr.CtrlField{
+		CtrlField: instr.CtrlField{
 			Class: 0x04,
 			Instr: 0xFF,
 			Length: blen.Length{
@@ -100,7 +78,7 @@ func TestCommandUnmarshal2(t *testing.T) {
 		return
 	}
 	want := Command{
-		Instr: instr.CtrlField{
+		CtrlField: instr.CtrlField{
 			Class: 0x06,
 			Instr: 0xD3,
 			Length: blen.Length{
@@ -132,7 +110,7 @@ func TestCommandUnmarshal3(t *testing.T) {
 		return
 	}
 	want := Command{
-		Instr: instr.CtrlField{
+		CtrlField: instr.CtrlField{
 			Class: 0x04,
 			Instr: 0xFF,
 			Length: blen.Length{
@@ -163,7 +141,7 @@ func TestCommandUnmarshal4(t *testing.T) {
 		return
 	}
 	want := Command{
-		Instr: instr.CtrlField{
+		CtrlField: instr.CtrlField{
 			Class: 0x04,
 			Instr: 0x0F,
 			Length: blen.Length{
@@ -194,7 +172,7 @@ func TestCommandUnmarshal5(t *testing.T) {
 		return
 	}
 	want := Command{
-		Instr: instr.CtrlField{
+		CtrlField: instr.CtrlField{
 			Class: 0x04,
 			Instr: 0xFF,
 			Length: blen.Length{
@@ -221,7 +199,7 @@ func TestCommandUnmarshal6(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-	want := Command{Instr: instr.CtrlField{
+	want := Command{CtrlField: instr.CtrlField{
 		Class: 0x4, Instr: 0xf, Length: blen.Length{Kind: 0x1, Size: 0x0, Value: 0x0}, RawDataLength: 0},
 		Data: apdu.DataUnit{Data: []uint8{}, BMPOBJs: []bmp.OBJ{
 			{ID: 0x27, Size: 2, Data: []uint8{0x0}},
@@ -276,7 +254,7 @@ func TestCommandUnmarshal7(t *testing.T) {
 		return
 	}
 	want := Command{
-		Instr: instr.CtrlField{
+		CtrlField: instr.CtrlField{
 			Class: 0x06,
 			Instr: 0x1E,
 			Length: blen.Length{

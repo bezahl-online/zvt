@@ -34,7 +34,7 @@ func TestRegister(t *testing.T) {
 	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands, *msgSquID)
 	i := instr.Map["ACK"]
 	want := Command{
-		Instr: i,
+		CtrlField: i,
 		Data: apdu.DataUnit{
 			Data:    []byte{},
 			BMPOBJs: []bmp.OBJ{},
@@ -56,7 +56,7 @@ func TestRegister(t *testing.T) {
 		// completion
 		i := instr.Map["Completion"]
 		want := Command{
-			Instr: i,
+			CtrlField: i,
 			Data: apdu.DataUnit{
 				Data: []byte{},
 				BMPOBJs: []bmp.OBJ{
@@ -79,87 +79,3 @@ func TestRegister(t *testing.T) {
 	}
 
 }
-
-// func TestDisplayText(t *testing.T) {
-// 	want := aprc.Response{
-// 		CCRC:   0x80,
-// 		APRC:   0x00,
-// 		Length: 0x00,
-// 		Data:   []byte{},
-// 	}
-// 	got, err := ZVT.DisplayText([]string{
-// 		"Da steh ich nun,",
-// 		"ich armer Tor,",
-// 		"Und bin so klug",
-// 		"als wie zuvor."})
-// 	if assert.NoError(t, err) {
-// 		assert.EqualValues(t, want, *got)
-// 	}
-// }
-
-func TestAbort(t *testing.T) {
-	i := instr.Map["ACK"]
-	want := Command{
-		Instr: i,
-		Data: apdu.DataUnit{
-			Data:    []byte{},
-			BMPOBJs: []bmp.OBJ{},
-			TLVContainer: tlv.Container{
-				Objects: []tlv.DataObject{},
-			},
-		},
-	}
-	err := ZVT.Abort()
-	got, err := ZVT.ReadResponse()
-	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, *got)
-	}
-}
-
-func TestLogOff(t *testing.T) {
-	i := instr.Map["ACK"]
-	want := Command{
-		Instr: i,
-		Data: apdu.DataUnit{
-			Data:    []byte{},
-			BMPOBJs: []bmp.OBJ{},
-			TLVContainer: tlv.Container{
-				Objects: []tlv.DataObject{},
-			},
-		},
-	}
-	err := ZVT.LogOff()
-	got, err := ZVT.ReadResponse()
-	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, *got)
-	}
-}
-
-// FIXME: getting error "0x83 function not possible" from PT
-// func TestChangPassword(t *testing.T) {
-// 	// start
-// 	want := Response{
-// 		CCRC:   0x80,
-// 		APRC:   0x00,
-// 		Length: 0x00,
-// 		Data:   []byte{},
-// 	}
-// 	var old, new *[3]byte = &[3]byte{0x12, 0x34, 0x56},
-// 		&[3]byte{0x12, 0x34, 0x56}
-// 	got, err := ZVT.ChangePassword(old, new)
-// 	if assert.NoError(t, err) {
-// 		assert.EqualValues(t, want, *got)
-
-// 		// completion
-// 		want = Response{
-// 			CCRC:   0x06,
-// 			APRC:   0x0F,
-// 			Length: 0x01,
-// 			Data:   []byte{0},
-// 		}
-// 		got, err = ZVT.readResponse(5 * time.Second)
-// 		if assert.NoError(t, err) {
-// 			assert.EqualValues(t, want, *got)
-// 		}
-// 	}
-// }
