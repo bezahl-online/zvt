@@ -17,6 +17,9 @@ import (
 // ZVT represents the driver
 var ZVT PT
 
+// stanard timeout for read from and write to PT
+const timeoutRW = 5 * time.Second
+
 func init() {
 	var pt PT = PT{
 		lock: &sync.RWMutex{},
@@ -136,6 +139,8 @@ func (p *PT) send(c Command) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("ECR => PT (%3d):% X\n", len(b), b)
+	p.conn.SetDeadline(time.Now().Add(timeoutRW))
 	_, err = p.conn.Write(b)
 	if err != nil {
 		return err
@@ -144,13 +149,15 @@ func (p *PT) send(c Command) error {
 }
 
 // ReadResponse reads from the connection to the PT
-func (p *PT) ReadResponse(timeout time.Duration) (*Command, error) {
+func (p *PT) ReadResponse() (*Command, error) {
 	var resp *Command = &Command{}
 	var err error
 	var readBuf []byte = make([]byte, 1024)
-	p.conn.SetDeadline(time.Now().Add(timeout))
+	p.conn.SetDeadline(time.Now().Add(timeoutRW))
 	nr, err := p.conn.Read(readBuf)
-	util.Save(&readBuf, nr)
+	if nr > 0 {
+		util.Save(&readBuf, nr)
+	}
 	if err != nil {
 		return resp, err
 	}

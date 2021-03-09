@@ -26,8 +26,6 @@ func (a *AuthConfig) marshal() apdu.DataUnit {
 	return apdu.DataUnit{
 		BMPOBJs: []bmp.OBJ{
 			{ID: 0x04, Data: bcd.FromUint(uint64(a.Amount), 6)},
-			// {ID: 0x49, Data: bcd.FromUint16(uint16(a.Currency))},
-			// {ID: 0x19, Data: []byte{a.PaymentType}},
 		},
 	}
 }

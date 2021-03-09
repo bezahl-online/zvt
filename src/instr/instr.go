@@ -34,54 +34,6 @@ func Find(command *[]byte) *CtrlField {
 var Map map[string]CtrlField = make(map[string]CtrlField)
 
 func init() {
-	Map["Registration"] = CtrlField{
-		Class: byte(0x06),
-		Instr: byte(0x00),
-		Length: blen.Length{
-			Kind: byte(blen.BINARY),
-		},
-	}
-	Map["Authorisation"] = CtrlField{
-		Class: byte(0x06),
-		Instr: byte(0x01),
-		Length: blen.Length{
-			Kind: byte(blen.BINARY),
-		},
-	}
-	Map["LogOff"] = CtrlField{
-		Class: byte(0x06),
-		Instr: byte(0x02),
-		Length: blen.Length{
-			Kind:  byte(blen.BINARY),
-			Value: 0,
-		},
-	}
-	Map["Abort"] = CtrlField{
-		Class: byte(0x06),
-		Instr: byte(0xB0),
-		Length: blen.Length{
-			Kind:  byte(blen.BINARY),
-			Value: 0,
-		},
-	}
-	Map["ACK"] = CtrlField{
-		Class: byte(0x80),
-		Instr: byte(0x00),
-		Length: blen.Length{
-			Kind:  blen.BINARY,
-			Size:  0,
-			Value: 0,
-		},
-		RawDataLength: 0,
-	}
-	Map["Completion"] = CtrlField{
-		Class: byte(0x06),
-		Instr: byte(0x0F),
-		Length: blen.Length{
-			Kind:  blen.BINARY,
-			Value: 0,
-		},
-	}
 	Map["Intermediate"] = CtrlField{
 		Class:         byte(0x04),
 		Instr:         byte(0xFF),
@@ -94,15 +46,57 @@ func init() {
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 0,
 	}
+	Map["Registration"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0x00),
+		Length:        blen.Length{Kind: byte(blen.BINARY)},
+		RawDataLength: 0,
+	}
+	Map["Authorisation"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0x01),
+		Length:        blen.Length{Kind: byte(blen.BINARY)},
+		RawDataLength: 0,
+	}
+	Map["LogOff"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0x02),
+		Length:        blen.Length{Kind: byte(blen.BINARY), Value: 0},
+		RawDataLength: 0,
+	}
 	Map["AccountBalance"] = CtrlField{
 		Class:         byte(0x06),
 		Instr:         byte(0x03),
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 0,
 	}
+	Map["TransactionAborted"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0x1E),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 1,
+	}
 	Map["PrintTextBlock"] = CtrlField{
 		Class:         byte(0x06),
 		Instr:         byte(0xD3),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 0,
+	}
+	Map["Abort"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0xB0),
+		Length:        blen.Length{Kind: byte(blen.BINARY), Value: 0},
+		RawDataLength: 0,
+	}
+	Map["ACK"] = CtrlField{
+		Class:         byte(0x80),
+		Instr:         byte(0x00),
+		Length:        blen.Length{Kind: blen.BINARY, Size: 0, Value: 0},
+		RawDataLength: 0,
+	}
+	Map["Completion"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0x0F),
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 0,
 	}

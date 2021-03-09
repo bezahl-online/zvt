@@ -3,7 +3,6 @@ package zvt
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
@@ -13,22 +12,6 @@ import (
 )
 
 func TestAuthorisation(t *testing.T) {
-	// var cardPollTimeout *tlv.DataObject = &tlv.DataObject{
-	// 	TAG:  []byte{0x1F, 0x5B},
-	// 	data: []byte{0x10},
-	// }
-	// var msgSquID *tlv.DataObject = &tlv.DataObject{
-	// 	TAG:  []byte{0x1F, 0x73},
-	// 	Data: []byte{0, 0, 0},
-	// }
-	// var objects *[]tlv.DataObject = &[]tlv.DataObject{}
-
-	// *objects = append(*objects, *msgSquID)
-	// var paymentType byte = payment.PrinterReady + payment.GirocardTransaction
-	// currency := EUR
-	// var tlvContainer *tlv.Container = &tlv.Container{
-	// 	Objects: *objects,
-	// }
 	i := instr.Map["ACK"]
 	want := Command{
 		Instr: i,
@@ -42,18 +25,26 @@ func TestAuthorisation(t *testing.T) {
 	}
 	config := &AuthConfig{
 		Amount: 1,
-		// Currency:    currency,
-		// PaymentType: paymentType,
-		// TLV:         tlvContainer,
 	}
 	err := ZVT.Authorisation(config)
-	got, err := ZVT.ReadResponse(time.Second * 5)
+	got, err := ZVT.ReadResponse()
 	if assert.NoError(t, err) {
 		if assert.Equal(t, want, *got) {
 			for {
-				got, err = ZVT.ReadResponse(5 * time.Second)
+				got, err = ZVT.ReadResponse()
 				if assert.NoError(t, err) {
-					fmt.Printf("%v\n", *got)
+					if got.Instr.Class == 0x06 && got.Instr.Instr == 0x1E {
+						if got.Data.Data[0] == 0x6C {
+							fmt.Println("Transaction aborted")
+							// ZVT.SendACK()
+							break
+						}
+					}
+					if got.Instr.Class == 0x06 && got.Instr.Instr == 0x0F {
+						fmt.Println("Transaction successfull")
+						ZVT.SendACK()
+						break
+					}
 					ZVT.SendACK()
 				}
 			}

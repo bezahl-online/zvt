@@ -2,7 +2,6 @@ package zvt
 
 import (
 	"testing"
-	"time"
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
@@ -51,7 +50,7 @@ func TestRegister(t *testing.T) {
 		service:      byte(serviceByte),
 		tlvContainer: tlvContainer,
 	})
-	got, err := ZVT.ReadResponse(time.Second * 5)
+	got, err := ZVT.ReadResponse()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 		// completion
@@ -70,7 +69,7 @@ func TestRegister(t *testing.T) {
 				},
 			},
 		}
-		got, err = ZVT.ReadResponse(5 * time.Second)
+		got, err = ZVT.ReadResponse()
 		if assert.NoError(t, err) {
 			if assert.EqualValues(t, want, *got) {
 				ZVT.SendACK()
@@ -111,7 +110,7 @@ func TestAbort(t *testing.T) {
 		},
 	}
 	err := ZVT.Abort()
-	got, err := ZVT.ReadResponse(time.Second * 5)
+	got, err := ZVT.ReadResponse()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 	}
@@ -130,7 +129,7 @@ func TestLogOff(t *testing.T) {
 		},
 	}
 	err := ZVT.LogOff()
-	got, err := ZVT.ReadResponse(time.Second * 5)
+	got, err := ZVT.ReadResponse()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 	}
