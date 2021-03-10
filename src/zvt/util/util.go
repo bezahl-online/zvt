@@ -9,10 +9,11 @@ import (
 var fileNr int = 0
 
 // Save saves data to persistence
-func Save(data *[]byte, length int) (string, error) {
+func Save(data *[]byte, length int, sender string) (string, error) {
 	_, _, d := time.Now().Date()
-	m, s, ms := time.Now().Clock()
-	fileName := fmt.Sprintf("dump/data%02d%02d%02d%03d.hex", d, m, s, ms)
+	h, m, s := time.Now().Clock()
+	ms := time.Now().UnixNano() / int64(time.Millisecond)
+	fileName := fmt.Sprintf("dump/%s%02d%02d%02d%02d%03d.hex", sender, d, h, m, s, ms)
 	err := ioutil.WriteFile(fileName, (*data)[:length], 0644)
 	if err != nil {
 		return "", err

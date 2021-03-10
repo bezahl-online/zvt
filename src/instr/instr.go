@@ -84,7 +84,8 @@ func init() {
 		Class:         byte(0x06),
 		Instr:         byte(0xD1),
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
-		RawDataLength: 0,
+		RawDataLength: 1, // FIXME: actually there is only raw data
+		// <attribut><text>
 	}
 	Map["PrintTextBlock"] = CtrlField{
 		Class:         byte(0x06),

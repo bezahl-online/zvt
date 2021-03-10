@@ -24,7 +24,7 @@ type PT struct {
 var ZVT PT
 
 // stanard timeout for read from and write to PT
-const timeoutRW = 5 * time.Second
+const defaultTimeout = 5 * time.Second
 
 func init() {
 	var pt PT = PT{
@@ -79,32 +79,60 @@ func (p *PT) send(c Command) error {
 		return err
 	}
 	fmt.Printf("ECR => PT (%3d):% X\n", len(b), b)
-	p.conn.SetDeadline(time.Now().Add(timeoutRW))
-	_, err = p.conn.Write(b)
+	p.conn.SetDeadline(time.Now().Add(defaultTimeout))
+	nr, err := p.conn.Write(b)
 	if err != nil {
 		return err
+	}
+	if nr > 0 {
+		util.Save(&b, nr, "EC")
 	}
 	return nil
 }
 
 // ReadResponse reads from the connection to the PT
 func (p *PT) ReadResponse() (*Command, error) {
+	return p.ReadResponseWithTimeout(defaultTimeout)
+}
+
+// ReadResponseWithTimeout reads from the connection to the PT
+// where a timeout can be specified
+// if reading time exceeds timout duration an error is returned
+func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
+	var err error
 	if p.conn == nil {
 		return nil, fmt.Errorf("no connection to PT")
 	}
 	var resp *Command = &Command{}
-	var err error
-	var readBuf []byte = make([]byte, 1024)
-	p.conn.SetDeadline(time.Now().Add(timeoutRW))
-	nr, err := p.conn.Read(readBuf)
-	if nr > 0 {
-		util.Save(&readBuf, nr)
+	var cf []byte = []byte{0, 0, 0}
+	p.conn.SetDeadline(time.Now().Add(timeout))
+	nr, err := p.conn.Read(cf)
+	i := instr.Find(&cf)
+	if i == nil {
+		return nil, fmt.Errorf("control field '% X' not found", cf)
 	}
+	lenBuf := []byte{cf[2]}
+	if cf[2] == 0xFF {
+		lenBuf = append(lenBuf, 0, 0)
+		nr, err = p.conn.Read(lenBuf[1:])
+		if err != nil {
+			return resp, err
+		}
+	}
+	i.Length.Unmarshal(lenBuf)
+	var readBuf []byte = make([]byte, i.Length.Value)
+	// p.conn.SetDeadline(time.Now().Add(timeout))
+	nr, err = p.conn.Read(readBuf)
 	if err != nil {
 		return resp, err
 	}
-	fmt.Printf("PT => ECR (%3d):% X\n", nr, readBuf[:nr])
-	data := readBuf[:nr]
+	fmt.Printf("PT => ECR (%03X):% X\n", []byte{i.Class, i.Instr}, readBuf[:nr])
+	if nr > 0 {
+		util.Save(&readBuf, nr, "PT")
+	}
+	data := []byte{i.Class, i.Instr}
+	data = append(data, lenBuf...)
+	data = append(data, readBuf[:nr]...)
 	if nr == 1 && data[0] == 0x15 { // incorrect password
 		return nil, fmt.Errorf("Incorrect Password")
 	}

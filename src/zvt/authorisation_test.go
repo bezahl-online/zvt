@@ -2,7 +2,9 @@ package zvt
 
 import (
 	"fmt"
+	"log"
 	"testing"
+	"time"
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
@@ -30,22 +32,26 @@ func TestAuthorisation(t *testing.T) {
 	got, err := ZVT.ReadResponse()
 	if assert.NoError(t, err) {
 		if assert.Equal(t, want, *got) {
-			for {
-				got, err = ZVT.ReadResponse()
+			done := false
+			for !done {
+				got, err = ZVT.ReadResponseWithTimeout(20 * time.Second)
 				if assert.NoError(t, err) {
-					if got.CtrlField.Class == 0x06 && got.CtrlField.Instr == 0x1E {
-						if got.Data.Data[0] == 0x6C {
-							fmt.Println("Transaction aborted")
-							// ZVT.SendACK()
-							break
+					ZVT.SendACK()
+					switch got.CtrlField.Class {
+					case 0x06:
+						switch got.CtrlField.Instr {
+						case 0x1E:
+							if got.Data.Data[0] == 0x6C {
+								fmt.Println("Transaction aborted")
+								done = true
+							}
+						case 0x0F:
+							fmt.Println("Transaction successfull")
+							done = true
 						}
 					}
-					if got.CtrlField.Class == 0x06 && got.CtrlField.Instr == 0x0F {
-						fmt.Println("Transaction successfull")
-						ZVT.SendACK()
-						break
-					}
-					ZVT.SendACK()
+				} else {
+					log.Fatal(err)
 				}
 			}
 		}

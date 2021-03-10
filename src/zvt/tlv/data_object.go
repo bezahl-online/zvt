@@ -59,6 +59,6 @@ func (obj *DataObject) Unmarshal(d []byte) (uint16, error) {
 	}
 	d = d[info.TAGNrLen+int(tagLengthSize):]
 	(*obj).Data = d[:tagDataLength]
-	(*obj).TAG = tagNr[:]
+	(*obj).TAG = tagNr[:info.TAGNrLen]
 	return objectLength, nil
 }
