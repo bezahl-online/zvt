@@ -28,7 +28,7 @@ func TestMarshalDataObjects(t *testing.T) {
 func TestUnmarshalDataObject(t *testing.T) {
 	data := []byte{0x26, 0x04, 0x0A, 0x02, 0x06, 0xD3}
 	want := DataObject{
-		TAG:  []byte{0x26, 0x0},
+		TAG:  []byte{0x26},
 		Data: []byte{0x0A, 0x02, 0x06, 0xD3},
 	}
 	var got DataObject = DataObject{}

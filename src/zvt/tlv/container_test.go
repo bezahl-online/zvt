@@ -33,7 +33,7 @@ func TestUnmarshalTLV(t *testing.T) {
 	data := []byte{0x06, 0x10, 0x26, 0x04, 0x0A, 0x02, 0x06,
 		0xD3, 0x1f, 0x5B, 0x01, 0x05, 0x45, 0x04, 0x02, 0x02, 0, 0}
 	var listOfCommands *DataObject = &DataObject{
-		TAG:  []byte{0x26, 0x0},
+		TAG:  []byte{0x26},
 		Data: []byte{0x0A, 0x02, 0x06, 0xD3},
 	}
 	var cardPollTimeout *DataObject = &DataObject{
@@ -41,7 +41,7 @@ func TestUnmarshalTLV(t *testing.T) {
 		Data: []byte{0x05},
 	}
 	var receiptParameter *DataObject = &DataObject{
-		TAG:  []byte{0x45, 0},
+		TAG:  []byte{0x45},
 		Data: []byte{0x02, 0x02, 0, 0},
 	}
 	var objects *[]DataObject = &[]DataObject{}
