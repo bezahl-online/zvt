@@ -2,6 +2,7 @@ package blen
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 const (
@@ -25,22 +26,23 @@ type Length struct {
 }
 
 // Format returns a byte representation of the specific length type
-func (l *Length) Format() []byte {
+func (l *Length) Format() ([]byte, error) {
 	switch l.Kind {
 	case NONE:
-		return []byte{}
+		return []byte{}, nil
 	case BINARY:
 		if l.Value > 254 {
-			var b []byte = []byte{0, 0}
-			binary.LittleEndian.PutUint16(b, l.Value)
-			return b
+			var b []byte = []byte{0xFF, 0, 0}
+			binary.LittleEndian.PutUint16(b[1:], l.Value)
+
+			return b, nil
 		}
-		return []byte{byte(l.Value)}
+		return []byte{byte(l.Value)}, nil
 	case LL:
 		return []byte{
 			0xf0 | byte(l.Value/10),
 			0xf0 | byte(l.Value-uint16(l.Value/10)*10),
-		}
+		}, nil
 	case LLL:
 		z1 := l.Value / 100
 		z2 := uint16(uint16(l.Value-z1*100) / 10)
@@ -49,9 +51,9 @@ func (l *Length) Format() []byte {
 			0xf0 | byte(z1),
 			0xf0 | byte(z2),
 			0xf0 | byte(z3),
-		}
+		}, nil
 	}
-	return []byte{}
+	return []byte{}, fmt.Errorf("kind of length not implemented")
 }
 
 // Unmarshal it

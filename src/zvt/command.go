@@ -22,7 +22,11 @@ func (c *Command) Marshal() ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
-	b = append(b, c.CtrlField.Marshal(uint16(len(data)))...)
+	cf, err := c.CtrlField.Marshal(uint16(len(data)))
+	if err != nil {
+		return b, err
+	}
+	b = append(b, cf...)
 	b = append(b, data...)
 	return b, nil
 }

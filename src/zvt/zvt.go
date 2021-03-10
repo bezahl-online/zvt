@@ -70,6 +70,9 @@ func (p *PT) Open() error {
 }
 
 func (p *PT) send(c Command) error {
+	if p.conn == nil {
+		return fmt.Errorf("no connection to PT")
+	}
 	var err error
 	b, err := c.Marshal()
 	if err != nil {
@@ -86,6 +89,9 @@ func (p *PT) send(c Command) error {
 
 // ReadResponse reads from the connection to the PT
 func (p *PT) ReadResponse() (*Command, error) {
+	if p.conn == nil {
+		return nil, fmt.Errorf("no connection to PT")
+	}
 	var resp *Command = &Command{}
 	var err error
 	var readBuf []byte = make([]byte, 1024)

@@ -10,8 +10,10 @@ import (
 func TestMarshal(t *testing.T) {
 	want := []byte{0x06, 0x00, 0x0D}
 	ctrlField := Map["Registration"]
-	got := ctrlField.Marshal(uint16(13))
-	assert.Equal(t, want, got)
+	got, err := ctrlField.Marshal(uint16(13))
+	if assert.NoError(t, err) {
+		assert.Equal(t, want, got)
+	}
 }
 
 func TestFind(t *testing.T) {

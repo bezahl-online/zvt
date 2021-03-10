@@ -13,8 +13,8 @@ import (
 )
 
 func TestCommandMarshal(t *testing.T) {
-	want := []byte{0x06, 0x01, 0x0a, 0x54, 0x65, 0x73,
-		0x74, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67}
+	// want := []byte{0x06, 0x01, 0x0a, 0x54, 0x65, 0x73,
+	// 	0x74, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67}
 	instr := instr.CtrlField{
 		Class: 0x06,
 		Instr: 0x01,
@@ -23,10 +23,30 @@ func TestCommandMarshal(t *testing.T) {
 			Value: uint16(10),
 		},
 	}
-	c := Command{instr, apdu.DataUnit{Data: []byte("Teststring")}}
+	want := []byte{0x06, 0x01, 0x17, 0x04, 0, 0, 0, 1, 0, 0, 0x05, 0x02, 0x06, 0x0C, 0x06, 0x06, 0x26, 0x4, 0xa, 0x2, 0x6, 0xd3, 0x1F, 0x04, 0x01, 0x02}
+	var apdu apdu.DataUnit = apdu.DataUnit{
+		BMPOBJs: []bmp.OBJ{
+			{ID: 0x04, Data: []byte{0, 0, 0, 1, 0, 0}},
+			{ID: 0x05, Data: []byte{2}},
+		},
+		TLVContainer: tlv.Container{
+			Objects: []tlv.DataObject{
+				{TAG: []byte{0x06}, Data: []byte{0x26, 0x4, 0xa, 0x2, 0x6, 0xd3}},
+				{TAG: []byte{0x1F, 0x04}, Data: []byte{0x02}},
+			},
+		},
+	}
+	c := Command{
+		CtrlField: instr,
+		Data:      apdu,
+	}
 	got, err := c.Marshal()
 	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, got)
+		if assert.EqualValues(t, want, got) {
+			c.Data.BMPOBJs[0].ID = 0xFF
+			_, err := c.Marshal()
+			assert.Error(t, err)
+		}
 	}
 }
 

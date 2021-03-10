@@ -11,11 +11,15 @@ type CtrlField struct {
 }
 
 // Marshal is
-func (c *CtrlField) Marshal(dataLength uint16) []byte {
+func (c *CtrlField) Marshal(dataLength uint16) ([]byte, error) {
 	var b []byte = []byte{c.Class, c.Instr}
 	c.Length.Value = dataLength
-	b = append(b, c.Length.Format()...)
-	return b
+	l, err := c.Length.Format()
+	if err != nil {
+		return b, err
+	}
+	b = append(b, l...)
+	return b, nil
 }
 
 // Find searches for Class and Instr in the Map
