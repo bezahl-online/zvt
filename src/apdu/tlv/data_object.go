@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"bezahl.online/zvt/src/apdu/bmp/blen"
-	"bezahl.online/zvt/src/zvt/tag"
+	"bezahl.online/zvt/src/apdu/tlv/tag"
 )
 
 // DataObject is part of a TLV

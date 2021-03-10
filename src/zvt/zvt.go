@@ -20,8 +20,8 @@ type PT struct {
 	conn net.Conn
 }
 
-// ZVT represents the driver
-var ZVT PT
+// PaymentTerminal represents the driver
+var PaymentTerminal PT
 
 // stanard timeout for read from and write to PT
 const defaultTimeout = 5 * time.Second
@@ -35,7 +35,7 @@ func init() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	ZVT = pt
+	PaymentTerminal = pt
 }
 
 // SendACK send ACK and return the response or error

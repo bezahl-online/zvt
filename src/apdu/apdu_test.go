@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/zvt/config"
-	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 

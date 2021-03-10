@@ -5,8 +5,8 @@ import (
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,8 +22,8 @@ func TestLogOff(t *testing.T) {
 			},
 		},
 	}
-	err := ZVT.LogOff()
-	got, err := ZVT.ReadResponse()
+	err := PaymentTerminal.LogOff()
+	got, err := PaymentTerminal.ReadResponse()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 	}

@@ -6,8 +6,8 @@ import (
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
 	"bezahl.online/zvt/src/apdu/bmp/blen"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/tlv"
 	"bezahl.online/zvt/src/zvt/util"
 	"github.com/stretchr/testify/assert"
 )

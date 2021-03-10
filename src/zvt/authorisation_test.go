@@ -8,8 +8,8 @@ import (
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,15 +28,15 @@ func TestAuthorisation(t *testing.T) {
 	config := &AuthConfig{
 		Amount: 1,
 	}
-	err := ZVT.Authorisation(config)
-	got, err := ZVT.ReadResponse()
+	err := PaymentTerminal.Authorisation(config)
+	got, err := PaymentTerminal.ReadResponse()
 	if assert.NoError(t, err) {
 		if assert.Equal(t, want, *got) {
 			done := false
 			for !done {
-				got, err = ZVT.ReadResponseWithTimeout(20 * time.Second)
+				got, err = PaymentTerminal.ReadResponseWithTimeout(20 * time.Second)
 				if assert.NoError(t, err) {
-					ZVT.SendACK()
+					PaymentTerminal.SendACK()
 					switch got.CtrlField.Class {
 					case 0x06:
 						switch got.CtrlField.Instr {

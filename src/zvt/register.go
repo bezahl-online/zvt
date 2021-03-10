@@ -2,8 +2,8 @@ package zvt
 
 import (
 	"bezahl.online/zvt/src/apdu"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/albenik/bcd"
 )
 

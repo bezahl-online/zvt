@@ -5,8 +5,8 @@ import (
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/tlv"
 )
 
 // Command is the structur for a APDU

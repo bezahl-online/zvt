@@ -5,8 +5,8 @@ import (
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,12 +22,12 @@ func TestDisplayText(t *testing.T) {
 			},
 		},
 	}
-	err := ZVT.DisplayText([]string{
+	err := PaymentTerminal.DisplayText([]string{
 		"Da steh ich nun,",
 		"ich armer Tor,",
 		"Und bin so klug",
 		"als wie zuvor."})
-	got, err := ZVT.ReadResponse()
+	got, err := PaymentTerminal.ReadResponse()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 	}

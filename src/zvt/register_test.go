@@ -5,9 +5,9 @@ import (
 
 	"bezahl.online/zvt/src/apdu"
 	"bezahl.online/zvt/src/apdu/bmp"
+	"bezahl.online/zvt/src/apdu/tlv"
 	"bezahl.online/zvt/src/instr"
 	"bezahl.online/zvt/src/zvt/config"
-	"bezahl.online/zvt/src/zvt/tlv"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,14 +43,14 @@ func TestRegister(t *testing.T) {
 			},
 		},
 	}
-	err := ZVT.Register(&Config{
+	err := PaymentTerminal.Register(&Config{
 		pwd:          fixedPassword,
 		config:       byte(configByte),
 		currency:     EUR,
 		service:      byte(serviceByte),
 		tlvContainer: tlvContainer,
 	})
-	got, err := ZVT.ReadResponse()
+	got, err := PaymentTerminal.ReadResponse()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)
 		// completion
@@ -69,10 +69,10 @@ func TestRegister(t *testing.T) {
 				},
 			},
 		}
-		got, err = ZVT.ReadResponse()
+		got, err = PaymentTerminal.ReadResponse()
 		if assert.NoError(t, err) {
 			if assert.EqualValues(t, want, *got) {
-				ZVT.SendACK()
+				PaymentTerminal.SendACK()
 			}
 		}
 
