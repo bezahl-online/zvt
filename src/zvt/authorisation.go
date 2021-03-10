@@ -1,10 +1,10 @@
 package zvt
 
 import (
-	"bezahl.online/zvt/src/apdu"
-	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/instr"
 	"github.com/albenik/bcd"
+	"github.com/bezahl-online/zvt/src/apdu"
+	"github.com/bezahl-online/zvt/src/apdu/bmp"
+	"github.com/bezahl-online/zvt/src/instr"
 )
 
 // AuthConfig is the auth data struct

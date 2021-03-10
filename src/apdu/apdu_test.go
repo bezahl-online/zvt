@@ -3,9 +3,9 @@ package apdu
 import (
 	"testing"
 
-	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/apdu/tlv"
-	"bezahl.online/zvt/src/zvt/config"
+	"github.com/bezahl-online/zvt/src/apdu/bmp"
+	"github.com/bezahl-online/zvt/src/apdu/tlv"
+	"github.com/bezahl-online/zvt/src/zvt/config"
 	"github.com/stretchr/testify/assert"
 )
 

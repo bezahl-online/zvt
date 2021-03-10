@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/util"
+	"github.com/bezahl-online/zvt/src/instr"
+	"github.com/bezahl-online/zvt/src/zvt/util"
 )
 
 // EUR currency code

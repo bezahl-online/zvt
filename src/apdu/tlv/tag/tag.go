@@ -3,7 +3,7 @@ package tag
 import (
 	"fmt"
 
-	"bezahl.online/zvt/src/apdu/bmp/blen"
+	"github.com/bezahl-online/zvt/src/apdu/bmp/blen"
 )
 
 // TODO: type InsideTAG []byte

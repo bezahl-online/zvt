@@ -1,10 +1,10 @@
 package zvt
 
 import (
-	"bezahl.online/zvt/src/apdu"
-	"bezahl.online/zvt/src/apdu/tlv"
-	"bezahl.online/zvt/src/instr"
 	"github.com/albenik/bcd"
+	"github.com/bezahl-online/zvt/src/apdu"
+	"github.com/bezahl-online/zvt/src/apdu/tlv"
+	"github.com/bezahl-online/zvt/src/instr"
 )
 
 // Config is the config struct

@@ -1,4 +1,4 @@
-module bezahl.online/zvt
+module github.com/bezahl-online/zvt
 
 go 1.16
 

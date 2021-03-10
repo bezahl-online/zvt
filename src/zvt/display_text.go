@@ -1,9 +1,9 @@
 package zvt
 
 import (
-	"bezahl.online/zvt/src/apdu"
-	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/instr"
+	"github.com/bezahl-online/zvt/src/apdu"
+	"github.com/bezahl-online/zvt/src/apdu/bmp"
+	"github.com/bezahl-online/zvt/src/instr"
 )
 
 // DisplayText implements instr 06 E0

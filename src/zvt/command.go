@@ -3,10 +3,10 @@ package zvt
 import (
 	"fmt"
 
-	"bezahl.online/zvt/src/apdu"
-	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/apdu/tlv"
-	"bezahl.online/zvt/src/instr"
+	"github.com/bezahl-online/zvt/src/apdu"
+	"github.com/bezahl-online/zvt/src/apdu/bmp"
+	"github.com/bezahl-online/zvt/src/apdu/tlv"
+	"github.com/bezahl-online/zvt/src/instr"
 )
 
 // Command is the structur for a APDU

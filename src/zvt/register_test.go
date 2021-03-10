@@ -3,11 +3,11 @@ package zvt
 import (
 	"testing"
 
-	"bezahl.online/zvt/src/apdu"
-	"bezahl.online/zvt/src/apdu/bmp"
-	"bezahl.online/zvt/src/apdu/tlv"
-	"bezahl.online/zvt/src/instr"
-	"bezahl.online/zvt/src/zvt/config"
+	"github.com/bezahl-online/zvt/src/apdu"
+	"github.com/bezahl-online/zvt/src/apdu/bmp"
+	"github.com/bezahl-online/zvt/src/apdu/tlv"
+	"github.com/bezahl-online/zvt/src/instr"
+	"github.com/bezahl-online/zvt/src/zvt/config"
 	"github.com/stretchr/testify/assert"
 )
 

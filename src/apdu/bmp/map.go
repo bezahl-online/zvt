@@ -1,7 +1,7 @@
 package bmp
 
 import (
-	"bezahl.online/zvt/src/apdu/bmp/blen"
+	"github.com/bezahl-online/zvt/src/apdu/bmp/blen"
 )
 
 // Info is the TAG info structure

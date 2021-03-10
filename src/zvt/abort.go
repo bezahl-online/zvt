@@ -1,7 +1,7 @@
 package zvt
 
 import (
-	"bezahl.online/zvt/src/instr"
+	"github.com/bezahl-online/zvt/src/instr"
 )
 
 var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}

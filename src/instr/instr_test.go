@@ -3,7 +3,7 @@ package instr
 import (
 	"testing"
 
-	"bezahl.online/zvt/src/apdu/bmp/blen"
+	"github.com/bezahl-online/zvt/src/apdu/bmp/blen"
 	"github.com/stretchr/testify/assert"
 )
 
