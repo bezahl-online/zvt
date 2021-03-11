@@ -54,3 +54,16 @@ func TestAuthorisation(t *testing.T) {
 	// }
 
 }
+
+func TestFormatPAN(t *testing.T) {
+	want := "XXXX XXXX XXXX 5726"
+	data := []uint8{0xee, 0xee, 0xee, 0xee, 0xee,
+		0xee, 0x57, 0x26}
+	got := formatPAN(data)
+	assert.Equal(t, want, got)
+	want = "XXXX XXXX XXXX 572"
+	data = []uint8{0xee, 0xee, 0xee, 0xee, 0xee,
+		0xee, 0x57, 0x2F}
+	got = formatPAN(data)
+	assert.Equal(t, want, got)
+}
