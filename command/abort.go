@@ -1,8 +1,6 @@
-package zvt
+package command
 
-import (
-	"github.com/bezahl-online/zvt/src/instr"
-)
+import "github.com/bezahl-online/zvt/instr"
 
 var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}
 

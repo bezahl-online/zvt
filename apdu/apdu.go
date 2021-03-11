@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/bezahl-online/zvt/src/apdu/bmp"
-	"github.com/bezahl-online/zvt/src/apdu/bmp/blen"
-	"github.com/bezahl-online/zvt/src/apdu/tlv"
+	"github.com/bezahl-online/zvt/apdu/bmp"
+	"github.com/bezahl-online/zvt/apdu/bmp/blen"
+	"github.com/bezahl-online/zvt/apdu/tlv"
 )
 
 // DataUnit is the structur of the APDU or APRC

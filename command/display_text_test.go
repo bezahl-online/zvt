@@ -1,16 +1,16 @@
-package zvt
+package command
 
 import (
 	"testing"
 
-	"github.com/bezahl-online/zvt/src/apdu"
-	"github.com/bezahl-online/zvt/src/apdu/bmp"
-	"github.com/bezahl-online/zvt/src/apdu/tlv"
-	"github.com/bezahl-online/zvt/src/instr"
+	"github.com/bezahl-online/zvt/apdu"
+	"github.com/bezahl-online/zvt/apdu/bmp"
+	"github.com/bezahl-online/zvt/apdu/tlv"
+	"github.com/bezahl-online/zvt/instr"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLogOff(t *testing.T) {
+func TestDisplayText(t *testing.T) {
 	i := instr.Map["ACK"]
 	want := Command{
 		CtrlField: i,
@@ -22,7 +22,11 @@ func TestLogOff(t *testing.T) {
 			},
 		},
 	}
-	err := PaymentTerminal.LogOff()
+	err := PaymentTerminal.DisplayText([]string{
+		"Da steh ich nun,",
+		"ich armer Tor,",
+		"Und bin so klug",
+		"als wie zuvor."})
 	got, err := PaymentTerminal.ReadResponse()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, *got)

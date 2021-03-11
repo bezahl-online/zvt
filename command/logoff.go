@@ -1,6 +1,6 @@
-package zvt
+package command
 
-import "github.com/bezahl-online/zvt/src/instr"
+import "github.com/bezahl-online/zvt/instr"
 
 // LogOff implements inst 06 02
 // with following consequences:

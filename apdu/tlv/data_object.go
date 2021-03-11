@@ -3,8 +3,8 @@ package tlv
 import (
 	"fmt"
 
-	"github.com/bezahl-online/zvt/src/apdu/bmp/blen"
-	"github.com/bezahl-online/zvt/src/apdu/tlv/tag"
+	"github.com/bezahl-online/zvt/apdu/bmp/blen"
+	"github.com/bezahl-online/zvt/apdu/tlv/tag"
 )
 
 // DataObject is part of a TLV

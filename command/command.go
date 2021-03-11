@@ -1,12 +1,12 @@
-package zvt
+package command
 
 import (
 	"fmt"
 
-	"github.com/bezahl-online/zvt/src/apdu"
-	"github.com/bezahl-online/zvt/src/apdu/bmp"
-	"github.com/bezahl-online/zvt/src/apdu/tlv"
-	"github.com/bezahl-online/zvt/src/instr"
+	"github.com/bezahl-online/zvt/apdu"
+	"github.com/bezahl-online/zvt/apdu/bmp"
+	"github.com/bezahl-online/zvt/apdu/tlv"
+	"github.com/bezahl-online/zvt/instr"
 )
 
 // Command is the structur for a APDU
@@ -81,4 +81,9 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		TLVContainer: tlv,
 	}
 	return nil
+}
+
+// IsAck returns true if command is ack
+func (c *Command) IsAck() bool {
+	return c.CtrlField.Class == 0x80 && c.CtrlField.Instr == 0x00
 }

@@ -1,14 +1,14 @@
-package zvt
+package command
 
 import (
 	"testing"
 
-	"github.com/bezahl-online/zvt/src/apdu"
-	"github.com/bezahl-online/zvt/src/apdu/bmp"
-	"github.com/bezahl-online/zvt/src/apdu/bmp/blen"
-	"github.com/bezahl-online/zvt/src/apdu/tlv"
-	"github.com/bezahl-online/zvt/src/instr"
-	"github.com/bezahl-online/zvt/src/zvt/util"
+	"github.com/bezahl-online/zvt/apdu"
+	"github.com/bezahl-online/zvt/apdu/bmp"
+	"github.com/bezahl-online/zvt/apdu/bmp/blen"
+	"github.com/bezahl-online/zvt/apdu/tlv"
+	"github.com/bezahl-online/zvt/instr"
+	"github.com/bezahl-online/zvt/util"
 	"github.com/stretchr/testify/assert"
 )
 

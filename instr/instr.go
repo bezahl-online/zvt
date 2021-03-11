@@ -1,6 +1,6 @@
 package instr
 
-import "github.com/bezahl-online/zvt/src/apdu/bmp/blen"
+import "github.com/bezahl-online/zvt/apdu/bmp/blen"
 
 // CtrlField is
 type CtrlField struct {

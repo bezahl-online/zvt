@@ -1,4 +1,4 @@
-package zvt
+package command
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bezahl-online/zvt/src/instr"
-	"github.com/bezahl-online/zvt/src/zvt/util"
+	"github.com/bezahl-online/zvt/instr"
+	"github.com/bezahl-online/zvt/util"
 )
 
 // EUR currency code
@@ -107,6 +107,9 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	var cf []byte = []byte{0, 0, 0}
 	p.conn.SetDeadline(time.Now().Add(timeout))
 	nr, err := p.conn.Read(cf)
+	if err != nil {
+		return resp, err
+	}
 	i := instr.Find(&cf)
 	if i == nil {
 		return nil, fmt.Errorf("control field '% X' not found", cf)
@@ -120,6 +123,11 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 		}
 	}
 	i.Length.Unmarshal(lenBuf)
+	if i.Length.Value == 0 {
+		return &Command{
+			CtrlField: *i,
+		}, err
+	}
 	var readBuf []byte = make([]byte, i.Length.Value)
 	// p.conn.SetDeadline(time.Now().Add(timeout))
 	nr, err = p.conn.Read(readBuf)
