@@ -5,3 +5,4 @@ It isn't complete yet and won't be more than
 needed to run the minimal functionalty 
 to work as a conduit for a cash register 
 project.
+
