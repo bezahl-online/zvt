@@ -20,9 +20,6 @@ type PT struct {
 	conn net.Conn
 }
 
-// PaymentTerminal represents the driver
-var PaymentTerminal PT
-
 // stanard timeout for read from and write to PT
 const defaultTimeout = 5 * time.Second
 
