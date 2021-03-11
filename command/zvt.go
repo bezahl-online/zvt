@@ -11,6 +11,9 @@ import (
 	"github.com/bezahl-online/zvt/util"
 )
 
+// PaymentTerminal represents the driver
+var PaymentTerminal PT
+
 // EUR currency code
 const EUR = 978
 
