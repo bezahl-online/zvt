@@ -47,6 +47,7 @@ const (
 )
 
 type AuthResult struct {
+	Error  string
 	Result string
 	Data   *AuthResultData
 }
@@ -75,6 +76,8 @@ func (p *PT) Authorisation(config *AuthConfig) (AuthResult, error) {
 			case 0x06:
 				switch got.CtrlField.Instr {
 				case 0x1E:
+					// FIXME: ErrorMessages MAP
+					// result.Error=ErrorMessages[got.Data.Data[0]]
 					switch got.Data.Data[0] {
 					case 0x6C:
 						fmt.Println("Transaction aborted")

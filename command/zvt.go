@@ -50,7 +50,7 @@ func (p *PT) SendACK() error {
 	return nil
 }
 
-// FIXME: create comm package!
+// TODO: create comm package!
 
 // Open opens a connection to the PT
 func (p *PT) Open() error {
