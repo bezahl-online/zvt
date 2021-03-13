@@ -52,7 +52,15 @@ type CompletionResponse struct {
 func (p *PT) Completion() (CompletionResponse, error) {
 	var err error
 	var result *Command
-	response := CompletionResponse{}
+	response := CompletionResponse{
+		Status:  0,
+		Message: "",
+		Transaction: &AuthResult{
+			Error:  "",
+			Result: Result_Success,
+			Data:   &AuthResultData{},
+		},
+	}
 	result, err = p.ReadResponseWithTimeout(20 * time.Second)
 	if err = p.SendACK(); err != nil {
 		return response, err
