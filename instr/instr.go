@@ -117,6 +117,12 @@ func init() {
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 0,
 	}
+	Map["AbortAuthorisation"] = CtrlField{
+		Class:         byte(0x84),
+		Instr:         byte(0xA0),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 0,
+	}
 	Map["NotSupported"] = CtrlField{
 		Class:         byte(0x84),
 		Instr:         byte(0x83),

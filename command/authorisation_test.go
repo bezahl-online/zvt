@@ -7,13 +7,14 @@ import (
 )
 
 func TestAuthorisation(t *testing.T) {
+	t.Cleanup(func() {
+		PaymentTerminal.Abort()
+	})
 	config := &AuthConfig{
 		Amount: 1,
 	}
-	_, err := PaymentTerminal.Authorisation(config)
+	err := PaymentTerminal.Authorisation(config)
 	if assert.NoError(t, err) {
-		// assert.NotEmpty(t, result)
-		// FIXME assert result
 	}
 
 }
