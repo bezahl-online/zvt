@@ -78,15 +78,13 @@ func (p *PT) send(c Command) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("ECR => PT (%3d):% X\n", len(b), b)
+	// fmt.Printf("ECR => PT (%3d):% X\n", len(b), b)
 	p.conn.SetDeadline(time.Now().Add(defaultTimeout))
-	nr, err := p.conn.Write(b)
+	_, err = p.conn.Write(b)
 	if err != nil {
 		return err
 	}
-	if nr > 0 {
-		util.Save(&b, nr, "EC")
-	}
+	util.Save(&[]byte{}, &c.CtrlField, "EC")
 	return nil
 }
 
@@ -124,26 +122,20 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	}
 	i.Length.Unmarshal(lenBuf)
 	if i.Length.Value == 0 {
+		util.Save(&[]byte{}, i, "PT")
 		return &Command{
 			CtrlField: *i,
 		}, err
 	}
 	var readBuf []byte = make([]byte, i.Length.Value)
-	// p.conn.SetDeadline(time.Now().Add(timeout))
 	nr, err = p.conn.Read(readBuf)
 	if err != nil {
 		return resp, err
 	}
-	fmt.Printf("PT => ECR (%03X):% X\n", []byte{i.Class, i.Instr}, readBuf[:nr])
-	if nr > 0 {
-		util.Save(&readBuf, nr, "PT")
-	}
+	util.Save(&readBuf, i, "PT")
 	data := []byte{i.Class, i.Instr}
 	data = append(data, lenBuf...)
 	data = append(data, readBuf[:nr]...)
-	if nr == 1 && data[0] == 0x15 { // incorrect password
-		return nil, fmt.Errorf("Incorrect Password")
-	}
 	err = resp.Unmarshal(&data)
 	return resp, err
 }

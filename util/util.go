@@ -4,17 +4,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"time"
+
+	"github.com/bezahl-online/zvt/instr"
 )
 
 var fileNr int = 0
 
 // Save saves data to persistence
-func Save(data *[]byte, length int, sender string) (string, error) {
-	_, _, d := time.Now().Date()
-	h, m, s := time.Now().Clock()
+func Save(data *[]byte, i *instr.CtrlField, sender string) (string, error) {
+	// _, _, d := time.Now().Date()
+	// h, m, s := time.Now().Clock()
+	ctrlField := []byte{(*i).Class, (*i).Instr}
+	fmt.Printf("%s(% X): % X\n", sender, ctrlField, *data)
 	ms := time.Now().UnixNano() / int64(time.Millisecond)
-	fileName := fmt.Sprintf("dump/%s%02d%02d%02d%02d%03d.hex", sender, d, h, m, s, ms)
-	err := ioutil.WriteFile(fileName, (*data)[:length], 0644)
+	fileName := fmt.Sprintf("dump/%d%s.hex", ms, sender)
+	dump := ctrlField
+	dump = append(dump, *data...)
+	err := ioutil.WriteFile(fileName, dump, 0644)
 	if err != nil {
 		return "", err
 	}

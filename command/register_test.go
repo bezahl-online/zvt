@@ -33,15 +33,10 @@ func TestRegister(t *testing.T) {
 	}
 	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands, *msgSquID)
 	i := instr.Map["ACK"]
+	i.Length.Size = 1
 	want := Command{
 		CtrlField: i,
-		Data: apdu.DataUnit{
-			Data:    []byte{},
-			BMPOBJs: []bmp.OBJ{},
-			TLVContainer: tlv.Container{
-				Objects: []tlv.DataObject{},
-			},
-		},
+		Data:      apdu.DataUnit{},
 	}
 	err := PaymentTerminal.Register(&Config{
 		pwd:          fixedPassword,

@@ -2,5 +2,4 @@ vendor
 .vscode
 zvtserver
 ./zvt
-EC*.hex
-PT*.hex
+*/dump/*.hex
