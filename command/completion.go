@@ -49,12 +49,12 @@ type CompletionResponse struct {
 	Transaction *AuthResult
 }
 
-func Completion() (CompletionResponse, error) {
+func (p *PT) Completion() (CompletionResponse, error) {
 	var err error
 	var result *Command
 	response := CompletionResponse{}
-	result, err = PaymentTerminal.ReadResponseWithTimeout(20 * time.Second)
-	if err = PaymentTerminal.SendACK(); err != nil {
+	result, err = p.ReadResponseWithTimeout(20 * time.Second)
+	if err = p.SendACK(); err != nil {
 		return response, err
 	}
 	if err = response.process(result); err != nil {
