@@ -16,7 +16,6 @@ func TestAuthorisation(t *testing.T) {
 	err := PaymentTerminal.Authorisation(config)
 	if assert.NoError(t, err) {
 	}
-
 }
 
 func TestFormatPAN(t *testing.T) {
