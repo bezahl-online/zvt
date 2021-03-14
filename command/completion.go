@@ -93,9 +93,8 @@ func (r *CompletionResponse) process(result *Command) error {
 		switch result.CtrlField.Instr {
 		case 0x0F:
 			r.Transaction.Data = &AuthResultData{}
-			// get error and result from BMP 0x27
-			// r.Transaction.Result, r.Transaction.Error =
 			r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
+			r.Transaction.Result = Result_Pending
 			return nil
 		case 0xFF:
 			r.Status = result.Data.Data[0]

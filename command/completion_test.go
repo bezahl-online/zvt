@@ -77,3 +77,50 @@ func TestProcess040f(t *testing.T) {
 	response.process(result)
 	assert.Equal(t, want, response)
 }
+
+func TestProcess040f2(t *testing.T) {
+	result := &Command{
+		CtrlField: instr.CtrlField{
+			Class: 0x04,
+			Instr: 0x0F,
+		},
+		Data: apdu.DataUnit{
+			Data:         []byte{},
+			BMPOBJs:      Objects,
+			TLVContainer: tlv.Container{},
+		},
+	}
+
+	want := CompletionResponse{
+		Status:  0,
+		Message: "",
+		Transaction: &AuthResult{
+			Error:  "",
+			Result: "pending",
+			Data: &AuthResultData{
+				Amount:     1,
+				ReceiptNr:  22,
+				TurnoverNr: 22,
+				TraceNr:    22,
+				Date:       "0308",
+				Time:       "164923",
+				TID:        "29001006",
+				VU:         "100764992",
+				AID:        "291675",
+				Card: CardData{
+					Name:  "Debit Mastercard",
+					Type:  46,
+					PAN:   "XXXX XXXX XXXX 5726",
+					Tech:  0,
+					SeqNr: 1,
+				},
+			}},
+	}
+	response := CompletionResponse{
+		Status:      0,
+		Message:     "",
+		Transaction: &AuthResult{},
+	}
+	response.process(result)
+	assert.Equal(t, want, response)
+}
