@@ -11,7 +11,7 @@ import (
 
 func TestCompletion(t *testing.T) {
 	want := CompletionResponse{}
-	got, err := Completion()
+	got, err := PaymentTerminal.Completion()
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, got)
 	}

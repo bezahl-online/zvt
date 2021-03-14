@@ -32,6 +32,7 @@ type AuthResultData struct {
 }
 
 const (
+	Result_Pending = "pending"
 	Result_Success = "success"
 	Result_Abort   = "abort"
 	Result_Timeout = "timeout"
@@ -57,7 +58,7 @@ func (p *PT) Completion() (CompletionResponse, error) {
 		Message: "",
 		Transaction: &AuthResult{
 			Error:  "",
-			Result: Result_Success,
+			Result: Result_Pending,
 			Data:   &AuthResultData{},
 		},
 	}
