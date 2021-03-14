@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bezahl-online/zvt/apdu"
+	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/apdu/tlv"
 	"github.com/bezahl-online/zvt/instr"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ func TestCompletion(t *testing.T) {
 	}
 }
 
-func TestProcess(t *testing.T) {
+func TestProcess04ff(t *testing.T) {
 	result := &Command{
 		CtrlField: instr.Map["Intermediate"],
 		Data: apdu.DataUnit{
@@ -41,4 +42,38 @@ func TestProcess(t *testing.T) {
 	response := CompletionResponse{}
 	response.process(result)
 	assert.Equal(t, want, response.Message)
+}
+func TestProcess040f(t *testing.T) {
+	result := &Command{
+		CtrlField: instr.Map["StatusInformation"],
+		Data: apdu.DataUnit{
+			Data: []byte{1},
+			BMPOBJs: []bmp.OBJ{
+				{ID: 0x27, Data: []byte{0x6C}},
+			},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{
+					{
+						TAG:  []byte{0x29},
+						Data: []byte{0x29, 0x00, 0x10, 0x06},
+					},
+				},
+			},
+		},
+	}
+	want := CompletionResponse{
+		Message: "",
+		Transaction: &AuthResult{
+			Error:  "",
+			Result: "abort",
+			Data:   &AuthResultData{},
+		},
+	}
+	response := CompletionResponse{
+		Status:      0,
+		Message:     "",
+		Transaction: &AuthResult{},
+	}
+	response.process(result)
+	assert.Equal(t, want, response)
 }

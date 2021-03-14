@@ -92,13 +92,10 @@ func (r *CompletionResponse) process(result *Command) error {
 	case 0x04:
 		switch result.CtrlField.Instr {
 		case 0x0F:
-			r.Transaction.Data = &AuthResultData{
-				Amount: 0,
-				Card: CardData{
-					Tech: 0,
-				},
-			}
-			r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
+			r.Transaction.Data = &AuthResultData{}
+			// get error and result from BMP 0x27
+			r.Transaction.Result, r.Transaction.Error =
+				r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
 			return nil
 		case 0xFF:
 			r.Status = result.Data.Data[0]
@@ -121,7 +118,7 @@ func (r *CompletionResponse) process(result *Command) error {
 	return nil
 }
 
-func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) {
+func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 	for _, obj := range objs {
 		switch obj.ID {
 		case 0x04:
@@ -139,7 +136,11 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) {
 			pan := formatPAN(obj.Data)
 			r.Card.PAN = pan
 		case 0x27:
-			// FIXME: map error codes
+			// Error and Result in AuthResult
+			switch obj.Data[0] {
+			case 0x6C:
+				result = Result_Abort
+			}
 		case 0x29:
 			r.TID = fmt.Sprintf("%X", obj.Data)
 		case 0x2A:
@@ -156,7 +157,7 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) {
 			r.Card.Type = int(obj.Data[0])
 		}
 	}
-
+	return result, error
 }
 func formatPAN(rawPAN []byte) string {
 	raw := fmt.Sprintf("%X", rawPAN)
