@@ -75,7 +75,7 @@ func (p *PT) Open() error {
 
 func (p *PT) reconnectIfLost() error {
 	if p.conn == nil {
-		go p.connect()
+		go p.Connect()
 		return fmt.Errorf("lost connection to scanner device")
 	}
 	return nil
