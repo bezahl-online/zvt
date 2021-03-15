@@ -31,9 +31,13 @@ func init() {
 		lock: &sync.RWMutex{},
 		conn: nil,
 	}
-	err := pt.Open()
-	if err != nil {
-		fmt.Println(err.Error())
+	go pt.connect()
+	// err := pt.Open()
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
+	for pt.conn == nil {
+		time.Sleep(time.Second)
 	}
 	PaymentTerminal = pt
 }
@@ -69,11 +73,19 @@ func (p *PT) Open() error {
 	return nil
 }
 
-func (p *PT) send(c Command) error {
+func (p *PT) reconnectIfLost() error {
 	if p.conn == nil {
-		return fmt.Errorf("no connection to PT")
+		go p.connect()
+		return fmt.Errorf("lost connection to scanner device")
 	}
+	return nil
+}
+
+func (p *PT) send(c Command) error {
 	var err error
+	if err = p.reconnectIfLost(); err != nil {
+		return err
+	}
 	b, err := c.Marshal()
 	if err != nil {
 		return err
@@ -98,8 +110,8 @@ func (p *PT) ReadResponse() (*Command, error) {
 // if reading time exceeds timout duration an error is returned
 func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	var err error
-	if p.conn == nil {
-		return nil, fmt.Errorf("no connection to PT")
+	if err = p.reconnectIfLost(); err != nil {
+		return nil, err
 	}
 	var resp *Command = &Command{}
 	var cf []byte = []byte{0, 0, 0}
