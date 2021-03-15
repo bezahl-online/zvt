@@ -59,7 +59,6 @@ func (p *PT) Completion() (CompletionResponse, error) {
 		Transaction: &AuthResult{
 			Error:  "",
 			Result: Result_Pending,
-			Data:   &AuthResultData{},
 		},
 	}
 	result, err = p.ReadResponseWithTimeout(20 * time.Second)
