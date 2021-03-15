@@ -80,7 +80,7 @@ func init() {
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
 		RawDataLength: 1,
 	}
-	Map["PrintLine"] = CtrlField{
+	Map["PrintLine"] = CtrlField{ // NOT realy implemented correctly
 		Class:         byte(0x06),
 		Instr:         byte(0xD1),
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
