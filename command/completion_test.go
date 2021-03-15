@@ -66,7 +66,7 @@ func TestProcess040f(t *testing.T) {
 		Transaction: &AuthResult{
 			Error:  "",
 			Result: "abort",
-			Data:   &AuthResultData{},
+			Data:   nil,
 		},
 	}
 	response := CompletionResponse{
@@ -78,7 +78,7 @@ func TestProcess040f(t *testing.T) {
 	assert.Equal(t, want, response)
 }
 
-func TestProcess040f2(t *testing.T) {
+func TestProcess040f_2(t *testing.T) {
 	result := &Command{
 		CtrlField: instr.CtrlField{
 			Class: 0x04,
