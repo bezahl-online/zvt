@@ -10,7 +10,7 @@ import (
 var connecting bool = false
 
 // Connect manages the connection to PT
-func (p *PT) connect() {
+func (p *PT) Connect() {
 	if connecting {
 		return
 	}

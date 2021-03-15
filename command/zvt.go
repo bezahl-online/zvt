@@ -31,7 +31,7 @@ func init() {
 		lock: &sync.RWMutex{},
 		conn: nil,
 	}
-	go pt.connect()
+	go pt.Connect()
 	// err := pt.Open()
 	// if err != nil {
 	// 	fmt.Println(err.Error())
