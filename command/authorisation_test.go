@@ -8,7 +8,7 @@ import (
 
 func TestAuthorisation(t *testing.T) {
 	t.Cleanup(func() {
-		PaymentTerminal.Abort()
+		// PaymentTerminal.Abort()
 	})
 	config := &AuthConfig{
 		Amount: 1,

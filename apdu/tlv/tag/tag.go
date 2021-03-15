@@ -7,6 +7,8 @@ import (
 )
 
 // TODO: type InsideTAG []byte
+// could map all the ways to interpret the
+// BMP's data correctly
 
 // Info is the TAG info structure
 type Info struct {
