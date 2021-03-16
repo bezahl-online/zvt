@@ -31,14 +31,10 @@ func init() {
 		lock: &sync.RWMutex{},
 		conn: nil,
 	}
-	go pt.Connect()
-	// err := pt.Open()
-	// if err != nil {
-	// 	fmt.Println(err.Error())
+	// go pt.Connect()
+	// for pt.conn == nil {
+	// 	time.Sleep(time.Second)
 	// }
-	for pt.conn == nil {
-		time.Sleep(time.Second)
-	}
 	PaymentTerminal = pt
 }
 
@@ -76,7 +72,12 @@ func (p *PT) Open() error {
 func (p *PT) reconnectIfLost() error {
 	if p.conn == nil {
 		go p.Connect()
-		return fmt.Errorf("lost connection to scanner device")
+		time.Sleep(10 * time.Millisecond)
+		if p.conn != nil {
+			// seems to be connected again
+			return nil
+		}
+		return fmt.Errorf("lost connection to PT")
 	}
 	return nil
 }
