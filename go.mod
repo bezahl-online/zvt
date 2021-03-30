@@ -1,5 +1,5 @@
 module github.com/bezahl-online/zvt
-
+// go env -w GOPRIVATE=github.com/bezahl-online/*
 go 1.16
 
 require (

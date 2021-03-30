@@ -1,0 +1,26 @@
+Frage:
+1. Ist es möglich, das Handyguthaben aufzuladen?
+
+2. Wie geht das Gerät mit Blue-Code um?
+
+3. Kann Quick verwendet werden?
+
+4. Sind Gutscheinkarten (Google, Amazon, Netflix) auch möglich?
+
+5. Kann Cash4Web gefauft werden?
+
+
+Antwort:
+1.: Das Aufladen von Handyguthaben muss über die Kassensoftware unterstützt werden. Dies betrifft unser Terminal nicht
+
+2.: Bluecode wird grundsätzlich unterstützt jedoch wird dies auch über das Kassen System gelöst (Scann Modul)
+
+In dem Kassensystem muss das Bluecode Kasseninterface Integriert werden.
+
+Um Ihr Selbst Programmiertes Kassensystem mit Bluecode ausstatten zu können muss diese bei Bluecode zertifiziert werden.
+
+3.: Quick wird von unseren Terminals leider nicht unterstützt.
+
+4.: Unsere Terminals haben keine Möglichkeit direkt Gutscheinkarten zu verkaufen. Wie in Punkt eins beschrieben können die Gutscheinkarten(Amazon/Netflix…) über das Kassensystem realisiert werden. Und die Bezahlung an unser Terminal weitergeleitet werden.
+
+5.: Dieser Punkt verhaltet sich gleich zu den Punkten 1 und 4.
