@@ -84,7 +84,11 @@ type AuthorisationResponse struct {
 
 func (r *AuthorisationResponse) Process(result *Command) error {
 	if r.Transaction == nil {
-		r.Transaction = &AuthResult{}
+		r.Transaction = &AuthResult{
+			Error:  "",
+			Result: Result_Pending,
+			Data:   &AuthResultData{},
+		}
 	}
 	switch result.CtrlField.Class {
 	case 0x06:
