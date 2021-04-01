@@ -38,9 +38,23 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		return fmt.Errorf("APRC %0X not found", (*data)[:2])
 	}
 	c.CtrlField = *i
+	// after binary length field
 	dstart := 3
 	if (*data)[2] == 0xff {
 		dstart = 5
+	}
+	// FIXME: workaround für end_of_day bug
+	if c.CtrlField.Class == 0x04 &&
+		c.CtrlField.Instr == 0x0f &&
+		(*data)[2] == 0x27 {
+		// length field missing bug
+		// we will insert it
+		var d []byte = make([]byte, len(*data)+1)
+		copy(d, *data)
+		l := len(*data)
+		d = append(d[:2], byte(l-2))
+		d = append(d, (*data)[2:]...)
+		*data = d
 	}
 	dend := dstart + i.RawDataLength
 	if (*data)[2] < byte(i.RawDataLength) {

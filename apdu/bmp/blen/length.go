@@ -68,12 +68,21 @@ func (l *Length) Unmarshal(d []byte) error {
 			l.Value = uint16(d[0])
 		}
 	case LLL:
+		if d[0]&0xF0 != 0xF0 ||
+			d[1]&0xF0 != 0xF0 ||
+			d[2]&0xF0 != 0xF0 {
+			return fmt.Errorf("LLL length data invalid: '%03X'", d[:3])
+		}
 		l.Size = 3
 		h := (d[0] & 0x0F)
 		z := (d[1] & 0x0F)
 		e := (d[2] & 0x0F)
 		l.Value = uint16(100*h + 10*z + e)
 	case LL:
+		if d[0]&0xF0 != 0xF0 ||
+			d[1]&0xF0 != 0xF0 {
+			return fmt.Errorf("LL length data invalid: '%02X'", d[:2])
+		}
 		l.Size = 2
 		z := (d[0] & 0x0F)
 		e := (d[1] & 0x0F)

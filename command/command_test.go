@@ -1,6 +1,7 @@
 package command
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/bezahl-online/zvt/apdu"
@@ -227,7 +228,7 @@ var Objects []bmp.OBJ = []bmp.OBJ{
 	{ID: 0x22, Size: 11, Data: []uint8{0xee, 0xee, 0xee, 0xee, 0xee,
 		0xee, 0x57, 0x26}},
 	{ID: 0x29, Size: 5, Data: []uint8{0x29, 0x0, 0x10, 0x6}},
-	{ID: 0x2a, Size: 15, Data: []uint8{0x31, 0x30, 0x30, 0x37, 0x36,
+	{ID: 0x2a, Size: 16, Data: []uint8{0x31, 0x30, 0x30, 0x37, 0x36,
 		0x34, 0x39, 0x39, 0x32, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20}},
 	{ID: 0x3b, Size: 9, Data: []uint8{0x32, 0x39, 0x31, 0x36, 0x37,
 		0x35, 0x0, 0x0}},
@@ -320,5 +321,95 @@ func TestCommandUnmarshal7(t *testing.T) {
 	err = got.Unmarshal(&testBytes)
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, got)
+	}
+}
+
+func TestCommandUnmarshal8(t *testing.T) {
+	testBytes, err := util.Load("testdata/1617181236803PT.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := Command{
+		CtrlField: instr.CtrlField{
+			Class: 0x06,
+			Instr: 0x1E,
+			Length: blen.Length{
+				Kind: blen.BINARY,
+			},
+			RawDataLength: 1,
+		},
+		Data: apdu.DataUnit{
+			Data:    []byte{0x6C},
+			BMPOBJs: []bmp.OBJ{},
+			TLVContainer: tlv.Container{
+				Objects: []tlv.DataObject{},
+			},
+		},
+	}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
+}
+
+func TestCommand_Marshal(t *testing.T) {
+	tests := []struct {
+		name    string
+		c       *Command
+		want    []byte
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.c.Marshal()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Command.Marshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Command.Marshal() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCommand_Unmarshal(t *testing.T) {
+	type args struct {
+		data *[]byte
+	}
+	tests := []struct {
+		name    string
+		c       *Command
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.c.Unmarshal(tt.args.data); (err != nil) != tt.wantErr {
+				t.Errorf("Command.Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestCommand_IsAck(t *testing.T) {
+	tests := []struct {
+		name string
+		c    *Command
+		want bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.c.IsAck(); got != tt.want {
+				t.Errorf("Command.IsAck() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

@@ -24,13 +24,14 @@ func init() {
 	InfoMap[0x0E] = Info{"Exp.Date", blen.Length{Kind: blen.NONE, Value: 2}}
 	InfoMap[0x17] = Info{"Card sequence-number", blen.Length{Kind: blen.NONE, Value: 2}}
 	InfoMap[0x19] = Info{"Status/PaymentType/CardType", blen.Length{Kind: blen.NONE, Value: 1}}
-	InfoMap[0x22] = Info{"PAN / EF_ID", blen.Length{Kind: blen.LL, Value: 0}}
+	InfoMap[0x22] = Info{"PAN / EF_ID", blen.Length{Kind: blen.LL}}
 	InfoMap[0x27] = Info{"Result-Code", blen.Length{Kind: blen.NONE, Value: 1}}
 	InfoMap[0x29] = Info{"Terminal ID", blen.Length{Kind: blen.NONE, Value: 4}}
 	InfoMap[0x2A] = Info{"VU-number", blen.Length{Kind: blen.NONE, Value: 15}}
 	InfoMap[0x3B] = Info{"AID authorisation-attribute", blen.Length{Kind: blen.NONE, Value: 8}}
-	InfoMap[0x3C] = Info{"Additional-data", blen.Length{Kind: blen.LLL, Value: 0}}
+	InfoMap[0x3C] = Info{"Additional-data", blen.Length{Kind: blen.LLL}}
 	InfoMap[0x49] = Info{"Currency", blen.Length{Kind: blen.NONE, Value: 2}}
+	InfoMap[0x60] = Info{"Variable totals", blen.Length{Kind: blen.LLL}}
 	InfoMap[0x87] = Info{"Receipt-number", blen.Length{Kind: blen.NONE, Value: 2}}
 	InfoMap[0x88] = Info{"Turnover record number", blen.Length{Kind: blen.NONE, Value: 3}}
 	InfoMap[0x8A] = Info{"Card-type", blen.Length{Kind: blen.NONE, Value: 1}}

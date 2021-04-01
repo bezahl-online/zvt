@@ -78,7 +78,13 @@ func init() {
 		Class:         byte(0x06),
 		Instr:         byte(0x1E),
 		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
-		RawDataLength: 1,
+		RawDataLength: 1, // password
+	}
+	Map["EndOfDay"] = CtrlField{
+		Class:         byte(0x06),
+		Instr:         byte(0x50),
+		Length:        blen.Length{Kind: blen.BINARY, Value: 0},
+		RawDataLength: 0,
 	}
 	Map["PrintLine"] = CtrlField{ // NOT realy implemented correctly
 		Class:         byte(0x06),

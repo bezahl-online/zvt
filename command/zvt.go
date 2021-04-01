@@ -5,11 +5,18 @@ import (
 	"net"
 	"os"
 	"sync"
+	"testing"
 	"time"
 
 	"github.com/bezahl-online/zvt/instr"
 	"github.com/bezahl-online/zvt/util"
 )
+
+func skipShort(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+}
 
 // PaymentTerminal represents the driver
 var PaymentTerminal PT
@@ -27,6 +34,8 @@ type PT struct {
 const defaultTimeout = 5 * time.Second
 
 func init() {
+	initLogger()
+	Logger.Info("logger initialized")
 	var pt PT = PT{
 		lock: &sync.RWMutex{},
 		conn: nil,
@@ -50,7 +59,7 @@ func (p *PT) SendACK() error {
 	return nil
 }
 
-// TODO: create comm package!
+// TODO: create comm interface!
 
 // Open opens a connection to the PT
 func (p *PT) Open() error {
@@ -84,6 +93,7 @@ func (p *PT) reconnectIfLost() error {
 
 func (p *PT) send(c Command) error {
 	var err error
+	Logger.Debugf("%+v", c)
 	if err = p.reconnectIfLost(); err != nil {
 		return err
 	}
