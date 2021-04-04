@@ -1,10 +1,10 @@
 package command
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/bezahl-online/zvt/apdu"
+	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/instr"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,43 +30,13 @@ func TestDisplayText(t *testing.T) {
 	}
 }
 
-func TestPT_DisplayText(t *testing.T) {
-	type args struct {
-		text []string
+func TestCompileText(t *testing.T) {
+	want := apdu.DataUnit{
+		BMPOBJs: []bmp.OBJ{
+			{ID: 0xF1, Data: []byte{0x54, 0x65, 0x73, 0x74}},
+			{ID: 0xF2, Data: []byte{0x41, 0x72, 0x72, 0x61, 0x79}},
+		},
 	}
-	tests := []struct {
-		name    string
-		p       *PT
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.p.DisplayText(tt.args.text); (err != nil) != tt.wantErr {
-				t.Errorf("PT.DisplayText() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func Test_compileText(t *testing.T) {
-	type args struct {
-		textarray []string
-	}
-	tests := []struct {
-		name string
-		args args
-		want apdu.DataUnit
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := compileText(tt.args.textarray); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("compileText() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	got := compileText([]string{"Test", "Array"})
+	assert.Equal(t, want, got)
 }

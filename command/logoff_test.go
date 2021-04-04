@@ -28,20 +28,3 @@ func TestLogOff(t *testing.T) {
 		assert.EqualValues(t, want, *got)
 	}
 }
-
-func TestPT_LogOff(t *testing.T) {
-	tests := []struct {
-		name    string
-		p       *PT
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.p.LogOff(); (err != nil) != tt.wantErr {
-				t.Errorf("PT.LogOff() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}

@@ -3,7 +3,6 @@ package command
 import (
 	"testing"
 
-	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/util"
 	"github.com/stretchr/testify/assert"
 )
@@ -98,87 +97,5 @@ func TestEndOfDayProcess2(t *testing.T) {
 		got := EndOfDayResponse{}
 		got.Process(&c)
 		assert.EqualValues(t, want, got)
-	}
-}
-
-func TestSingleTotals_Unmarshal(t *testing.T) {
-	type args struct {
-		data []byte
-	}
-	tests := []struct {
-		name string
-		s    *SingleTotals
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.s.Unmarshal(tt.args.data)
-		})
-	}
-}
-
-func TestPT_EndOfDay(t *testing.T) {
-	tests := []struct {
-		name    string
-		p       *PT
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.p.EndOfDay(); (err != nil) != tt.wantErr {
-				t.Errorf("PT.EndOfDay() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestEndOfDayResponse_Process(t *testing.T) {
-	type args struct {
-		result *Command
-	}
-	tests := []struct {
-		name    string
-		r       *EndOfDayResponse
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.r.Process(tt.args.result); (err != nil) != tt.wantErr {
-				t.Errorf("EndOfDayResponse.Process() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestEoDResultData_FromOBJs(t *testing.T) {
-	type args struct {
-		objs []bmp.OBJ
-	}
-	tests := []struct {
-		name       string
-		r          *EoDResultData
-		args       args
-		wantResult string
-		wantError  string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotResult, gotError := tt.r.FromOBJs(tt.args.objs)
-			if gotResult != tt.wantResult {
-				t.Errorf("EoDResultData.FromOBJs() gotResult = %v, want %v", gotResult, tt.wantResult)
-			}
-			if gotError != tt.wantError {
-				t.Errorf("EoDResultData.FromOBJs() gotError = %v, want %v", gotError, tt.wantError)
-			}
-		})
 	}
 }

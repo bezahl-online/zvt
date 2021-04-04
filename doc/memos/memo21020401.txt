@@ -9,11 +9,11 @@ Der Ablauf der Integration sieht so aus, dass nach erfolgter Implementierung der
 ✓ Anmeldung / Registration (06 00)
 ✓ Einkauf / Authorization (06 01)
   Storno / Reversal (06 30)
-  Belegnachdruck / Repeat receipt (006 20)
-  Tagesende / End of day (06 50)
+  Belegnachdruck / Repeat receipt (06 20)
+✓ Tagesende / End of day (06 50)
 ✓ Abort (06 B0)
-  Belegdruck: über Kassenbondrucker via Blockdruck (06 D3, Configbyte BE, TLV Container muss dafür implementiert sein)
-  Textanzeige der Abbrüche und Meldungen des Host (Mapping lt. ZVT Protokoll Error Codes 1-63) oder Anzeige des BMP 3C (kein mappen notwendig)
+✓ Belegdruck: über Kassenbondrucker via Blockdruck (06 D3, Configbyte BE, TLV Container muss dafür implementiert sein)
+✓ Textanzeige der Abbrüche und Meldungen des Host (Mapping lt. ZVT Protokoll Error Codes 1-63) oder Anzeige des BMP 3C (kein mappen notwendig)
 ✓ Mögliche Anbindungen an das Kassensystem via serieller oder TCP/IP Schnittstelle
  
 

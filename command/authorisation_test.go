@@ -1,7 +1,6 @@
 package command
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/bezahl-online/zvt/apdu"
@@ -135,109 +134,4 @@ func TestAuthProcess040f_2(t *testing.T) {
 	}
 	response.Process(result)
 	assert.Equal(t, want, response)
-}
-
-func TestPT_Authorisation(t *testing.T) {
-	type args struct {
-		config *AuthConfig
-	}
-	tests := []struct {
-		name    string
-		p       *PT
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.p.Authorisation(tt.args.config); (err != nil) != tt.wantErr {
-				t.Errorf("PT.Authorisation() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestAuthConfig_marshal(t *testing.T) {
-	tests := []struct {
-		name string
-		a    *AuthConfig
-		want apdu.DataUnit
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.a.marshal(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AuthConfig.marshal() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestAuthorisationResponse_Process(t *testing.T) {
-	type args struct {
-		result *Command
-	}
-	tests := []struct {
-		name    string
-		r       *AuthorisationResponse
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.r.Process(tt.args.result); (err != nil) != tt.wantErr {
-				t.Errorf("AuthorisationResponse.Process() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestAuthResultData_FromOBJs(t *testing.T) {
-	type args struct {
-		objs []bmp.OBJ
-	}
-	tests := []struct {
-		name       string
-		r          *AuthResultData
-		args       args
-		wantResult string
-		wantError  string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotResult, gotError := tt.r.FromOBJs(tt.args.objs)
-			if gotResult != tt.wantResult {
-				t.Errorf("AuthResultData.FromOBJs() gotResult = %v, want %v", gotResult, tt.wantResult)
-			}
-			if gotError != tt.wantError {
-				t.Errorf("AuthResultData.FromOBJs() gotError = %v, want %v", gotError, tt.wantError)
-			}
-		})
-	}
-}
-
-func Test_formatPAN(t *testing.T) {
-	type args struct {
-		rawPAN []byte
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := formatPAN(tt.args.rawPAN); got != tt.want {
-				t.Errorf("formatPAN() = %v, want %v", got, tt.want)
-			}
-		})
-	}
 }

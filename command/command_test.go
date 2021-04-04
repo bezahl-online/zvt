@@ -1,7 +1,6 @@
 package command
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/bezahl-online/zvt/apdu"
@@ -49,17 +48,6 @@ func TestCommandMarshal(t *testing.T) {
 			assert.Error(t, err)
 		}
 	}
-}
-
-func TestCompileText(t *testing.T) {
-	want := apdu.DataUnit{
-		BMPOBJs: []bmp.OBJ{
-			{ID: 0xF1, Data: []byte{0x54, 0x65, 0x73, 0x74}},
-			{ID: 0xF2, Data: []byte{0x41, 0x72, 0x72, 0x61, 0x79}},
-		},
-	}
-	got := compileText([]string{"Test", "Array"})
-	assert.Equal(t, want, got)
 }
 
 func TestCommandUnmarshal1(t *testing.T) {
@@ -350,66 +338,5 @@ func TestCommandUnmarshal8(t *testing.T) {
 	err = got.Unmarshal(&testBytes)
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, want, got)
-	}
-}
-
-func TestCommand_Marshal(t *testing.T) {
-	tests := []struct {
-		name    string
-		c       *Command
-		want    []byte
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.Marshal()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Command.Marshal() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Command.Marshal() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestCommand_Unmarshal(t *testing.T) {
-	type args struct {
-		data *[]byte
-	}
-	tests := []struct {
-		name    string
-		c       *Command
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.c.Unmarshal(tt.args.data); (err != nil) != tt.wantErr {
-				t.Errorf("Command.Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestCommand_IsAck(t *testing.T) {
-	tests := []struct {
-		name string
-		c    *Command
-		want bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.c.IsAck(); got != tt.want {
-				t.Errorf("Command.IsAck() = %v, want %v", got, tt.want)
-			}
-		})
 	}
 }
