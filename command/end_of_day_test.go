@@ -74,28 +74,11 @@ func TestEndOfDayProcess(t *testing.T) {
 }
 
 func TestEndOfDayProcess2(t *testing.T) {
-	want := EndOfDayResponse{
-		TransactionResponse: TransactionResponse{},
-		Transaction: &EoDResult{
-			Error:  "",
-			Result: "pending",
-			Data: &EoDResultData{
-				TraceNr: 0,
-				Date:    "",
-				Time:    "",
-				Total:   0,
-				Totals:  SingleTotals{},
-			},
-		},
-	}
 	testBytes, err := util.Load("testdata/1617177992186PT.hex")
 	if !assert.NoError(t, err) {
 		return
 	}
 	c := Command{}
-	if err := c.Unmarshal(&testBytes); assert.NoError(t, err) {
-		got := EndOfDayResponse{}
-		got.Process(&c)
-		assert.EqualValues(t, want, got)
-	}
+	err = c.Unmarshal(&testBytes)
+	assert.Error(t, err)
 }

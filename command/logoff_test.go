@@ -11,6 +11,7 @@ import (
 )
 
 func TestLogOff(t *testing.T) {
+	skipShort(t)
 	i := instr.Map["ACK"]
 	want := Command{
 		CtrlField: i,

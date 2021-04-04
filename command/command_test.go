@@ -319,16 +319,27 @@ func TestCommandUnmarshal8(t *testing.T) {
 	}
 	want := Command{
 		CtrlField: instr.CtrlField{
-			Class: 0x06,
-			Instr: 0x1E,
+			Class: 0x04,
+			Instr: 0x0F,
 			Length: blen.Length{
-				Kind: blen.BINARY,
+				Kind:  blen.BINARY,
+				Size:  0,
+				Value: 0,
 			},
-			RawDataLength: 1,
+			RawDataLength: 0,
 		},
 		Data: apdu.DataUnit{
-			Data:    []byte{0x6C},
-			BMPOBJs: []bmp.OBJ{},
+			Data: []byte{},
+			BMPOBJs: []bmp.OBJ{
+				{ID: 0x27, Size: 2, Data: []byte{0}},
+				{ID: 0x04, Size: 7, Data: []byte{0, 0, 0, 0, 0x26, 0}},
+				{ID: 0x0C, Size: 4, Data: []byte{0x10, 0x59, 0x37}},
+				{ID: 0x0D, Size: 3, Data: []byte{0x03, 0x31}},
+				{ID: 0x60, Size: 57, Data: []byte{0, 0x68, 0, 0x71, 0x04,
+					0, 0, 0, 0, 0x26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+			},
 			TLVContainer: tlv.Container{
 				Objects: []tlv.DataObject{},
 			},
