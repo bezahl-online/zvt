@@ -2,6 +2,7 @@ package command
 
 import (
 	"testing"
+	"time"
 
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
@@ -13,6 +14,7 @@ import (
 func TestAuthorisation(t *testing.T) {
 	skipShort(t)
 	t.Cleanup(func() {
+		time.Sleep(time.Second)
 		PaymentTerminal.Abort()
 	})
 	config := &AuthConfig{

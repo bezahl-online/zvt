@@ -2,30 +2,37 @@ package command
 
 import (
 	"log"
-	"os"
-	"strings"
 
+	"github.com/bezahl-online/zvt/util"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-var Logger *zap.SugaredLogger
+var Logger *zap.Logger
 
 func initLogger() {
-	cfg := zap.NewProductionConfig()
-	var logfilePath string
-	if v := os.Getenv("ZVT_LOGFILEPATH"); len(v) > 0 {
-		logfilePath = v
-	} else {
-		log.Fatal("please set environment varibalbe 'ZVT_LOGFILEPATH'")
-	}
-	logfilePath = strings.TrimRight(logfilePath, "/")
-	logfilePath += "/zvt.log.json"
-	cfg.OutputPaths = []string{
-		logfilePath,
+	logfilePath := util.ENVFilePath("ZVT_LOGFILEPATH", "zvt.log.json")
+	cfg := zap.Config{
+		Encoding:    "json",
+		Level:       zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		OutputPaths: []string{logfilePath},
+		// ErrorOutputPaths: []string{"stderr"},
+		EncoderConfig: zapcore.EncoderConfig{
+			MessageKey: "message",
+
+			LevelKey:    "level",
+			EncodeLevel: zapcore.LowercaseLevelEncoder,
+
+			TimeKey:    "time",
+			EncodeTime: zapcore.ISO8601TimeEncoder,
+
+			CallerKey:    "caller",
+			EncodeCaller: zapcore.ShortCallerEncoder,
+		},
 	}
 	if l, err := cfg.Build(); err != nil {
 		log.Fatal(err)
 	} else {
-		Logger = l.Sugar()
+		Logger = l
 	}
 }

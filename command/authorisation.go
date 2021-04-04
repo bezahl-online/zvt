@@ -23,16 +23,17 @@ type AuthConfig struct {
 // initiates a payment process
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) Authorisation(config *AuthConfig) error {
+	Logger.Info(fmt.Sprintf("AUTHORISATION amount: %5.2f", float64(config.Amount)/100))
 	ctrlField := instr.Map["Authorisation"]
 	err := p.send(Command{ctrlField, config.marshal()})
 	if err != nil {
 		return err
 	}
 	response, err := PaymentTerminal.ReadResponse()
-	if err == nil && !response.IsAck() {
-		err = fmt.Errorf("error code %0X %0X", response.CtrlField.Class, response.CtrlField.Instr)
+	if err == nil {
+		return err
 	}
-	return err
+	return response.IsAck()
 }
 
 func (a *AuthConfig) marshal() apdu.DataUnit {
@@ -96,13 +97,13 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 		case 0x1E:
 			switch result.Data.Data[0] {
 			case 0x6C:
-				fmt.Println("Transaction aborted")
+				Logger.Info("Transaction aborted")
 				r.Transaction.Result = Result_Abort
 			}
 			return nil
 
 		case 0x0F:
-			fmt.Println("Transaction successfull")
+			Logger.Info("Transaction successfull")
 			r.Transaction.Result = Result_Success
 			return nil
 		}
@@ -129,6 +130,7 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 					}, string(obj.Data))
 				}
 			}
+			Logger.Info(r.Message)
 		}
 	}
 	return nil
@@ -172,7 +174,7 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) 
 		case 0x8A:
 			r.Card.Type = int(obj.Data[0])
 		default:
-			fmt.Printf("no path for BMP-ID %0X", obj.ID)
+			Logger.Error(fmt.Sprintf("no path for BMP-ID %0X", obj.ID))
 		}
 	}
 	return result, error

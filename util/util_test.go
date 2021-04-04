@@ -13,7 +13,7 @@ func TestSaveToFile(t *testing.T) {
 	testbytes := []byte("This are test bytes")
 	want := []byte{0x80, 0}
 	want = append(want, testbytes...)
-	filename, err := Save(&testbytes, &instr.CtrlField{
+	filename := Save(&testbytes, &instr.CtrlField{
 		Class: 0x80,
 		Instr: 00,
 		Length: blen.Length{
@@ -23,11 +23,9 @@ func TestSaveToFile(t *testing.T) {
 		},
 		RawDataLength: 0,
 	}, "Test")
+	got, err := Load(filename)
 	if assert.NoError(t, err) {
-		got, err := Load(filename)
-		if assert.NoError(t, err) {
-			assert.Equal(t, want, got)
-			os.Remove(filename)
-		}
+		assert.Equal(t, want, got)
+		os.Remove(filename)
 	}
 }

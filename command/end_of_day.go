@@ -74,6 +74,7 @@ type EndOfDayResponse struct {
 // initiates a end of day process
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) EndOfDay() error {
+	Logger.Info("END OF DAY")
 	if err := p.send(Command{
 		CtrlField: instr.Map["EndOfDay"],
 		Data: apdu.DataUnit{
@@ -83,10 +84,10 @@ func (p *PT) EndOfDay() error {
 		return err
 	}
 	response, err := PaymentTerminal.ReadResponse()
-	if err == nil && !response.IsAck() {
-		err = fmt.Errorf("error code %0X %0X", response.CtrlField.Class, response.CtrlField.Instr)
+	if err == nil {
+		return err
 	}
-	return err
+	return response.IsAck()
 }
 
 func (r *EndOfDayResponse) Process(result *Command) error {
@@ -99,13 +100,13 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 		case 0x1E:
 			switch result.Data.Data[0] {
 			case 0x6C:
-				fmt.Println("Transaction aborted")
+				Logger.Info("Transaction aborted")
 				r.Transaction.Result = Result_Abort
 			}
 			return nil
 
 		case 0x0F:
-			fmt.Println("Transaction successfull")
+			Logger.Info("Transaction successfull")
 			r.Transaction.Result = Result_Success
 			return nil
 		}
@@ -158,7 +159,7 @@ func (r *EoDResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 		case 0x60:
 			r.Totals.Unmarshal(obj.Data)
 		default:
-			fmt.Printf("no path for BMP-ID %0X", obj.ID)
+			Logger.Error(fmt.Sprintf("no path for BMP-ID %0X", obj.ID))
 		}
 	}
 	return result, error

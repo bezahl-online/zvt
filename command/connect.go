@@ -5,6 +5,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 var connecting bool = false
@@ -29,18 +31,20 @@ func (p *PT) Connect() {
 
 	// connect to PT via TCP/IP
 	var err error = fmt.Errorf("no connection to PT")
-	fmt.Printf("connecting to '%s'\n", os.Getenv("ZVT_URL"))
+	Logger.Debug("connecting", zap.String("url", os.Getenv("ZVT_URL")))
 	for err != nil {
 		err := p.Open()
 		if err != nil {
-			fmt.Printf("\n*** Error while connection to PT:"+
-				" %s\nRetrying after %d seconds\n", err.Error(), pause.getSeconds())
+			Logger.Error("error while connecting to PT",
+				zap.Error(err))
 			if pause.getSeconds() < 300 {
 				pause.double()
 			}
 			pause.wait()
 		} else {
-			fmt.Println("connection to PT established")
+			Logger.Debug("connection to PT established",
+				zap.String("url", os.Getenv("ZVT_URL")),
+			)
 			break
 		}
 	}
