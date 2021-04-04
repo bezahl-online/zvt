@@ -101,7 +101,7 @@ func (c *Command) Unmarshal(data *[]byte) error {
 func (c *Command) IsAck() (err error) {
 	isAck := c.CtrlField.Class == 0x80 && c.CtrlField.Instr == 0x00
 	if !isAck {
-		err = fmt.Errorf("error % 02X", []byte{c.CtrlField.Class, c.CtrlField.Instr, c.Data.Data[0]})
+		err = fmt.Errorf("error % 02X %+v", []byte{c.CtrlField.Class, c.CtrlField.Instr}, c.Data)
 		Logger.Error(err.Error())
 	}
 	return err
