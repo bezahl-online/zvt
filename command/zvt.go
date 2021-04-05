@@ -2,9 +2,9 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -20,15 +20,18 @@ func skipShort(t *testing.T) {
 }
 
 // PaymentTerminal represents the driver
-var PaymentTerminal PT
+var PaymentTerminal PT = PT{
+	Logger: &zap.Logger{},
+	conn:   nil,
+}
 
 // EUR currency code
 const EUR = 978
 
 // PT is the class
 type PT struct {
-	lock *sync.RWMutex
-	conn net.Conn
+	Logger *zap.Logger
+	conn   net.Conn
 }
 
 // stanard timeout for read from and write to PT
@@ -36,21 +39,17 @@ const defaultTimeout = 5 * time.Second
 
 func init() {
 	initLogger()
-	Logger.Debug("logger initialized")
-	var pt PT = PT{
-		lock: &sync.RWMutex{},
-		conn: nil,
-	}
-	// go pt.Connect()
-	// for pt.conn == nil {
-	// 	time.Sleep(time.Second)
+	// Logger.Debug("logger initialized")
+	// var pt PT = PT{
+	// 	lock: &sync.RWMutex{},
+	// 	conn: nil,
 	// }
-	PaymentTerminal = pt
+	// PaymentTerminal = pt
 }
 
 // SendACK send ACK and return the response or error
 func (p *PT) SendACK() error {
-	Logger.Info("ACK")
+	p.Logger.Info("ACK")
 	i := instr.Map["ACK"]
 	err := p.send(Command{
 		CtrlField: i,
@@ -95,21 +94,22 @@ func (p *PT) reconnectIfLost() error {
 }
 
 func (p *PT) send(c Command) error {
+	log.Println("will write")
 	var err error
 	if err = p.reconnectIfLost(); err != nil {
-		Logger.Error(err.Error())
+		p.Logger.Error(err.Error())
 		return err
 	}
 	b, err := c.Marshal()
 	if err != nil {
-		Logger.Error(err.Error())
+		p.Logger.Error(err.Error())
 		return err
 	}
 	logCommand(c, b)
 	p.conn.SetDeadline(time.Now().Add(defaultTimeout))
 	_, err = p.conn.Write(b)
 	if err != nil {
-		Logger.Error(err.Error())
+		p.Logger.Error(err.Error())
 		return err
 	}
 	util.Save(&[]byte{}, &c.CtrlField, "EC")
@@ -129,6 +129,7 @@ func logCommand(c Command, b []byte) {
 		zap.String("data", byteArrayToHexString(b)),
 	)
 }
+
 func byteArrayToHexString(b []byte) string {
 	return fmt.Sprintf("% 02X", b)
 }
@@ -142,9 +143,10 @@ func (p *PT) ReadResponse() (*Command, error) {
 // where a timeout can be specified
 // if reading time exceeds timout duration an error is returned
 func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
+	log.Println("will read")
 	var err error
 	if err = p.reconnectIfLost(); err != nil {
-		Logger.Error(err.Error())
+		p.Logger.Error(err.Error())
 		return nil, err
 	}
 	var resp *Command = &Command{}
@@ -152,13 +154,13 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	p.conn.SetDeadline(time.Now().Add(timeout))
 	nr, err := p.conn.Read(cf)
 	if err != nil {
-		Logger.Error(err.Error())
+		p.Logger.Error(err.Error())
 		return resp, err
 	}
 	i := instr.Find(&cf)
 	if i == nil {
 		err := fmt.Errorf("control field '% X' not found", cf)
-		Logger.Error(err.Error())
+		p.Logger.Error(err.Error())
 		return nil, err
 	}
 	lenBuf := []byte{cf[2]}
@@ -166,13 +168,13 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 		lenBuf = append(lenBuf, 0, 0)
 		nr, err = p.conn.Read(lenBuf[1:])
 		if err != nil {
-			Logger.Error(err.Error())
+			p.Logger.Error(err.Error())
 			return resp, err
 		}
 	}
 	i.Length.Unmarshal(lenBuf)
 	if i.Length.Value == 0 {
-		Logger.Debug("PT => ECR",
+		p.Logger.Debug("PT => ECR",
 			zap.Int("len", nr),
 			zap.String("data", byteArrayToHexString(cf)),
 		)
@@ -183,7 +185,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	var readBuf []byte = make([]byte, i.Length.Value)
 	nr, err = p.conn.Read(readBuf)
 	if err != nil {
-		Logger.Error(err.Error())
+		p.Logger.Error(err.Error())
 		return resp, err
 	}
 	data := []byte{i.Class, i.Instr}
@@ -191,7 +193,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	data = append(data, readBuf[:nr]...)
 	err = resp.Unmarshal(&data)
 	util.Save(&data, i, "PT")
-	Logger.Debug("PT => ECR",
+	p.Logger.Debug("PT => ECR",
 		zap.Int("len", nr),
 		zap.String("data", byteArrayToHexString(data)),
 	)

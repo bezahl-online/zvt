@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"os"
-	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -17,10 +16,10 @@ func (p *PT) Connect() {
 		return
 	}
 	connecting = true
-	var mutex *sync.RWMutex = (*p).lock
-	if mutex == nil {
-		mutex = &sync.RWMutex{}
-	}
+	// var mutex *sync.RWMutex = (*p).lock
+	// if mutex == nil {
+	// 	mutex = &sync.RWMutex{}
+	// }
 	var pause delay = delay{
 		dur: 1 * time.Second,
 	}
@@ -31,18 +30,18 @@ func (p *PT) Connect() {
 
 	// connect to PT via TCP/IP
 	var err error = fmt.Errorf("no connection to PT")
-	Logger.Debug("connecting", zap.String("url", os.Getenv("ZVT_URL")))
+	p.Logger.Debug("connecting", zap.String("url", os.Getenv("ZVT_URL")))
 	for err != nil {
 		err := p.Open()
 		if err != nil {
-			Logger.Error("error while connecting to PT",
+			p.Logger.Error("error while connecting to PT",
 				zap.Error(err))
 			if pause.getSeconds() < 300 {
 				pause.double()
 			}
 			pause.wait()
 		} else {
-			Logger.Debug("connection to PT established",
+			p.Logger.Debug("connection to PT established",
 				zap.String("url", os.Getenv("ZVT_URL")),
 			)
 			break
