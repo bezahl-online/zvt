@@ -20,10 +20,7 @@ func skipShort(t *testing.T) {
 }
 
 // PaymentTerminal represents the driver
-var PaymentTerminal PT = PT{
-	Logger: Logger,
-	conn:   nil,
-}
+var PaymentTerminal PT = PT{}
 
 // EUR currency code
 const EUR = 978
@@ -39,6 +36,7 @@ const defaultTimeout = 5 * time.Second
 
 func init() {
 	initLogger()
+	PaymentTerminal.Logger = Logger
 	// Logger.Debug("logger initialized")
 	// var pt PT = PT{
 	// 	lock: &sync.RWMutex{},
