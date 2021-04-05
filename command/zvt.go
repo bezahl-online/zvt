@@ -21,7 +21,7 @@ func skipShort(t *testing.T) {
 
 // PaymentTerminal represents the driver
 var PaymentTerminal PT = PT{
-	Logger: &zap.Logger{},
+	Logger: Logger,
 	conn:   nil,
 }
 
