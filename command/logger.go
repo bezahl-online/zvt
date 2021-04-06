@@ -8,9 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Logger *zap.Logger
-
-func initLogger() {
+func getLogger() *zap.Logger {
 	logfilePath := util.ENVFilePath("ZVT_LOGFILEPATH", "zvt.log.json")
 	cfg := zap.Config{
 		Encoding:    "json",
@@ -30,9 +28,9 @@ func initLogger() {
 			EncodeCaller: zapcore.ShortCallerEncoder,
 		},
 	}
-	if l, err := cfg.Build(); err != nil {
+	zapLogger, err := cfg.Build()
+	if err != nil {
 		log.Fatal(err)
-	} else {
-		Logger = l
 	}
+	return zapLogger
 }

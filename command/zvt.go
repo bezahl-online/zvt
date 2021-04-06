@@ -25,6 +25,8 @@ var PaymentTerminal PT = PT{}
 // EUR currency code
 const EUR = 978
 
+var Logger *zap.Logger
+
 // PT is the class
 type PT struct {
 	Logger *zap.Logger
@@ -35,14 +37,8 @@ type PT struct {
 const defaultTimeout = 5 * time.Second
 
 func init() {
-	initLogger()
-	PaymentTerminal.Logger = Logger
-	// Logger.Debug("logger initialized")
-	// var pt PT = PT{
-	// 	lock: &sync.RWMutex{},
-	// 	conn: nil,
-	// }
-	// PaymentTerminal = pt
+	PaymentTerminal.Logger = getLogger()
+	Logger = PaymentTerminal.Logger
 }
 
 // SendACK send ACK and return the response or error
