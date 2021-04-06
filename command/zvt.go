@@ -118,7 +118,8 @@ func logCommand(c Command, b []byte) {
 		l = 20
 		more = "..."
 	}
-	Logger.Debug(fmt.Sprintf("ECR => PT [% 02X] Data: % 02X%s", []byte{cf.Class, cf.Instr}, b[:l], more),
+	apduStart := l - int(c.CtrlField.Length.Value)
+	Logger.Debug(fmt.Sprintf("ECR => PT [% 02X] Data: % 02X%s", []byte{cf.Class, cf.Instr}, b[apduStart:l], more),
 		zap.Int("len", len(b)),
 		zap.String("data", byteArrayToHexString(b)),
 	)
@@ -168,10 +169,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	}
 	i.Length.Unmarshal(lenBuf)
 	if i.Length.Value == 0 {
-		p.Logger.Debug("PT => ECR",
-			zap.Int("len", nr),
-			zap.String("data", byteArrayToHexString(cf)),
-		)
+		p.Logger.Debug(fmt.Sprintf("PT => ECR [% 02X]", cf))
 		return &Command{
 			CtrlField: *i,
 		}, err
@@ -187,7 +185,14 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	data = append(data, readBuf[:nr]...)
 	err = resp.Unmarshal(&data)
 	util.Save(&data, i, "PT")
-	p.Logger.Debug("PT => ECR",
+	l := i.Length.Value
+	more := ""
+	if l > 20 {
+		l = 20
+		more = "..."
+	}
+	apduStart := len(data) - int(i.Length.Value)
+	p.Logger.Debug(fmt.Sprintf("PT => ECR [% 02X] APDU: % 02X%s", []byte{cf[0], cf[1]}, data[apduStart:l], more),
 		zap.Int("len", nr),
 		zap.String("data", byteArrayToHexString(data)),
 	)
