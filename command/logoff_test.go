@@ -24,8 +24,10 @@ func TestLogOff(t *testing.T) {
 		},
 	}
 	err := PaymentTerminal.LogOff()
-	got, err := PaymentTerminal.ReadResponse()
 	if assert.NoError(t, err) {
-		assert.EqualValues(t, want, *got)
+		got, err := PaymentTerminal.ReadResponse()
+		if assert.NoError(t, err) {
+			assert.EqualValues(t, want, *got)
+		}
 	}
 }

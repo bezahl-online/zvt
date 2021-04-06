@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"testing"
@@ -88,7 +87,6 @@ func (p *PT) reconnectIfLost() error {
 }
 
 func (p *PT) send(c Command) error {
-	log.Println("will write")
 	var err error
 	if err = p.reconnectIfLost(); err != nil {
 		p.Logger.Error(err.Error())
@@ -121,14 +119,13 @@ func logCommand(fromPT bool, c Command, b []byte) {
 	message := fmt.Sprintf("%s [% 02X]", from, []byte{cf.Class, cf.Instr})
 	if blen > apduStart {
 		l := blen
+		andMore := ""
 		if blen > 20 {
 			l = 20
+			andMore = "..."
 		}
 		data := b[apduStart:l]
-		if l < blen {
-			data = append(data, []byte("...")...)
-		}
-		message = fmt.Sprintf("%s APDU: % 02X", message, data)
+		message = fmt.Sprintf("%s APDU: % 02X%s", message, data, andMore)
 	}
 	Logger.Debug(message,
 		zap.Int("len", int(c.CtrlField.Length.Value)),
@@ -149,7 +146,6 @@ func (p *PT) ReadResponse() (*Command, error) {
 // where a timeout can be specified
 // if reading time exceeds timout duration an error is returned
 func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
-	log.Println("will read")
 	var err error
 	if err = p.reconnectIfLost(); err != nil {
 		p.Logger.Error(err.Error())
@@ -158,7 +154,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	var resp *Command = &Command{}
 	var cf []byte = []byte{0, 0, 0}
 	p.conn.SetDeadline(time.Now().Add(timeout))
-	nr, err := p.conn.Read(cf)
+	_, err = p.conn.Read(cf)
 	if err != nil {
 		p.Logger.Error(err.Error())
 		return resp, err
@@ -172,7 +168,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	lenBuf := []byte{cf[2]}
 	if cf[2] == 0xFF {
 		lenBuf = append(lenBuf, 0, 0)
-		nr, err = p.conn.Read(lenBuf[1:])
+		_, err = p.conn.Read(lenBuf[1:])
 		if err != nil {
 			p.Logger.Error(err.Error())
 			return resp, err
@@ -186,7 +182,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 		}, err
 	}
 	var readBuf []byte = make([]byte, i.Length.Value)
-	nr, err = p.conn.Read(readBuf)
+	nr, err := p.conn.Read(readBuf)
 	if err != nil {
 		p.Logger.Error(err.Error())
 		return resp, err

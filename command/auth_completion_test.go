@@ -18,6 +18,7 @@ func TestAuthorisationCompletion(t *testing.T) {
 		if got.Transaction != nil && got.Transaction.Result != Result_Pending {
 			if got.Transaction.Result == Result_Success {
 				// TODO assert result values
+				_ = 0
 			}
 			break
 		}
