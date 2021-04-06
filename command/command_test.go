@@ -50,6 +50,18 @@ func TestCommandMarshal(t *testing.T) {
 	}
 }
 
+func TestCommandMarshal0(t *testing.T) {
+	instr := instr.Map["ACK"]
+	want := []byte{0x80, 0x00, 0x00}
+	c := Command{
+		CtrlField: instr,
+	}
+	got, err := c.Marshal()
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, want, got)
+	}
+}
+
 func TestCommandUnmarshal1(t *testing.T) {
 	testBytes, err := util.Load("testdata/data050730027.hex")
 	if !assert.NoError(t, err) {

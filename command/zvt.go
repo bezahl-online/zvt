@@ -104,7 +104,11 @@ func (p *PT) send(c Command) error {
 		p.Logger.Error(err.Error())
 		return err
 	}
-	util.Save(&[]byte{}, &c.CtrlField, "EC")
+	data, err := c.Data.Marshal()
+	if err != nil {
+		Logger.Error(err.Error())
+	}
+	util.Save(&data, &c.CtrlField, "EC")
 	return nil
 }
 

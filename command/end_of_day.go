@@ -109,6 +109,9 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 			Logger.Info("Transaction successfull")
 			r.Transaction.Result = Result_Success
 			return nil
+		default:
+			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
+				result.CtrlField.Instr))
 		}
 	case 0x04:
 		switch result.CtrlField.Instr {
@@ -133,7 +136,13 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 					}, string(obj.Data))
 				}
 			}
+		default:
+			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",
+				result.CtrlField.Instr))
 		}
+	default:
+		Logger.Error(fmt.Sprintf("PT command '%02X %02X' not handled",
+			result.CtrlField.Class, result.CtrlField.Instr))
 	}
 	return nil
 }
