@@ -99,7 +99,7 @@ func (p *PT) send(c Command) error {
 		p.Logger.Error(err.Error())
 		return err
 	}
-	logCommand(c, b)
+	logCommand(false, c, b)
 	p.conn.SetDeadline(time.Now().Add(defaultTimeout))
 	_, err = p.conn.Write(b)
 	if err != nil {
@@ -110,17 +110,28 @@ func (p *PT) send(c Command) error {
 	return nil
 }
 
-func logCommand(c Command, b []byte) {
+func logCommand(fromPT bool, c Command, b []byte) {
 	cf := c.CtrlField
-	l := len(b)
-	more := ""
-	if l > 20 {
-		l = 20
-		more = "..."
+	blen := len(b)
+	apduStart := blen - int(c.CtrlField.Length.Value)
+	from := "ECR => PT"
+	if fromPT {
+		from = "PT => ECR"
 	}
-	apduStart := l - int(c.CtrlField.Length.Value)
-	Logger.Debug(fmt.Sprintf("ECR => PT [% 02X] Data: % 02X%s", []byte{cf.Class, cf.Instr}, b[apduStart:l], more),
-		zap.Int("len", len(b)),
+	message := fmt.Sprintf("%s [% 02X]", from, []byte{cf.Class, cf.Instr})
+	if blen > apduStart {
+		l := blen
+		if blen > 20 {
+			l = 20
+		}
+		data := b[apduStart:l]
+		if l < blen {
+			data = append(data, []byte("...")...)
+		}
+		message = fmt.Sprintf("%s APDU: % 02X", message, data)
+	}
+	Logger.Debug(message,
+		zap.Int("len", int(c.CtrlField.Length.Value)),
 		zap.String("data", byteArrayToHexString(b)),
 	)
 }
@@ -185,25 +196,15 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	data = append(data, readBuf[:nr]...)
 	err = resp.Unmarshal(&data)
 	util.Save(&data, i, "PT")
-	l := i.Length.Value
-	more := ""
-	if l > 20 {
-		l = 20
-		more = "..."
-	}
-	apduStart := len(data) - int(i.Length.Value)
-	p.Logger.Debug(fmt.Sprintf("PT => ECR [% 02X] APDU: % 02X%s", []byte{cf[0], cf[1]}, data[apduStart:l], more),
-		zap.Int("len", nr),
-		zap.String("data", byteArrayToHexString(data)),
-	)
+	logCommand(true, Command{CtrlField: *i}, data)
 	return resp, err
 }
 
-func compileLL(l uint8) []byte {
-	var b []byte = make([]byte, 2)
-	lz := uint8(l / 10)           // value of tens
-	le := uint8(l - uint8(10*lz)) // value of unit position
-	b[0] = 0xF0 + lz              // code into 0xFx (tens) (BCD)
-	b[1] = 0xF0 + le              // code into 0xFy (unit) (BCD)
-	return b
-}
+// func compileLL(l uint8) []byte {
+// 	var b []byte = make([]byte, 2)
+// 	lz := uint8(l / 10)           // value of tens
+// 	le := uint8(l - uint8(10*lz)) // value of unit position
+// 	b[0] = 0xF0 + lz              // code into 0xFx (tens) (BCD)
+// 	b[1] = 0xF0 + le              // code into 0xFy (unit) (BCD)
+// 	return b
+// }

@@ -15,7 +15,7 @@ func TestAuthorisation(t *testing.T) {
 	skipShort(t)
 	t.Cleanup(func() {
 		time.Sleep(time.Second)
-		PaymentTerminal.Abort()
+		// PaymentTerminal.Abort()
 	})
 	config := &AuthConfig{
 		Amount: 1,
