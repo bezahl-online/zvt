@@ -201,15 +201,20 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 }
 
 var IntermediateStatus map[byte]string = make(map[byte]string)
-
+BZT wartet auf Betragbestätigung
 func init() {
+	IntermediateStatus[0] = "BZT wartet auf Betragbestätigung"
 	IntermediateStatus[1] = "Bitte Anzeigen auf dem PIN-Pad beachten"
 	IntermediateStatus[2] = "Bitte Anzeigen auf dem PIN-Pad beachten"
 	IntermediateStatus[3] = "Vorgang nicht möglich"
+	IntermediateStatus[4] = "BZT wartet auf Antwort vom FEP"
+	IntermediateStatus[5] = "BZT sendet Autostorno"
+	IntermediateStatus[6] = "BZT sendet Nachbuchungen"
 	IntermediateStatus[7] = "Karte nicht zugelassen"
 	IntermediateStatus[8] = "Karte unbekannt / undefiniert"
 	IntermediateStatus[9] = "Karte verfallen"
 	IntermediateStatus[10] = "Karte einstecken"
+	IntermediateStatus[11] = "Bitte Karte entnehmen!"
 	IntermediateStatus[12] = "Karte nicht lesbar"
 	IntermediateStatus[13] = "Vorgang abgebrochen"
 	IntermediateStatus[14] = "Vorgang wird bearbeitet bitte warten..."
