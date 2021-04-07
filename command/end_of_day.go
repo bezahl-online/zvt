@@ -100,7 +100,6 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 		r.Transaction = &EoDResult{
 			Error:  "",
 			Result: Result_Pending,
-			Data:   &EoDResultData{},
 		}
 	}
 	switch result.CtrlField.Class {
