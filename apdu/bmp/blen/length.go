@@ -25,8 +25,8 @@ type Length struct {
 	Value uint16
 }
 
-// Format returns a byte representation of the specific length type
-func (l *Length) Format() ([]byte, error) {
+// Marshal returns a byte representation of the specific length type
+func (l *Length) Marshal() ([]byte, error) {
 	switch l.Kind {
 	case NONE:
 		return []byte{}, nil

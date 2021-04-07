@@ -191,20 +191,11 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 		p.Logger.Error(err.Error())
 		return resp, err
 	}
+	util.Save(&readBuf, i, "PT")
 	data := []byte{i.Class, i.Instr}
 	data = append(data, lenBuf...)
 	data = append(data, readBuf[:nr]...)
 	err = resp.Unmarshal(&data)
-	util.Save(&data, i, "PT")
 	logCommand(true, Command{CtrlField: *i}, data)
 	return resp, err
 }
-
-// func compileLL(l uint8) []byte {
-// 	var b []byte = make([]byte, 2)
-// 	lz := uint8(l / 10)           // value of tens
-// 	le := uint8(l - uint8(10*lz)) // value of unit position
-// 	b[0] = 0xF0 + lz              // code into 0xFx (tens) (BCD)
-// 	b[1] = 0xF0 + le              // code into 0xFy (unit) (BCD)
-// 	return b
-// }

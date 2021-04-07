@@ -14,7 +14,7 @@ type CtrlField struct {
 func (c *CtrlField) Marshal(dataLength uint16) ([]byte, error) {
 	var b []byte = []byte{c.Class, c.Instr}
 	c.Length.Value = dataLength
-	l, err := c.Length.Format()
+	l, err := c.Length.Marshal()
 	if err != nil {
 		return b, err
 	}

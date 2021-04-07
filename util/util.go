@@ -11,21 +11,28 @@ import (
 	"github.com/bezahl-online/zvt/instr"
 )
 
+const DumpFilePath = "ZVT_DUMPFILEPATH"
+
 // Save saves data to persistence
-func Save(data *[]byte, i *instr.CtrlField, sender string) string {
-	if len(os.Getenv("ZVT_DUMPFILEPATH")) == 0 {
-		return ""
+func Save(data *[]byte, i *instr.CtrlField, sender string) (string, error) {
+	if len(os.Getenv(DumpFilePath)) == 0 {
+		return "", fmt.Errorf("environment variable '%s' not defined", DumpFilePath)
 	}
-	ctrlField := []byte{(*i).Class, (*i).Instr}
 	ms := time.Now().UnixNano() / int64(time.Millisecond)
-	dumpfilePath := ENVFilePath("ZVT_DUMPFILEPATH", fmt.Sprintf("%d%s.hex", ms, sender))
+	dumpfilePath := ENVFilePath(DumpFilePath, fmt.Sprintf("%d%s.hex", ms, sender))
+	ctrlField := []byte{(*i).Class, (*i).Instr}
 	dump := ctrlField
+	dumpLength, err := i.Length.Marshal()
+	if err != nil {
+		return "", err
+	}
+	dump = append(dump, dumpLength...)
 	dump = append(dump, *data...)
-	err := ioutil.WriteFile(dumpfilePath, dump, 0644)
+	err = ioutil.WriteFile(dumpfilePath, dump, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return dumpfilePath
+	return dumpfilePath, nil
 }
 
 // Load returns data from persitence

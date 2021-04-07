@@ -11,21 +11,23 @@ import (
 
 func TestSaveToFile(t *testing.T) {
 	testbytes := []byte("This are test bytes")
-	want := []byte{0x80, 0}
+	want := []byte{0x06, 0xD3, 0xFF, 0x2D, 0x04}
 	want = append(want, testbytes...)
-	filename := Save(&testbytes, &instr.CtrlField{
-		Class: 0x80,
-		Instr: 00,
+	filename, err := Save(&testbytes, &instr.CtrlField{
+		Class: 0x06,
+		Instr: 0xD3,
 		Length: blen.Length{
-			Kind:  0,
-			Size:  0,
-			Value: 0,
+			Kind:  blen.BINARY,
+			Size:  3,
+			Value: 1069,
 		},
 		RawDataLength: 0,
 	}, "Test")
-	got, err := Load(filename)
 	if assert.NoError(t, err) {
-		assert.Equal(t, want, got)
-		os.Remove(filename)
+		got, err := Load(filename)
+		if assert.NoError(t, err) {
+			assert.Equal(t, want, got)
+			os.Remove(filename)
+		}
 	}
 }

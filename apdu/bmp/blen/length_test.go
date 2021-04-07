@@ -11,35 +11,35 @@ func TestLengthFormat(t *testing.T) {
 	var got []byte
 	var err error
 	l = Length{Kind: 255, Value: uint16(123)}
-	got, err = l.Format()
+	got, err = l.Marshal()
 	assert.Error(t, err)
 	want := []byte{}
 	l = Length{Kind: NONE, Value: uint16(123)}
-	got, err = l.Format()
+	got, err = l.Marshal()
 	if assert.NoError(t, err) {
 		assert.Equal(t, want, got)
 	}
 	want = []byte{123}
 	l = Length{Kind: BINARY, Value: uint16(123)}
-	got, err = l.Format()
+	got, err = l.Marshal()
 	if assert.NoError(t, err) {
 		assert.Equal(t, want, got)
 	}
 	want = []byte{0xff, 0x6F, 0x02}
 	l = Length{Kind: BINARY, Value: uint16(623)}
-	got, err = l.Format()
+	got, err = l.Marshal()
 	if assert.NoError(t, err) {
 		assert.Equal(t, want, got)
 	}
 	want = []byte{0xF3, 0xF8}
 	l = Length{Kind: LL, Value: uint16(38)}
-	got, err = l.Format()
+	got, err = l.Marshal()
 	if assert.NoError(t, err) {
 		assert.Equal(t, want, got)
 	}
 	want = []byte{0xF3, 0xF8, 0xF7}
 	l = Length{Kind: LLL, Value: uint16(387)}
-	got, err = l.Format()
+	got, err = l.Marshal()
 	if assert.NoError(t, err) {
 		assert.Equal(t, want, got)
 	}

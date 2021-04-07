@@ -23,9 +23,9 @@ func CompileLength(len int) []byte {
 	return length
 }
 
-// DecompileLength retrieves the length from the coded length
-// in the TLV data object data structure byte(s) according
-// to the ZVT protocol
+// DecompileLength retrieves the length from the big edian
+// coded length in the TLV data object data structure byte(s)
+// according to the ZVT protocol
 // returns (dataLength(uint16), tagLengthSize(uint16) error)
 func DecompileLength(data *[]byte) (uint16, uint16, error) {
 	l := *data

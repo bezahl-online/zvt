@@ -72,7 +72,9 @@ func TestCommandUnmarshal1(t *testing.T) {
 			Class: 0x04,
 			Instr: 0xFF,
 			Length: blen.Length{
-				Kind: blen.BINARY,
+				Kind:  blen.BINARY,
+				Size:  1,
+				Value: 46,
 			},
 			RawDataLength: 2,
 		},
@@ -103,7 +105,9 @@ func TestCommandUnmarshal2(t *testing.T) {
 			Class: 0x06,
 			Instr: 0xD3,
 			Length: blen.Length{
-				Kind: blen.BINARY,
+				Kind:  blen.BINARY,
+				Size:  3,
+				Value: 526,
 			},
 			RawDataLength: 0,
 		},
@@ -135,7 +139,9 @@ func TestCommandUnmarshal3(t *testing.T) {
 			Class: 0x04,
 			Instr: 0xFF,
 			Length: blen.Length{
-				Kind: blen.BINARY,
+				Kind:  blen.BINARY,
+				Size:  1,
+				Value: 46,
 			},
 			RawDataLength: 2,
 		},
@@ -166,7 +172,9 @@ func TestCommandUnmarshal4(t *testing.T) {
 			Class: 0x04,
 			Instr: 0x0F,
 			Length: blen.Length{
-				Kind: blen.BINARY,
+				Kind:  blen.BINARY,
+				Size:  1,
+				Value: 7,
 			},
 			RawDataLength: 0,
 		},
@@ -197,7 +205,9 @@ func TestCommandUnmarshal5(t *testing.T) {
 			Class: 0x04,
 			Instr: 0xFF,
 			Length: blen.Length{
-				Kind: blen.BINARY,
+				Kind:  blen.BINARY,
+				Size:  1,
+				Value: 1,
 			},
 			RawDataLength: 2,
 		},
@@ -247,7 +257,7 @@ func TestCommandUnmarshal6(t *testing.T) {
 		return
 	}
 	want := Command{CtrlField: instr.CtrlField{
-		Class: 0x4, Instr: 0xf, Length: blen.Length{Kind: 0x1, Size: 0x0, Value: 0x0}, RawDataLength: 0},
+		Class: 0x4, Instr: 0xf, Length: blen.Length{Kind: 0x1, Size: 1, Value: 219}, RawDataLength: 0},
 		Data: apdu.DataUnit{Data: []uint8{}, BMPOBJs: Objects, TLVContainer: tlv.Container{Objects: []tlv.DataObject{
 			{TAG: []uint8{0x24}, Data: []uint8{0x7, 0xe, 0x47, 0x45,
 				0x4e, 0x2e, 0x4e, 0x52, 0x2e, 0x3a, 0x32, 0x39, 0x31, 0x36, 0x37, 0x35}},
@@ -273,15 +283,18 @@ func TestCommandUnmarshal6(t *testing.T) {
 
 func TestFromOBJs(t *testing.T) {
 	want := AuthResultData{
-		Amount:     1,
-		ReceiptNr:  22,
-		TurnoverNr: 22,
-		TraceNr:    22,
-		Date:       "0308",
-		Time:       "164923",
-		TID:        "29001006",
-		VU:         "100764992",
-		AID:        "291675",
+		Amount:      1,
+		Currency:    978,
+		ReceiptNr:   22,
+		TurnoverNr:  22,
+		TraceNr:     22,
+		Date:        "0308",
+		Time:        "164923",
+		TID:         "29001006",
+		VU:          "100764992",
+		AID:         "291675",
+		Info:        "GEN.NR.:291675",
+		PaymentType: PaymentType_pin,
 		Card: CardData{
 			Name:  "Debit Mastercard",
 			Type:  46,
@@ -305,7 +318,9 @@ func TestCommandUnmarshal7(t *testing.T) {
 			Class: 0x06,
 			Instr: 0x1E,
 			Length: blen.Length{
-				Kind: blen.BINARY,
+				Kind:  blen.BINARY,
+				Size:  1,
+				Value: 1,
 			},
 			RawDataLength: 1,
 		},
@@ -335,8 +350,8 @@ func TestCommandUnmarshal8(t *testing.T) {
 			Instr: 0x0F,
 			Length: blen.Length{
 				Kind:  blen.BINARY,
-				Size:  0,
-				Value: 0,
+				Size:  1,
+				Value: 73,
 			},
 			RawDataLength: 0,
 		},

@@ -7,6 +7,7 @@ import (
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/apdu/tlv"
 	"github.com/bezahl-online/zvt/instr"
+	"go.uber.org/zap"
 )
 
 // Command is the structur for a APDU
@@ -38,11 +39,6 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		return fmt.Errorf("APRC %0X not found", (*data)[:2])
 	}
 	c.CtrlField = *i
-	// after binary length field
-	dstart := 3
-	if (*data)[2] == 0xff {
-		dstart = 5
-	}
 	// FIXME: workaround für end_of_day bug
 	if c.CtrlField.Class == 0x04 &&
 		c.CtrlField.Instr == 0x0f &&
@@ -55,6 +51,17 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		d = append(d[:2], byte(l-2))
 		d = append(d, (*data)[2:]...)
 		*data = d
+		Logger.Debug("Workaround for missing length field",
+			zap.String("Data", fmt.Sprintf("a length of %d is inserted", l)))
+	}
+	err := c.CtrlField.Length.Unmarshal((*data)[2:])
+	if err != nil {
+		return err
+	}
+	// after binary length field
+	dstart := 3
+	if (*data)[2] == 0xff {
+		dstart = 5
 	}
 	dend := dstart + i.RawDataLength
 	if (*data)[2] < byte(i.RawDataLength) {
@@ -85,7 +92,7 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		return nil
 	}
 	tlvData := (*data)[dend:]
-	err := tlv.Unmarshal(&tlvData)
+	err = tlv.Unmarshal(&tlvData)
 	if err != nil {
 		return err
 	}

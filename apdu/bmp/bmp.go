@@ -19,7 +19,7 @@ func (o *OBJ) Marshal() ([]byte, error) {
 		return b, fmt.Errorf("BMP '%04X' not found", o.ID)
 	}
 	info.Length.Value = uint16(len(o.Data))
-	l, err := info.Length.Format()
+	l, err := info.Length.Marshal()
 	if err != nil {
 		return b, err
 	}

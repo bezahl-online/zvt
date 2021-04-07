@@ -52,17 +52,32 @@ type CardData struct {
 	SeqNr int
 }
 
+// payment-type:
+// 40 = offline
+// 50  =  card  in  terminal  checked  positively,  but  no  Authorisation  carried out
+// 60 = online
+// 70 = PIN-payment (also possible for EMV-processing, i.e. credit cards,ecTrack2, ecEMV online/offline).If the TLV-container is active, this information can be specified in tag 2F (see chapter TLV-container).
+const (
+	PaymentType_offline = 0x40
+	PaymentType_positiv = 0x50
+	PaymentType_online  = 0x60
+	PaymentType_pin     = 0x70
+)
+
 type AuthResultData struct {
-	Amount     int64
-	ReceiptNr  int
-	TurnoverNr int
-	TraceNr    int
-	Date       string
-	Time       string
-	TID        string
-	VU         string
-	AID        string
-	Card       CardData
+	Amount      int64
+	Currency    int
+	ReceiptNr   int
+	TurnoverNr  int
+	TraceNr     int
+	Date        string
+	Time        string
+	TID         string
+	VU          string
+	AID         string
+	Info        string
+	PaymentType byte
+	Card        CardData
 }
 
 const (
@@ -101,11 +116,13 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 				r.Transaction.Result = Result_Abort
 			}
 			return nil
-
 		case 0x0F:
 			Logger.Info("Transaction successfull")
 			r.Transaction.Result = Result_Success
 			return nil
+		default:
+			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
+				result.CtrlField.Instr))
 		}
 	case 0x04:
 		switch result.CtrlField.Instr {
@@ -131,6 +148,9 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 				}
 			}
 			Logger.Info(r.Message)
+		default:
+			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",
+				result.CtrlField.Instr))
 		}
 	}
 	return nil
@@ -150,6 +170,8 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) 
 			r.Date = fmt.Sprintf("%04X", obj.Data)
 		case 0x17:
 			r.Card.SeqNr = int(bcd.ToUint16(obj.Data))
+		case 0x19:
+			r.PaymentType = obj.Data[0]
 		case 0x22:
 			pan := formatPAN(obj.Data)
 			r.Card.PAN = pan
@@ -165,6 +187,10 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) 
 			r.VU = strings.TrimSpace(string(obj.Data))
 		case 0x3B:
 			r.AID = strings.Trim(string(obj.Data), string(byte(0x00)))
+		case 0x3C:
+			r.Info = string(obj.Data)
+		case 0x49:
+			r.Currency = int(bcd.ToUint16(obj.Data))
 		case 0x87:
 			r.ReceiptNr = int(bcd.ToUint16(obj.Data))
 		case 0x88:

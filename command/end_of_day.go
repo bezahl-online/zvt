@@ -8,7 +8,9 @@ import (
 	"github.com/albenik/bcd"
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
+	"github.com/bezahl-online/zvt/apdu/tlv"
 	"github.com/bezahl-online/zvt/instr"
+	"go.uber.org/zap"
 )
 
 var fixedPassword [3]byte = [3]byte{0x12, 0x34, 0x56}
@@ -52,13 +54,17 @@ func (s *SingleTotals) Unmarshal(data []byte) {
 }
 
 type EoDResultData struct {
-	TraceNr int
-	Date    string
-	Time    string
-	Total   int64
-	Totals  SingleTotals
+	TraceNr  int
+	Date     string
+	Time     string
+	Total    int64
+	Totals   *SingleTotals
+	PrintOut *PrintOut
 }
-
+type PrintOut struct {
+	Type byte
+	Text string
+}
 type EoDResult struct {
 	Error  string
 	Result string
@@ -104,11 +110,17 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 				r.Transaction.Result = Result_Abort
 			}
 			return nil
-
 		case 0x0F:
 			Logger.Info("Transaction successfull")
 			r.Transaction.Result = Result_Success
 			return nil
+		case 0xD3:
+			r.Transaction.Data = &EoDResultData{
+				PrintOut: &PrintOut{},
+			}
+			r.Transaction.Data.FromTLV(result.Data.TLVContainer.Objects)
+			Logger.Info("Print Block (06 D3)",
+				zap.String("Data", r.Transaction.Data.PrintOut.Text))
 		default:
 			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
 				result.CtrlField.Instr))
@@ -124,16 +136,7 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 			r.Status = result.Data.Data[0]
 			for _, obj := range result.Data.TLVContainer.Objects {
 				if obj.TAG[0] == byte(0x24) {
-					r.Message = strings.Map(func(r rune) rune {
-						if (unicode.IsLetter(r) ||
-							unicode.IsDigit(r) ||
-							unicode.IsPunct(r) ||
-							unicode.IsSpace(r)) &&
-							r != 0x26 {
-							return r
-						}
-						return -1
-					}, string(obj.Data))
+					r.Message = GetPureText(string(obj.Data))
 				}
 			}
 		default:
@@ -147,6 +150,39 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 	return nil
 }
 
+func GetPureText(text string) string {
+	return strings.Map(func(r rune) rune {
+		if (unicode.IsLetter(r) ||
+			unicode.IsDigit(r) ||
+			unicode.IsPunct(r) ||
+			unicode.IsSpace(r)) &&
+			r != 0x26 {
+			return r
+		}
+		return -1
+	}, string(text))
+}
+
+func (r *EoDResultData) FromTLV(objs []tlv.DataObject) {
+	for _, obj := range objs {
+		switch obj.TAG[0] {
+		case 0x1F:
+			switch obj.TAG[1] {
+			case 7: // receipt-type
+				r.PrintOut.Type = obj.Data[0]
+			default:
+				Logger.Error(fmt.Sprintf("TLV TAG '1F %0X' not handled",
+					obj.TAG[1]))
+			}
+		case 0x25:
+			r.PrintOut.Text = GetPureText(string(obj.Data))
+		default:
+			Logger.Error(fmt.Sprintf("TLV TAG '% 0X' not handled",
+				obj.TAG))
+		}
+	}
+
+}
 func (r *EoDResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 	for _, obj := range objs {
 		switch obj.ID {
@@ -166,6 +202,7 @@ func (r *EoDResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 				result = Result_Abort
 			}
 		case 0x60:
+			r.Totals = &SingleTotals{}
 			r.Totals.Unmarshal(obj.Data)
 		default:
 			Logger.Error(fmt.Sprintf("no path for BMP-ID %0X", obj.ID))
