@@ -201,7 +201,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 }
 
 var IntermediateStatus map[byte]string = make(map[byte]string)
-BZT wartet auf Betragbestätigung
+
 func init() {
 	IntermediateStatus[0] = "BZT wartet auf Betragbestätigung"
 	IntermediateStatus[1] = "Bitte Anzeigen auf dem PIN-Pad beachten"
