@@ -199,3 +199,18 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	logCommand(true, Command{CtrlField: *i}, data)
 	return resp, err
 }
+
+var IntermediateStatus map[byte]string = make(map[byte]string)
+
+func init() {
+	IntermediateStatus[1] = "Bitte Anzeigen auf dem PIN-Pad beachten"
+	IntermediateStatus[2] = "Bitte Anzeigen auf dem PIN-Pad beachten"
+	IntermediateStatus[3] = "Vorgang nicht möglich"
+	IntermediateStatus[7] = "Karte nicht zugelassen"
+	IntermediateStatus[8] = "Karte unbekannt / undefiniert"
+	IntermediateStatus[9] = "Karte verfallen"
+	IntermediateStatus[10] = "Karte einstecken"
+	IntermediateStatus[12] = "Karte nicht lesbar"
+	IntermediateStatus[13] = "Vorgang abgebrochen"
+	IntermediateStatus[14] = "Vorgang wird bearbeitet bitte warten..."
+}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/bezahl-online/zvt/instr"
 )
@@ -50,4 +51,17 @@ func ENVFilePath(envName string, fileName string) string {
 	filePath = strings.TrimRight(filePath, "/")
 	filePath += "/" + fileName
 	return filePath
+}
+
+func GetPureText(text string) string {
+	return strings.Map(func(r rune) rune {
+		if (unicode.IsLetter(r) ||
+			unicode.IsDigit(r) ||
+			unicode.IsPunct(r) ||
+			unicode.IsSpace(r)) &&
+			r != 0x26 {
+			return r
+		}
+		return -1
+	}, string(text))
 }

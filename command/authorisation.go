@@ -3,12 +3,12 @@ package command
 import (
 	"fmt"
 	"strings"
-	"unicode"
 
 	"github.com/albenik/bcd"
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/instr"
+	"github.com/bezahl-online/zvt/util"
 )
 
 // AuthConfig is the auth data struct
@@ -135,16 +135,7 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 			r.Status = result.Data.Data[0]
 			for _, obj := range result.Data.TLVContainer.Objects {
 				if obj.TAG[0] == byte(0x24) {
-					r.Message = strings.Map(func(r rune) rune {
-						if (unicode.IsLetter(r) ||
-							unicode.IsDigit(r) ||
-							unicode.IsPunct(r) ||
-							unicode.IsSpace(r)) &&
-							r != 0x26 {
-							return r
-						}
-						return -1
-					}, string(obj.Data))
+					r.Message = util.GetPureText(string(obj.Data))
 				}
 			}
 			Logger.Info(r.Message)

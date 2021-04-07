@@ -2,14 +2,13 @@ package command
 
 import (
 	"fmt"
-	"strings"
-	"unicode"
 
 	"github.com/albenik/bcd"
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/apdu/tlv"
 	"github.com/bezahl-online/zvt/instr"
+	"github.com/bezahl-online/zvt/util"
 	"go.uber.org/zap"
 )
 
@@ -98,7 +97,11 @@ func (p *PT) EndOfDay() error {
 
 func (r *EndOfDayResponse) Process(result *Command) error {
 	if r.Transaction == nil {
-		r.Transaction = &EoDResult{}
+		r.Transaction = &EoDResult{
+			Error:  "",
+			Result: Result_Pending,
+			Data:   &EoDResultData{},
+		}
 	}
 	switch result.CtrlField.Class {
 	case 0x06:
@@ -136,8 +139,11 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 			r.Status = result.Data.Data[0]
 			for _, obj := range result.Data.TLVContainer.Objects {
 				if obj.TAG[0] == byte(0x24) {
-					r.Message = GetPureText(string(obj.Data))
+					r.Message = util.GetPureText(string(obj.Data))
 				}
+			}
+			if len(r.Message) == 0 {
+				r.Message = IntermediateStatus[r.Status]
 			}
 		default:
 			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",
@@ -148,19 +154,6 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 			result.CtrlField.Class, result.CtrlField.Instr))
 	}
 	return nil
-}
-
-func GetPureText(text string) string {
-	return strings.Map(func(r rune) rune {
-		if (unicode.IsLetter(r) ||
-			unicode.IsDigit(r) ||
-			unicode.IsPunct(r) ||
-			unicode.IsSpace(r)) &&
-			r != 0x26 {
-			return r
-		}
-		return -1
-	}, string(text))
 }
 
 func (r *EoDResultData) FromTLV(objs []tlv.DataObject) {
@@ -175,7 +168,7 @@ func (r *EoDResultData) FromTLV(objs []tlv.DataObject) {
 					obj.TAG[1]))
 			}
 		case 0x25:
-			r.PrintOut.Text = GetPureText(string(obj.Data))
+			r.PrintOut.Text = util.GetPureText(string(obj.Data))
 		default:
 			Logger.Error(fmt.Sprintf("TLV TAG '% 0X' not handled",
 				obj.TAG))
