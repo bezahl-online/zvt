@@ -51,6 +51,8 @@ func TestRegister(t *testing.T) {
 			assert.EqualValues(t, want, *got)
 			// completion
 			i := instr.Map["Completion"]
+			i.Length.Size = 1
+			i.Length.Value = 10
 			want := Command{
 				CtrlField: i,
 				Data: apdu.DataUnit{

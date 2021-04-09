@@ -6,10 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEndOfDayCompletion(t *testing.T) {
+func TestAuthorisationCompletion(t *testing.T) {
 	skipShort(t)
 	for {
-		got := EndOfDayResponse{}
+		got := AuthorisationResponse{}
 		err := PaymentTerminal.Completion(&got)
 		if err != nil {
 			assert.NoError(t, err)
