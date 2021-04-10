@@ -8,6 +8,7 @@ import (
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/apdu/tlv"
 	"github.com/bezahl-online/zvt/instr"
+	"github.com/bezahl-online/zvt/messages"
 	"github.com/bezahl-online/zvt/util"
 	"go.uber.org/zap"
 )
@@ -108,12 +109,12 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 		case 0x1E:
 			switch result.Data.Data[0] {
 			case 0x6C:
-				Logger.Info("Transaction aborted")
+				Logger.Info("Transaktion abgebrochen")
 				r.Transaction.Result = Result_Abort
 			}
 			return nil
 		case 0x0F:
-			Logger.Info("Transaction successfull")
+			Logger.Info("Transaktion erfolgreich")
 			r.Transaction.Result = Result_Success
 			return nil
 		case 0xD3:
@@ -142,7 +143,7 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 				}
 			}
 			if len(r.Message) == 0 {
-				r.Message = IntermediateStatus[r.Status]
+				r.Message = messages.IntermediateStatus[r.Status]
 			}
 		default:
 			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",

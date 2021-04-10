@@ -131,7 +131,7 @@ func TestEndOfDayProcess3(t *testing.T) {
 			got2 := EndOfDayResponse{}
 			got2.Process(&got)
 			assert.EqualValues(t, 3, got2.Transaction.Data.PrintOut.Type)
-			assert.EqualValues(t, 1057, len(got2.Transaction.Data.PrintOut.Text))
+			assert.EqualValues(t, 924, len(got2.Transaction.Data.PrintOut.Text))
 		}
 	}
 

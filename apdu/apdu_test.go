@@ -30,8 +30,8 @@ func TestMarshal(t *testing.T) {
 			config.AdminReceiptPrintedByECR +
 			config.PTSendsIntermediateStatus +
 			config.ECRusingPrintLinesForPrintout)
-		serviceByte := byte(config.ServiceMenuNOTAssignedToFunctionKey +
-			config.DisplayTextsForCommandsAuthorisation)
+		serviceByte := byte(config.Service_MenuNOTAssignedToFunctionKey +
+			config.Service_DisplayTextsForCommandsAuthorisationInCAPITALS)
 		var apdu DataUnit = DataUnit{
 			Data: []byte{configByte, serviceByte},
 			TLVContainer: tlv.Container{

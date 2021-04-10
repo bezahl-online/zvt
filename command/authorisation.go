@@ -8,6 +8,7 @@ import (
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/instr"
+	"github.com/bezahl-online/zvt/messages"
 	"github.com/bezahl-online/zvt/util"
 )
 
@@ -23,7 +24,7 @@ type AuthConfig struct {
 // initiates a payment process
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) Authorisation(config *AuthConfig) error {
-	Logger.Info(fmt.Sprintf("AUTHORISATION amount: %5.2f", float64(config.Amount)/100))
+	Logger.Info(fmt.Sprintf("ECR: AUTHORISATION amount: %5.2f", float64(config.Amount)/100))
 	ctrlField := instr.Map["Authorisation"]
 	err := p.send(Command{ctrlField, config.marshal()})
 	if err != nil {
@@ -109,15 +110,19 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 	switch result.CtrlField.Class {
 	case 0x06:
 		switch result.CtrlField.Instr {
-		case 0x1E:
-			switch result.Data.Data[0] {
-			case 0x6C:
-				Logger.Info("Transaction aborted")
-				r.Transaction.Result = Result_Abort
+		case 0x1E: // Abort from PT
+			Logger.Info("PT: 'Transaktion abgebrochen'")
+			r.Transaction.Result = Result_Abort
+			var ok bool
+			r.Message, ok = messages.ErrorMessage[result.Data.Data[0]]
+			if ok {
+				Logger.Info(fmt.Sprintf("PT: '%s'", r.Message))
+			} else {
+				Logger.Error(fmt.Sprintf("06 1E: unmapped error message code %0X", result.Data.Data[0]))
 			}
 			return nil
 		case 0x0F:
-			Logger.Info("Transaction successfull")
+			Logger.Info("PT: 'Transaktion erfolgreich'")
 			r.Transaction.Result = Result_Success
 			return nil
 		default:
@@ -128,17 +133,33 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 		switch result.CtrlField.Instr {
 		case 0x0F:
 			r.Transaction.Data = &AuthResultData{}
-			r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
 			r.Transaction.Result = Result_Pending
+			// Result can be chaned by next call
+			r.Transaction.Data.FromOBJs(r, result.Data.BMPOBJs)
 			return nil
 		case 0xFF:
 			r.Status = result.Data.Data[0]
+			var ok bool
+			r.Message, ok = messages.IntermediateStatus[result.Data.Data[0]]
+			if ok {
+				Logger.Info(fmt.Sprintf("PT: '%s'", r.Message))
+			} else {
+				Logger.Error(fmt.Sprintf("04 FF: unmapped intermediate status code %0X", result.Data.Data[0]))
+			}
 			for _, obj := range result.Data.TLVContainer.Objects {
-				if obj.TAG[0] == byte(0x24) {
+				switch obj.TAG[0] {
+				case 0x24:
 					r.Message = util.GetPureText(string(obj.Data))
+					Logger.Info(fmt.Sprintf("PT: '%s'", strings.ReplaceAll(r.Message, "\n", "; ")))
+				case 0x1F:
+					switch obj.TAG[1] {
+					default:
+						Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG))
+					}
+				default:
+					Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG[0]))
 				}
 			}
-			Logger.Info(r.Message)
 		default:
 			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",
 				result.CtrlField.Instr))
@@ -147,7 +168,7 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 	return nil
 }
 
-func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
+func (r *AuthResultData) FromOBJs(ar *AuthorisationResponse, objs []bmp.OBJ) (error string) {
 	for _, obj := range objs {
 		switch obj.ID {
 		case 0x04:
@@ -170,7 +191,13 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) 
 			// Error and Result in AuthResult
 			switch obj.Data[0] {
 			case 0x6C:
-				result = Result_Abort
+				ar.Transaction.Result = Result_Abort
+			default:
+				var ok bool
+				ar.Message, ok = messages.IntermediateStatus[obj.Data[0]]
+				if !ok {
+					Logger.Error(fmt.Sprintf("0x27: unmapped intermediate status code %0X", obj.Data[0]))
+				}
 			}
 		case 0x29:
 			r.TID = fmt.Sprintf("%X", obj.Data)
@@ -180,6 +207,7 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) 
 			r.AID = strings.Trim(string(obj.Data), string(byte(0x00)))
 		case 0x3C:
 			r.Info = string(obj.Data)
+			Logger.Info(fmt.Sprintf("PT: Info '%s'", r.Info))
 		case 0x49:
 			r.Currency = int(bcd.ToUint16(obj.Data))
 		case 0x87:
@@ -194,7 +222,7 @@ func (r *AuthResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) 
 			Logger.Error(fmt.Sprintf("no path for BMP-ID %0X", obj.ID))
 		}
 	}
-	return result, error
+	return error
 }
 
 func formatPAN(rawPAN []byte) string {

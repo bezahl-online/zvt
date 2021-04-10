@@ -59,7 +59,7 @@ func GetPureText(text string) string {
 			unicode.IsDigit(r) ||
 			unicode.IsPunct(r) ||
 			unicode.IsSpace(r)) &&
-			r != 0x26 {
+			r != 0x26 && r != '\r' {
 			return r
 		}
 		return -1

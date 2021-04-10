@@ -33,7 +33,7 @@ type PT struct {
 }
 
 // stanard timeout for read from and write to PT
-const defaultTimeout = 5 * time.Second
+const defaultTimeout = 30 * time.Second
 
 func init() {
 	PaymentTerminal.Logger = getLogger()
@@ -42,7 +42,7 @@ func init() {
 
 // SendACK send ACK and return the response or error
 func (p *PT) SendACK() error {
-	p.Logger.Info("ACK")
+	p.Logger.Info("ECR: 'ACK'")
 	i := instr.Map["ACK"]
 	err := p.send(Command{
 		CtrlField: i,
@@ -198,24 +198,4 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	err = resp.Unmarshal(&data)
 	logCommand(true, Command{CtrlField: *i}, data)
 	return resp, err
-}
-
-var IntermediateStatus map[byte]string = make(map[byte]string)
-
-func init() {
-	IntermediateStatus[0] = "BZT wartet auf Betragbestätigung"
-	IntermediateStatus[1] = "Bitte Anzeigen auf dem PIN-Pad beachten"
-	IntermediateStatus[2] = "Bitte Anzeigen auf dem PIN-Pad beachten"
-	IntermediateStatus[3] = "Vorgang nicht möglich"
-	IntermediateStatus[4] = "BZT wartet auf Antwort vom FEP"
-	IntermediateStatus[5] = "BZT sendet Autostorno"
-	IntermediateStatus[6] = "BZT sendet Nachbuchungen"
-	IntermediateStatus[7] = "Karte nicht zugelassen"
-	IntermediateStatus[8] = "Karte unbekannt / undefiniert"
-	IntermediateStatus[9] = "Karte verfallen"
-	IntermediateStatus[10] = "Karte einstecken"
-	IntermediateStatus[11] = "Bitte Karte entnehmen!"
-	IntermediateStatus[12] = "Karte nicht lesbar"
-	IntermediateStatus[13] = "Vorgang abgebrochen"
-	IntermediateStatus[14] = "Vorgang wird bearbeitet bitte warten..."
 }

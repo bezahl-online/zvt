@@ -3,7 +3,6 @@ package command
 import (
 	"testing"
 
-	"github.com/bezahl-online/zvt/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,18 +27,18 @@ func TestRegisterCompletion(t *testing.T) {
 	}
 }
 
-func TestRegisterProcess(t *testing.T) {
-	want := RegisterResponse{}
-	testBytes, err := util.Load("testdata/.hex")
-	if !assert.NoError(t, err) {
-		return
-	}
-	c := Command{}
-	c.Unmarshal(&testBytes)
-	got := RegisterResponse{}
-	got.Process(&c)
-	assert.EqualValues(t, want, got)
-}
+// func TestRegisterProcess(t *testing.T) {
+// 	want := RegisterResponse{}
+// 	testBytes, err := util.Load("testdata/.hex")
+// 	if !assert.NoError(t, err) {
+// 		return
+// 	}
+// 	c := Command{}
+// 	c.Unmarshal(&testBytes)
+// 	got := RegisterResponse{}
+// 	got.Process(&c)
+// 	assert.EqualValues(t, want, got)
+// }
 
 // func TestRegisterProcess2(t *testing.T) {
 // 	testBytes, err := util.Load("testdata/.hex")

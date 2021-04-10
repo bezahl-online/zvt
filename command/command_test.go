@@ -304,7 +304,11 @@ func TestFromOBJs(t *testing.T) {
 		},
 	}
 	var got AuthResultData = AuthResultData{}
-	got.FromOBJs(Objects)
+	var ar *AuthorisationResponse = &AuthorisationResponse{
+		TransactionResponse: TransactionResponse{},
+		Transaction:         &AuthResult{},
+	}
+	got.FromOBJs(ar, Objects)
 	assert.EqualValues(t, want, got)
 }
 
