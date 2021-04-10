@@ -119,7 +119,7 @@ func TestEndOfDayProcess3(t *testing.T) {
 			BMPOBJs: []bmp.OBJ{},
 			TLVContainer: tlv.Container{
 				Objects: []tlv.DataObject{
-					{[]byte{0xD3}, []byte{0x00}},
+					{TAG: []byte{0xD3}, Data: []byte{0x00}},
 				},
 			},
 		},

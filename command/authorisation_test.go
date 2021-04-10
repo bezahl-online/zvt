@@ -84,7 +84,7 @@ func TestAuthProcess040f(t *testing.T) {
 	want := AuthorisationResponse{
 		Transaction: &AuthResult{
 			Error:  "",
-			Result: "pending",
+			Result: "abort",
 			Data:   &AuthResultData{},
 		},
 	}
@@ -109,6 +109,10 @@ func TestAuthProcess040f_2(t *testing.T) {
 	}
 
 	want := AuthorisationResponse{
+		TransactionResponse: TransactionResponse{
+			Status:  0,
+			Message: "BZT wartet auf Betragbestätigung",
+		},
 		Transaction: &AuthResult{
 			Error:  "",
 			Result: "pending",
