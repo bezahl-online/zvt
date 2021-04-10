@@ -2,29 +2,29 @@ package config
 
 const (
 	// PaymentReceiptPrintedByECR ECR assumes receipt-printout for payment functions
-	PaymentReceiptPrintedByECR = 2 << iota
+	PaymentReceiptPrintedByECR = 2
 
 	// AdminReceiptPrintedByECR ECR assumes receipt-printout for administration functions
-	AdminReceiptPrintedByECR
+	AdminReceiptPrintedByECR = 4
 
 	// PTSendsIntermediateStatus PTSendsIntermediateStatus
-	PTSendsIntermediateStatus
+	PTSendsIntermediateStatus = 8
 
-	// AmountInputOnPTpossible ECR controls payment function
-	AmountInputOnPTpossible
+	// AmountInputOnPTNotPossible ECR controls payment function
+	AmountInputOnPTNotPossible = 16
 
-	// AdminFunctionOnPTpossible ECR controls administration function
-	AdminFunctionOnPTpossible
-	_
+	// AdminFunctionOnPTNotPossible ECR controls administration function
+	AdminFunctionOnPTNotPossible = 32
 
 	// ECRusingPrintLinesForPrintout ECR print-type
-	ECRusingPrintLinesForPrintout
+	// unset (0) means: ECR compiles receipts itself from the status-information data
+	ECRusingPrintLinesForPrintout = 128
 )
 
 const (
-	// ServiceMenuNOTAssignedToFunctionKey prevents PT from assigning the service menu to the function key
-	ServiceMenuNOTAssignedToFunctionKey = 1 << iota
+	// Service_MenuNOTAssignedToFunctionKey prevents PT from assigning the service menu to the function key
+	Service_MenuNOTAssignedToFunctionKey = 1
 
-	// DisplayTextsForCommandsAuthorisation Pre-initialisation and Reversal will be displayed in capitals
-	DisplayTextsForCommandsAuthorisation
+	// Service_DisplayTextsForCommandsAuthorisationInCAPITALS Pre-initialisation and Reversal will be displayed in capitals
+	Service_DisplayTextsForCommandsAuthorisationInCAPITALS = 2
 )
