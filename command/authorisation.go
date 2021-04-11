@@ -104,7 +104,6 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 		r.Transaction = &AuthResult{
 			Error:  "",
 			Result: Result_Pending,
-			Data:   &AuthResultData{},
 		}
 	}
 	switch result.CtrlField.Class {
@@ -134,7 +133,7 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 		case 0x0F:
 			r.Transaction.Data = &AuthResultData{}
 			r.Transaction.Result = Result_Pending
-			// Result can be chaned by next call
+			// Result can be changed by next call
 			r.Transaction.Data.FromOBJs(r, result.Data.BMPOBJs)
 			return nil
 		case 0xFF:
