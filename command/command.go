@@ -6,6 +6,7 @@ import (
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/apdu/tlv"
+	"github.com/bezahl-online/zvt/apdu/tlv/tag"
 	"github.com/bezahl-online/zvt/instr"
 	"go.uber.org/zap"
 )
@@ -80,6 +81,7 @@ func (c *Command) Unmarshal(data *[]byte) error {
 			return err
 		}
 		objs = append(objs, o)
+		Logger.Debug(fmt.Sprintf("BMP %02X: '%s'", o.ID, bmp.InfoMap[o.ID].Name))
 		dend += o.Size
 	}
 	if x < 1 {
@@ -95,6 +97,13 @@ func (c *Command) Unmarshal(data *[]byte) error {
 	err = tlv.Unmarshal(&tlvData)
 	if err != nil {
 		return err
+	}
+	for _, o := range tlv.Objects {
+		var tagID [2]byte = [2]byte{o.TAG[0]}
+		if tagID[0] == 0x1F {
+			tagID[1] = o.TAG[1]
+		}
+		Logger.Debug(fmt.Sprintf("TAG %02X: '%s'", o.TAG, tag.InfoMap[tagID].Name))
 	}
 	c.Data = apdu.DataUnit{
 		Data:         raw,

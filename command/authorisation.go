@@ -7,6 +7,7 @@ import (
 	"github.com/albenik/bcd"
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
+	"github.com/bezahl-online/zvt/apdu/tlv"
 	"github.com/bezahl-online/zvt/instr"
 	"github.com/bezahl-online/zvt/messages"
 	"github.com/bezahl-online/zvt/util"
@@ -166,7 +167,26 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 	}
 	return nil
 }
-
+func (r *AuthResultData) FromTLV(ar *AuthorisationResponse, objs []tlv.DataObject) {
+	for _, obj := range objs {
+		switch obj.TAG[0] {
+		case 0x24:
+			ar.Message = util.GetPureText(string(obj.Data))
+			Logger.Info(fmt.Sprintf("PT: '%s'", strings.ReplaceAll(ar.Message, "\n", "; ")))
+		case 0x1F:
+			switch obj.TAG[1] { //FIXME: add all tags
+			case 0x10: // FIXME: "4.2.3.Karteninhaberauthentifizierung"
+				// r.Card.Auth = int(obj.Data[0])
+			case 0x12:
+				r.Card.Tech = int(obj.Data[0])
+			default:
+				Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG))
+			}
+		default:
+			Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG[0]))
+		}
+	}
+}
 func (r *AuthResultData) FromOBJs(ar *AuthorisationResponse, objs []bmp.OBJ) (error string) {
 	for _, obj := range objs {
 		switch obj.ID {
