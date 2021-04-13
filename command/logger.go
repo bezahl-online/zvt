@@ -13,7 +13,7 @@ func getLogger() *zap.Logger {
 	cfg := zap.Config{
 		Encoding:    "json",
 		Level:       zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		OutputPaths: []string{logfilePath, "stdout"},
+		OutputPaths: []string{logfilePath}, // "stdout"},
 		// ErrorOutputPaths: []string{"stderr"},
 		EncoderConfig: zapcore.EncoderConfig{
 			MessageKey: "message",

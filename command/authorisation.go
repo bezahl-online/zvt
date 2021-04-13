@@ -213,9 +213,9 @@ func (r *AuthResultData) FromOBJs(ar *AuthorisationResponse, objs []bmp.OBJ) (er
 				ar.Transaction.Result = Result_Abort
 			default:
 				var ok bool
-				ar.Message, ok = messages.IntermediateStatus[obj.Data[0]]
+				ar.Message, ok = messages.ErrorMessage[obj.Data[0]]
 				if !ok {
-					Logger.Error(fmt.Sprintf("0x27: unmapped intermediate status code %0X", obj.Data[0]))
+					Logger.Error(fmt.Sprintf("0x27: unmapped error message code %0X", obj.Data[0]))
 				}
 			}
 		case 0x29:

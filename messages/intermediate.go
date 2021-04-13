@@ -18,6 +18,8 @@ func init() {
 	IntermediateStatus[0x0C] = "Karte nicht lesbar"
 	IntermediateStatus[0x0D] = "Vorgang abgebrochen"
 	IntermediateStatus[0x0E] = "Vorgang wird bearbeitet bitte warten..."
+	// FIXME: map all intermediat status codes!
+	IntermediateStatus[0x17] = "Bitte warten..."
 
 	// IntermediateStatus[0x6C] = "Vorgang wird bearbeitet bitte warten..."
 }

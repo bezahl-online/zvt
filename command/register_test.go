@@ -18,19 +18,22 @@ func TestRegister(t *testing.T) {
 		config.AdminFunctionOnPTNotPossible
 	serviceByte := config.Service_MenuNOTAssignedToFunctionKey +
 		config.Service_DisplayTextsForCommandsAuthorisationInCAPITALS
-	var msgSquID *tlv.DataObject = &tlv.DataObject{
+	var msgSquID tlv.DataObject = tlv.DataObject{
 		TAG:  []byte{0x1F, 0x73},
 		Data: []byte{0, 0, 0},
 	}
-
-	var listOfCommands *tlv.DataObject = &tlv.DataObject{
+	// var cardType tlv.DataObject = tlv.DataObject{
+	// 	TAG:  []byte{0x1F, 0x60},
+	// 	Data: []byte{0x03},
+	// }
+	var listOfCommands tlv.DataObject = tlv.DataObject{
 		TAG:  []byte{0x26},
 		Data: []byte{0x0A, 0x02, 0x06, 0xD3},
 	}
 	var tlvContainer *tlv.Container = &tlv.Container{
 		Objects: []tlv.DataObject{},
 	}
-	tlvContainer.Objects = append(tlvContainer.Objects, *listOfCommands, *msgSquID)
+	tlvContainer.Objects = append(tlvContainer.Objects, listOfCommands, msgSquID) //, cardType)
 	i := instr.Map["ACK"]
 	i.Length.Size = 1
 	err := PaymentTerminal.Register(&Config{

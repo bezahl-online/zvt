@@ -16,7 +16,7 @@ type TransactionResponse struct {
 func (p *PT) Completion(response CompletionResponse) error {
 	var err error
 	var result *Command
-	if result, err = p.ReadResponseWithTimeout(20 * time.Second); err != nil {
+	if result, err = p.ReadResponseWithTimeout(5 * time.Minute); err != nil {
 		return err
 	}
 	if err = p.SendACK(); err != nil {

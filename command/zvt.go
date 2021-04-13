@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"testing"
@@ -33,7 +34,7 @@ type PT struct {
 }
 
 // stanard timeout for read from and write to PT
-const defaultTimeout = 30 * time.Second
+const defaultTimeout = 5 * time.Minute
 
 func init() {
 	PaymentTerminal.Logger = getLogger()
@@ -121,6 +122,7 @@ func logCommand(fromPT bool, c Command, b []byte) {
 		from = "PT => ECR"
 	}
 	message := fmt.Sprintf("%s [% 02X]", from, []byte{cf.Class, cf.Instr})
+	log.Println(fmt.Sprintf("%s APDU: % 02X", message, b[apduStart:]))
 	if blen > apduStart {
 		l := blen
 		andMore := ""
@@ -157,7 +159,8 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	}
 	var resp *Command = &Command{}
 	var cf []byte = []byte{0, 0, 0}
-	p.conn.SetDeadline(time.Now().Add(timeout))
+	deadline := time.Now().Add(timeout)
+	p.conn.SetDeadline(deadline)
 	_, err = p.conn.Read(cf)
 	if err != nil {
 		p.Logger.Error(err.Error())
@@ -180,7 +183,9 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	}
 	i.Length.Unmarshal(lenBuf)
 	if i.Length.Value == 0 {
-		p.Logger.Debug(fmt.Sprintf("PT => ECR [% 02X]", cf))
+		message := fmt.Sprintf("PT => ECR [% 02X]", cf)
+		p.Logger.Debug(message)
+		log.Print(message)
 		return &Command{
 			CtrlField: *i,
 		}, err
