@@ -11,6 +11,16 @@ type TransactionResponse struct {
 	Message string
 }
 
+// Definition of <status-byte>
+// first byte of (06 0F) completion
+const (
+	Status_initialisation_necessary = 1 << iota
+	Status_diagnosis_necessary
+	Status_OPT_action_necessary
+	Status_fillingstation_mode
+	Status_vendingmachine_mode
+)
+
 // Completion implements slave mode of ECR
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) Completion(response CompletionResponse) error {
