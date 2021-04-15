@@ -124,9 +124,6 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 		case 0x0F:
 			Logger.Info("PT: 'Transaktion erfolgreich'")
 			r.Transaction.Result = Result_Success
-			if result.Data.Data != nil && len(result.Data.Data) > 0 {
-				r.Status = result.Data.Data[0]
-			}
 			return nil
 		default:
 			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",

@@ -107,17 +107,22 @@ func (r *RegisterResponse) Process(result *Command) error {
 	case 0x06:
 		switch result.CtrlField.Instr {
 		case 0x1E:
+			r.Status = result.Data.Data[0]
 			switch result.Data.Data[0] {
 			case 0x6C:
 				Logger.Info("Transaktion abgebrochen")
 				r.Transaction.Result = Result_Abort
 			default:
+				r.Message = messages.ErrorMessage[r.Status]
 				Logger.Error(fmt.Sprintf("0x1E: no path for result code %0X", result.Data.Data[0]))
 			}
 			return nil
 		case 0x0F:
 			Logger.Info("Transaktion erfolgreich")
 			r.Transaction.Result = Result_Success
+			if result.Data.Data != nil && len(result.Data.Data) > 0 {
+				r.Status = result.Data.Data[0]
+			}
 			return nil
 		default:
 			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
@@ -131,7 +136,9 @@ func (r *RegisterResponse) Process(result *Command) error {
 			r.Transaction.Result = Result_Pending
 			return nil
 		case 0xFF:
-			r.Status = result.Data.Data[0]
+			if result.Data.Data != nil && len(result.Data.Data) > 0 {
+				r.Status = result.Data.Data[0]
+			}
 			for _, obj := range result.Data.TLVContainer.Objects {
 				if obj.TAG[0] == byte(0x24) {
 					r.Message = util.GetPureText(string(obj.Data))
