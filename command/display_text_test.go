@@ -18,10 +18,14 @@ func TestDisplayText(t *testing.T) {
 	}
 	want.CtrlField.Length.Size = 1
 	err := PaymentTerminal.DisplayText([]string{
-		"Da steh ich nun,",
-		"ich armer Tor,",
-		"Und bin so klug",
-		"als wie zuvor."})
+		// "Da steh ich nun,",
+		// "ich armer Tor,",
+		// "Und bin so klug",
+		// "als wie zuvor.",
+		"Greisslomat e.U.",
+		"Dorf 122",
+		"6645 Vorderhornbach",
+	})
 	if assert.NoError(t, err) {
 		got, err := PaymentTerminal.ReadResponse()
 		if assert.NoError(t, err) {

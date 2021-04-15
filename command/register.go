@@ -7,6 +7,7 @@ import (
 	"github.com/bezahl-online/zvt/apdu"
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/apdu/tlv"
+	"github.com/bezahl-online/zvt/config"
 	"github.com/bezahl-online/zvt/instr"
 	"github.com/bezahl-online/zvt/messages"
 	"github.com/bezahl-online/zvt/util"
@@ -39,13 +40,47 @@ type RegisterResponse struct {
 
 // Register implements inst 06 00
 // set up different configurations on the PT
-func (p *PT) Register(config *Config) error {
-	p.Logger.Info(fmt.Sprintf("Register (06 00) Config %04b %04b", (config.config&0xF0)>>4, config.config&0x0F))
+func (p *PT) Register() error {
+	config := configure()
+	p.Logger.Info("Register (06 00)")
 	i := instr.Map["Registration"]
 	return p.send(Command{
 		CtrlField: i,
-		Data:      (*config).CompileConfig(),
+		Data:      config.CompileConfig(),
 	})
+}
+
+func configure() Config {
+	configByte := config.PaymentReceiptPrintedByECR +
+		config.AdminReceiptPrintedByECR +
+		config.PTSendsIntermediateStatus +
+		// config.AmountInputOnPTNotPossible +
+		config.AdminFunctionOnPTNotPossible
+	serviceByte := config.Service_MenuNOTAssignedToFunctionKey +
+		config.Service_DisplayTextsForCommandsAuthorisationInCAPITALS
+	// var msgSquID tlv.DataObject = tlv.DataObject{
+	// 	TAG:  []byte{0x1F, 0x73},
+	// 	Data: []byte{0, 0, 0},
+	// }
+	// var cardType tlv.DataObject = tlv.DataObject{
+	// 	TAG:  []byte{0x1F, 0x60},
+	// 	Data: []byte{0x03},
+	// }
+	var listOfCommands tlv.DataObject = tlv.DataObject{
+		TAG:  []byte{0x26},
+		Data: []byte{0x0A, 0x02, 0x06, 0xD3},
+	}
+	var tlvContainer *tlv.Container = &tlv.Container{
+		Objects: []tlv.DataObject{},
+	}
+	tlvContainer.Objects = append(tlvContainer.Objects, listOfCommands) // , msgSquID , cardType)
+	return Config{
+		pwd:          fixedPassword,
+		config:       byte(configByte),
+		currency:     EUR,
+		service:      byte(serviceByte),
+		tlvContainer: tlvContainer,
+	}
 }
 
 // CompileConfig return a compiled byte array of the configuration
