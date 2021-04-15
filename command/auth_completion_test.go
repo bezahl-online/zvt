@@ -38,7 +38,7 @@ func TestAuthorisationProcess(t *testing.T) {
 	want := AuthorisationResponse{
 		TransactionResponse: TransactionResponse{
 			Status:  0,
-			Message: "BZT sendet Autostorno",
+			Message: "ABGELEHNT",
 		},
 		Transaction: &AuthResult{
 			Error:  "",

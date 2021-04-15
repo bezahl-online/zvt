@@ -111,7 +111,7 @@ func TestAuthProcess040f_2(t *testing.T) {
 	want := AuthorisationResponse{
 		TransactionResponse: TransactionResponse{
 			Status:  0,
-			Message: "BZT wartet auf Betragbestätigung",
+			Message: "OK",
 		},
 		Transaction: &AuthResult{
 			Error:  "",
