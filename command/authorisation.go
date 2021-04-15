@@ -124,6 +124,9 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 		case 0x0F:
 			Logger.Info("PT: 'Transaktion erfolgreich'")
 			r.Transaction.Result = Result_Success
+			if result.Data.Data != nil && len(result.Data.Data) > 0 {
+				r.Status = result.Data.Data[0]
+			}
 			return nil
 		default:
 			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
@@ -138,7 +141,9 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 			r.Transaction.Data.FromOBJs(r, result.Data.BMPOBJs)
 			return nil
 		case 0xFF:
-			r.Status = result.Data.Data[0]
+			if result.Data.Data != nil && len(result.Data.Data) > 0 {
+				r.Status = result.Data.Data[0]
+			}
 			var ok bool
 			r.Message, ok = messages.IntermediateStatus[result.Data.Data[0]]
 			if ok {
