@@ -4,6 +4,62 @@ var ErrorMessage map[byte]string = make(map[byte]string)
 
 func init() {
 	ErrorMessage[0x00] = "OK"
+	ErrorMessage[0x01] = "ABGELEHNT"
+	ErrorMessage[0x02] = "ABGELEHNT"
+	ErrorMessage[0x03] = "FALSCHE VUNR"
+	ErrorMessage[0x04] = "ABGELEHNT"
+	ErrorMessage[0x05] = "ABGELEHNT"
+	ErrorMessage[0x06] = "KARTE UNGUELTIG"
+	ErrorMessage[0x07] = "ABGELEHNT"
+	ErrorMessage[0x08] = "ABGELEHNT"
+	ErrorMessage[0x09] = "FLEET ID FALSCH"
+	ErrorMessage[0x0A] = "TRANSAKTION NICHT ERLAUBT"
+	ErrorMessage[0x0B] = "ABGELEHNT"
+	ErrorMessage[0x0C] = "ABGELEHNT"
+	ErrorMessage[0x0D] = "BETRAG UNGUELTIG"
+	ErrorMessage[0x0E] = "KARTE UNGUELTIG"
+	ErrorMessage[0x0F] = "SYSTEMFEHLER"
+	ErrorMessage[0x10] = "ABGELEHNT"
+	ErrorMessage[0x11] = "FLEET ID ZU OFT FALSCH"
+
+	ErrorMessage[0x18] = "SYSTEMFEHLER"
+	ErrorMessage[0x19] = "STORNO ABGELEHNT"
+
+	ErrorMessage[0x1D] = "FEHLGESCHLAGEN"
+	ErrorMessage[0x1E] = "FORMATFEHLER"
+
+	ErrorMessage[0x22] = "ABGELEHNT"
+
+	ErrorMessage[0x29] = "ABGELEHNT"
+
+	ErrorMessage[0x2B] = "ABGELEHNT"
+
+	ErrorMessage[0x32] = "ABGELEHNT"
+	ErrorMessage[0x33] = "ABGELEHNT"
+
+	ErrorMessage[0x36] = "KARTE ABGELAUFEN"
+	ErrorMessage[0x37] = "PIN FALSCH"
+	ErrorMessage[0x38] = "PIN FALSCH"
+	ErrorMessage[0x39] = "KARTE FALSCH"
+	ErrorMessage[0x3A] = "SYSTEMFEHLER"
+
+	ErrorMessage[0x3F] = "SYSTEMFEHLER"
+
+	ErrorMessage[0x40] = "BETRAG FALSCH"
+
+	ErrorMessage[0x4C] = "SYSTEMFEHLER"
+
+	ErrorMessage[0x50] = "KARTE ABGELAUFEN"
+	ErrorMessage[0x51] = "PIN/KPN FALSCH"
+	ErrorMessage[0x52] = "KPN FALSCH"
+	ErrorMessage[0x53] = "ABGELEHNT"
+
+	ErrorMessage[0x55] = "ABGELEHNT"
+	ErrorMessage[0x56] = "TERMINAL INAKTIV"
+	ErrorMessage[0x57] = "INITIALISIERUNG"
+	ErrorMessage[0x58] = "ABGELEHNT"
+	ErrorMessage[0x59] = "TERMINAL GESPERRT"
+
 	ErrorMessage[0x64] = "card not readable"
 	ErrorMessage[0x65] = "card-data not present"
 	ErrorMessage[0x66] = "processing-error"
