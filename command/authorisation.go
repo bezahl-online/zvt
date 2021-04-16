@@ -47,11 +47,12 @@ func (a *AuthConfig) marshal() apdu.DataUnit {
 }
 
 type CardData struct {
-	Name  string
-	Type  int
-	PAN   string
-	Tech  int
-	SeqNr int
+	Name   string
+	Type   int
+	PAN    string
+	Tech   int
+	SeqNr  int
+	Expiry string
 }
 
 // payment-type:
@@ -79,6 +80,7 @@ type AuthResultData struct {
 	AID         string
 	Info        string
 	PaymentType byte
+	EMVCustomer string
 	Card        CardData
 }
 
@@ -148,20 +150,7 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 			} else {
 				Logger.Error(fmt.Sprintf("04 FF: unmapped intermediate status code %0X", result.Data.Data[0]))
 			}
-			for _, obj := range result.Data.TLVContainer.Objects {
-				switch obj.TAG[0] {
-				case 0x24:
-					r.Message = util.GetPureText(string(obj.Data))
-					Logger.Info(fmt.Sprintf("PT: '%s'", strings.ReplaceAll(r.Message, "\n", "; ")))
-				case 0x1F:
-					switch obj.TAG[1] {
-					default:
-						Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG))
-					}
-				default:
-					Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG[0]))
-				}
-			}
+			r.Transaction.Data.FromTLV(r, result.Data.TLVContainer.Objects)
 		default:
 			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",
 				result.CtrlField.Instr))
@@ -181,6 +170,10 @@ func (r *AuthResultData) FromTLV(ar *AuthorisationResponse, objs []tlv.DataObjec
 				// r.Card.Auth = int(obj.Data[0])
 			case 0x12:
 				r.Card.Tech = int(obj.Data[0])
+			case 0x46:
+				r.EMVCustomer = string(obj.Data)
+			case 0x47:
+				r.AID = string(obj.Data)
 			default:
 				Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG))
 			}
@@ -201,6 +194,8 @@ func (r *AuthResultData) FromOBJs(ar *AuthorisationResponse, objs []bmp.OBJ) (er
 			r.Time = fmt.Sprintf("%06X", obj.Data)
 		case 0x0D:
 			r.Date = fmt.Sprintf("%04X", obj.Data)
+		case 0x0E:
+			r.Card.Expiry = fmt.Sprintf("%04X", obj.Data)
 		case 0x17:
 			r.Card.SeqNr = int(bcd.ToUint16(obj.Data))
 		case 0x19:

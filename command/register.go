@@ -54,7 +54,7 @@ func configure() Config {
 	configByte := config.PaymentReceiptPrintedByECR +
 		config.AdminReceiptPrintedByECR +
 		config.PTSendsIntermediateStatus +
-		// config.AmountInputOnPTNotPossible +
+		config.AmountInputOnPTNotPossible +
 		config.AdminFunctionOnPTNotPossible
 	serviceByte := config.Service_MenuNOTAssignedToFunctionKey +
 		config.Service_DisplayTextsForCommandsAuthorisationInCAPITALS

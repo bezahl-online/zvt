@@ -14,6 +14,7 @@ import (
 
 func TestEndOfDayCompletion(t *testing.T) {
 	skipShort(t)
+	TestEndOfDay(t)
 	for {
 		got := EndOfDayResponse{}
 		err := PaymentTerminal.Completion(&got)
