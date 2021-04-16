@@ -81,6 +81,7 @@ type AuthResultData struct {
 	Info        string
 	PaymentType byte
 	EMVCustomer string
+	EMVMerchant string
 	Card        CardData
 }
 
@@ -173,7 +174,7 @@ func (r *AuthResultData) FromTLV(ar *AuthorisationResponse, objs []tlv.DataObjec
 			case 0x46:
 				r.EMVCustomer = string(obj.Data)
 			case 0x47:
-				r.AID = string(obj.Data)
+				r.EMVMerchant = string(obj.Data)
 			default:
 				Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG))
 			}
