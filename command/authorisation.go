@@ -165,16 +165,16 @@ func (r *AuthResultData) FromTLV(ar *AuthorisationResponse, objs []tlv.DataObjec
 		case 0x24:
 			ar.Message = util.GetPureText(string(obj.Data))
 			Logger.Info(fmt.Sprintf("PT: '%s'", strings.ReplaceAll(ar.Message, "\n", "; ")))
+		case 0x46:
+			r.EMVCustomer = string(obj.Data)
+		case 0x47:
+			r.EMVMerchant = string(obj.Data)
 		case 0x1F:
 			switch obj.TAG[1] { //FIXME: add all tags
 			case 0x10: // FIXME: "4.2.3.Karteninhaberauthentifizierung"
 				// r.Card.Auth = int(obj.Data[0])
 			case 0x12:
 				r.Card.Tech = int(obj.Data[0])
-			case 0x46:
-				r.EMVCustomer = string(obj.Data)
-			case 0x47:
-				r.EMVMerchant = string(obj.Data)
 			default:
 				Logger.Error(fmt.Sprintf("04 FF TLV TAG %02X' not handled", obj.TAG))
 			}
