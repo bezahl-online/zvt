@@ -382,3 +382,24 @@ func TestCommandUnmarshal8(t *testing.T) {
 		assert.EqualValues(t, want, got)
 	}
 }
+func TestCommandUnmarshal9(t *testing.T) {
+	testBytes, err := util.Load("testdata/1618593839564PT.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	want := []string{"A0000000043060 C614239C90BE3A54", "A0000000043060 C614239C90BE3A54"}
+	var got Command = Command{}
+	err = got.Unmarshal(&testBytes)
+	if assert.NoError(t, err) {
+		var evm_c, evm_m string
+		for _, obj := range got.Data.TLVContainer.Objects {
+			switch obj.TAG[0] {
+			case 0x46:
+				evm_c = string(obj.Data)
+			case 0x47:
+				evm_m = string(obj.Data)
+			}
+		}
+		assert.EqualValues(t, want, []string{evm_c, evm_m})
+	}
+}
