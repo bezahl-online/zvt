@@ -139,7 +139,7 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 			r.Transaction.Result = Result_Pending
 			// Result can be changed by next call
 			r.Transaction.Data.FromOBJs(r, result.Data.BMPOBJs)
-			return nil
+			r.Transaction.Data.FromTLV(r, result.Data.TLVContainer.Objects)
 		case 0xFF:
 			if result.Data.Data != nil && len(result.Data.Data) > 0 {
 				r.Status = result.Data.Data[0]
