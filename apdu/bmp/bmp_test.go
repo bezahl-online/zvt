@@ -19,7 +19,7 @@ func TestMarshal(t *testing.T) {
 	if assert.NoError(t, err) {
 		if assert.EqualValues(t, want, got) {
 			obj := OBJ{
-				ID: 0xf9,
+				ID: 0x0F,
 			}
 			_, err := obj.Marshal()
 			assert.Error(t, err)
@@ -40,7 +40,7 @@ func TestUnmarshal(t *testing.T) {
 	err := got.Unmarshal(data)
 	if assert.NoError(t, err) {
 		if assert.EqualValues(t, want, got) {
-			err := got.Unmarshal([]byte{0xf9, 0xf1, 0xF6})
+			err := got.Unmarshal([]byte{0xf1, 0xf1, 0xF6})
 			if assert.Error(t, err) {
 				err = got.Unmarshal([]byte{})
 				assert.Error(t, err)
