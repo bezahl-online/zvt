@@ -38,7 +38,7 @@ func TestAuthorisationProcess(t *testing.T) {
 	want := AuthorisationResponse{
 		TransactionResponse: TransactionResponse{
 			Status:  0,
-			Message: "ABGELEHNT",
+			Message: "Karte abgelehnt",
 		},
 		Transaction: &AuthResult{
 			Error:  "",

@@ -29,10 +29,10 @@ func (p *PT) Completion(response CompletionResponse) error {
 	if result, err = p.ReadResponseWithTimeout(5 * time.Minute); err != nil {
 		return err
 	}
-	if err = p.SendACK(); err != nil {
+	if err = response.Process(result); err != nil {
 		return err
 	}
-	if err = response.Process(result); err != nil {
+	if err = p.SendACK(); err != nil {
 		return err
 	}
 	return nil

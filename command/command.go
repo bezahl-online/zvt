@@ -113,7 +113,7 @@ func (c *Command) Unmarshal(data *[]byte) error {
 	return nil
 }
 
-// IsAck returns true if command is ack
+// IsAck returns nil if it is ACK else  error
 func (c *Command) IsAck() (err error) {
 	isAck := c.CtrlField.Class == 0x80 && c.CtrlField.Instr == 0x00
 	if !isAck {
