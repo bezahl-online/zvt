@@ -1,6 +1,12 @@
 package command
 
-import "time"
+import (
+	"fmt"
+	"net"
+	"time"
+
+	"github.com/bezahl-online/zvt/messages"
+)
 
 type CompletionResponse interface {
 	Process(*Command) error
@@ -26,8 +32,28 @@ const (
 func (p *PT) Completion(response CompletionResponse) error {
 	var err error
 	var result *Command
-	if result, err = p.ReadResponseWithTimeout(5 * time.Minute); err != nil {
-		return err
+	if result, err = p.ReadResponseWithTimeout(30 * time.Second); err != nil {
+		if err.(net.Error).Timeout() {
+			p.Status()
+			if result, err = p.ReadResponseWithTimeout(5 * time.Second); err != nil {
+				return err
+			}
+			if result != nil && result.Data.BMPOBJs != nil &&
+				len(result.Data.BMPOBJs) > 0 &&
+				result.Data.BMPOBJs[0].ID == 0x27 {
+				errCode := result.Data.BMPOBJs[0].Data[0]
+				message, ok := messages.ErrorMessage[errCode]
+				if ok {
+					Logger.Info(fmt.Sprintf("PT: '%s'", message))
+				} else {
+					Logger.Error(fmt.Sprintf("06 0F: unmapped error message code %0X", result.Data.Data[0]))
+				}
+			}
+			p.SendACK()
+			return nil
+		} else {
+			return err
+		}
 	}
 	if err = response.Process(result); err != nil {
 		return err

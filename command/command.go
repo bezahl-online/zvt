@@ -35,6 +35,7 @@ func (c *Command) Marshal() ([]byte, error) {
 
 // Unmarshal is
 func (c *Command) Unmarshal(data *[]byte) error {
+	var err error
 	i := instr.Find(data)
 	if i == nil {
 		return fmt.Errorf("APRC %0X not found", (*data)[:2])
@@ -46,17 +47,22 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		(*data)[2] == 0x27 {
 		// length field missing bug
 		// we will insert it
-		var d []byte = make([]byte, len(*data)+1)
-		copy(d, *data)
 		l := len(*data)
-		d = append(d[:2], byte(l-2))
-		d = append(d, (*data)[2:]...)
-		*data = d
+		if *data, err = insert(data, 2, byte(l-2)); err != nil {
+			return err
+		}
 		Logger.Debug("Workaround for missing length field",
 			zap.String("Data", fmt.Sprintf("a length of %d is inserted", l)))
 	}
-	err := c.CtrlField.Length.Unmarshal((*data)[2:])
-	if err != nil {
+	if c.CtrlField.Class == 0x06 &&
+		c.CtrlField.Instr == 0x0F &&
+		(*data)[2] == 0x01 {
+		if *data, err = insert(data, 3, 0x27); err != nil {
+			return err
+		}
+		(*data)[2] = 0x02
+	}
+	if err := c.CtrlField.Length.Unmarshal((*data)[2:]); err != nil {
 		return err
 	}
 	// after binary length field
@@ -111,6 +117,17 @@ func (c *Command) Unmarshal(data *[]byte) error {
 		TLVContainer: tlv,
 	}
 	return nil
+}
+
+func insert(data *[]byte, pos int, b byte) ([]byte, error) {
+	if pos > len(*data) {
+		return []byte{}, fmt.Errorf("position greater than length of data")
+	}
+	var d []byte = make([]byte, len(*data)+1)
+	copy(d, *data)
+	d = append(d[:pos], b)
+	d = append(d, (*data)[pos:]...)
+	return d, nil
 }
 
 // IsAck returns nil if it is ACK else  error

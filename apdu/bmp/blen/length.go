@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// different kinds of length representations
 const (
 	// NONE no legth (tag has no data)
 	NONE = iota
@@ -20,9 +21,9 @@ const (
 
 // Length is the length
 type Length struct {
-	Kind  byte
-	Size  byte
-	Value uint16
+	Kind  byte   // kind of length field
+	Size  byte   // size of length field
+	Value uint16 // actual data length
 }
 
 // Marshal returns a byte representation of the specific length type
@@ -56,7 +57,8 @@ func (l *Length) Marshal() ([]byte, error) {
 	return []byte{}, fmt.Errorf("kind of length not implemented")
 }
 
-// Unmarshal it
+// Unmarshal a length depending on its kind
+// fills a Length structure
 func (l *Length) Unmarshal(d []byte) error {
 	switch l.Kind {
 	case BINARY:
