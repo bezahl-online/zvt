@@ -122,7 +122,11 @@ func logCommand(fromPT bool, c Command, b []byte) {
 		from = "PT => ECR"
 	}
 	message := fmt.Sprintf("%s [% 02X]", from, []byte{cf.Class, cf.Instr})
-	log.Println(fmt.Sprintf("%s APDU: % 02X", message, b[apduStart:]))
+	logstr := fmt.Sprintf("%s (%3d)", message, int(c.CtrlField.Length.Value))
+	if blen > 3 {
+		logstr += fmt.Sprintf(" APDU: % 02X", b[apduStart:])
+	}
+	log.Println(logstr)
 	if blen > apduStart {
 		l := blen
 		andMore := ""
@@ -161,15 +165,16 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	var cf []byte = []byte{0, 0, 0}
 	deadline := time.Now().Add(timeout)
 	p.conn.SetDeadline(deadline)
-	_, err = p.conn.Read(cf)
+	n, err := p.conn.Read(cf)
+	_ = n
 	if err != nil {
-		p.Logger.Error(err.Error())
+		// p.Logger.Error(err.Error())
 		return resp, err
 	}
 	i := instr.Find(&cf)
 	if i == nil {
 		err := fmt.Errorf("control field '% X' not found", cf)
-		p.Logger.Error(err.Error())
+		// p.Logger.Error(err.Error())
 		return nil, err
 	}
 	lenBuf := []byte{cf[2]}
@@ -177,13 +182,13 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 		lenBuf = append(lenBuf, 0, 0)
 		_, err = p.conn.Read(lenBuf[1:])
 		if err != nil {
-			p.Logger.Error(err.Error())
+			// p.Logger.Error(err.Error())
 			return resp, err
 		}
 	}
 	i.Length.Unmarshal(lenBuf)
 	if i.Length.Value == 0 {
-		message := fmt.Sprintf("PT => ECR [% 02X]", cf)
+		message := fmt.Sprintf("PT => ECR [% 02X]", cf[:2])
 		p.Logger.Debug(message)
 		log.Print(message)
 		return &Command{
@@ -193,7 +198,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	var readBuf []byte = make([]byte, i.Length.Value)
 	nr, err := p.conn.Read(readBuf)
 	if err != nil {
-		p.Logger.Error(err.Error())
+		// p.Logger.Error(err.Error())
 		return resp, err
 	}
 	util.Save(&readBuf, i, "PT")
