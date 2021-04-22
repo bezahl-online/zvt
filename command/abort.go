@@ -9,11 +9,11 @@ import (
 func (p *PT) Abort() error {
 	Logger.Info("ABORT")
 	if err := p.send(Command{CtrlField: instr.Map["Abort"]}); err != nil {
-		return err
+		return p.logSendError(err)
 	}
 	response, err := PaymentTerminal.ReadResponse()
 	if err != nil {
-		return err
+		return p.logResponseError(err)
 	}
 	return response.IsAck()
 }

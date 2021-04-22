@@ -42,7 +42,7 @@ func TestAuthorisationProcess(t *testing.T) {
 	c.Unmarshal(&testBytes)
 	want := AuthorisationResponse{
 		TransactionResponse: TransactionResponse{
-			Status:  0,
+			Status:  5,
 			Message: "Karte abgelehnt",
 		},
 		Transaction: &AuthResult{

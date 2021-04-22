@@ -29,11 +29,11 @@ func (p *PT) Authorisation(config *AuthConfig) error {
 	ctrlField := instr.Map["Authorisation"]
 	err := p.send(Command{ctrlField, config.marshal()})
 	if err != nil {
-		return err
+		return p.logSendError(err)
 	}
 	response, err := PaymentTerminal.ReadResponse()
 	if err != nil {
-		return err
+		return p.logResponseError(err)
 	}
 	return response.IsAck()
 }

@@ -41,7 +41,7 @@ func (p *PT) Completion(response CompletionResponse) error {
 			}
 			statusEnquiryResult, err := p.ReadResponse()
 			if err != nil {
-				return err
+				p.logResponseError(err)
 			}
 			if statusEnquiryResult != nil && statusEnquiryResult.Data.BMPOBJs != nil &&
 				len(statusEnquiryResult.Data.BMPOBJs) > 0 &&

@@ -118,6 +118,18 @@ func (p *PT) send(c Command) error {
 	return nil
 }
 
+func (p *PT) logSendError(err error) error {
+	p.Logger.Error("error while sending command to PT",
+		zap.Error(err))
+	return err
+}
+
+func (p *PT) logResponseError(err error) error {
+	p.Logger.Error("error while reading response from PT",
+		zap.Error(err))
+	return err
+}
+
 func logCommand(fromPT bool, c Command, b []byte) {
 	cf := c.CtrlField
 	blen := len(b)
@@ -179,7 +191,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 		}
 		return resp, err
 	}
-	i := instr.Find(&cf)
+	i := instr.Find(&cf) // FIXME: not tested from here to end
 	if i == nil {
 		err := fmt.Errorf("control field '% X' not found", cf)
 		// p.Logger.Error(err.Error())

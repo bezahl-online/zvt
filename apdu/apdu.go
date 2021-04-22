@@ -53,7 +53,7 @@ func (a *DataUnit) Unmarshal(data *[]byte) error {
 		switch info.Length.Kind {
 		case blen.NONE:
 			bmpLen = uint16(info.Length.Value)
-		case blen.BINARY:
+		case blen.BINARY: // FIXME: not tested
 			if d[0] == 0xFF {
 				if len(d) < 2 {
 					return fmt.Errorf("wrong BMP length")
@@ -63,14 +63,14 @@ func (a *DataUnit) Unmarshal(data *[]byte) error {
 			} else {
 				d = d[1:]
 			}
-		case blen.LL:
+		case blen.LL: // FIXME: not tested
 			if len(d) < 2 {
 				return fmt.Errorf("wrong BMP length")
 			}
 			bmpLen = uint16(10*(d[1]&0x0F)) +
 				uint16(d[2]&0x0F)
 			d = d[2:]
-		case blen.LLL:
+		case blen.LLL: // FIXME: not tested
 			if len(d) < 3 {
 				return fmt.Errorf("wrong BMP length")
 			}
@@ -81,7 +81,7 @@ func (a *DataUnit) Unmarshal(data *[]byte) error {
 		}
 		if len(d) < int(bmpLen) {
 			dataLength := 10
-			if len(d) < 10 {
+			if len(d) < 10 { // FIXME: not tested
 				dataLength = len(d)
 			}
 			return fmt.Errorf("wrong BMP length before '% X'", d[:dataLength])

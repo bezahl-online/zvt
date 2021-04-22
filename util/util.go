@@ -54,7 +54,7 @@ func ENVFilePath(envName string, fileName string) string {
 }
 
 func GetPureText(text string) string {
-	return strings.Map(func(r rune) rune {
+	return strings.Map(func(r rune) rune { // FIXME: not tested
 		if (unicode.IsLetter(r) ||
 			unicode.IsDigit(r) ||
 			unicode.IsPunct(r) ||

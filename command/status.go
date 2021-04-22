@@ -41,7 +41,7 @@ func (p *PT) Status() error {
 	}
 	response, err := PaymentTerminal.ReadResponse()
 	if err != nil {
-		return err
+		return p.logResponseError(err)
 	}
 	return response.IsAck()
 }
