@@ -39,10 +39,18 @@ func TestStatusProcess(t *testing.T) {
 	c := Command{}
 	c.Unmarshal(&testBytes)
 	want := StatusResponse{
-		TransactionResponse: TransactionResponse{},
+		TransactionResponse: TransactionResponse{
+			Status:  0,
+			Message: "card inserted",
+		},
 		Transaction: &StatusResult{
 			Error:  "",
 			Result: "success",
+			Data: &StatusResultData{
+				Date:   "",
+				Time:   "",
+				Status: 0xDC,
+			},
 		},
 	}
 	got := StatusResponse{}

@@ -7,12 +7,12 @@ import (
 	"github.com/bezahl-online/zvt/apdu/bmp"
 	"github.com/bezahl-online/zvt/instr"
 	"github.com/bezahl-online/zvt/messages"
-	"github.com/bezahl-online/zvt/util"
 )
 
 type StatusResultData struct {
-	Date string
-	Time string
+	Date   string
+	Time   string
+	Status byte
 }
 
 type StatusResult struct {
@@ -56,49 +56,15 @@ func (r *StatusResponse) Process(result *Command) error {
 	switch result.CtrlField.Class {
 	case 0x06:
 		switch result.CtrlField.Instr {
-		case 0x1E:
-			r.Status = result.Data.Data[0]
-			switch result.Data.Data[0] {
-			case 0x6C:
-				Logger.Info("Transaktion abgebrochen")
-				r.Transaction.Result = Result_Abort
-			default:
-				r.Message = messages.ErrorMessage[r.Status]
-				Logger.Error(fmt.Sprintf("0x1E: no path for result code %0X", result.Data.Data[0]))
-			}
-			return nil
 		case 0x0F:
-			Logger.Info("Transaktion erfolgreich")
+			Logger.Info("Statusabfrage erfolgreich")
 			r.Transaction.Result = Result_Success
-			if result.Data.Data != nil && len(result.Data.Data) > 0 {
-				r.Status = result.Data.Data[0]
-			}
+			r.Transaction.Data = &StatusResultData{}
+			r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
+			r.Message = messages.ErrorMessage[r.Transaction.Data.Status]
 			return nil
 		default:
 			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
-				result.CtrlField.Instr))
-		}
-	case 0x04:
-		switch result.CtrlField.Instr {
-		case 0x0F:
-			r.Transaction.Data = &StatusResultData{}
-			r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
-			r.Transaction.Result = Result_Pending
-			return nil
-		case 0xFF:
-			if result.Data.Data != nil && len(result.Data.Data) > 0 {
-				r.Status = result.Data.Data[0]
-			}
-			for _, obj := range result.Data.TLVContainer.Objects {
-				if obj.TAG[0] == byte(0x24) {
-					r.Message = util.GetPureText(string(obj.Data))
-				}
-			}
-			if len(r.Message) == 0 {
-				r.Message = messages.IntermediateStatus[r.Status]
-			}
-		default:
-			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",
 				result.CtrlField.Instr))
 		}
 	default:
@@ -108,26 +74,6 @@ func (r *StatusResponse) Process(result *Command) error {
 	return nil
 }
 
-// func (r *EoDResultData) FromTLV(objs []tlv.DataObject) {
-// 	for _, obj := range objs {
-// 		switch obj.TAG[0] {
-// 		case 0x1F:
-// 			switch obj.TAG[1] {
-// 			case 7: // receipt-type
-// 				r.PrintOut.Type = obj.Data[0]
-// 			default:
-// 				Logger.Error(fmt.Sprintf("TLV TAG '1F %0X' not handled",
-// 					obj.TAG[1]))
-// 			}
-// 		case 0x25:
-// 			r.PrintOut.Text = util.GetPureText(string(obj.Data))
-// 		default:
-// 			Logger.Error(fmt.Sprintf("TLV TAG '% 0X' not handled",
-// 				obj.TAG))
-// 		}
-// 	}
-
-// }
 func (r *StatusResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 	for _, obj := range objs {
 		switch obj.ID {
@@ -136,13 +82,7 @@ func (r *StatusResultData) FromOBJs(objs []bmp.OBJ) (result string, error string
 		case 0x0D:
 			r.Date = fmt.Sprintf("%04X", obj.Data)
 		case 0x27:
-			// Error and Result in AuthResult
-			switch obj.Data[0] {
-			case 0x6C:
-				result = Result_Abort
-			default:
-				Logger.Error(fmt.Sprintf("0x6C: no path for status %0X", obj.Data[0]))
-			}
+			r.Status = obj.Data[0]
 		default:
 			Logger.Error(fmt.Sprintf("no path for BMP-ID %0X", obj.ID))
 		}
