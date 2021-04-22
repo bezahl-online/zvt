@@ -16,8 +16,8 @@ func TestAuthorisationCompletion(t *testing.T) {
 		err := PaymentTerminal.Completion(&got)
 		if err != nil {
 			log.Println(err.Error())
-			// assert.NoError(t, err)
-			// break
+			assert.NoError(t, err)
+			break
 		}
 		if got.Transaction != nil && got.Transaction.Result != Result_Pending {
 			if got.Transaction.Result == Result_Success {

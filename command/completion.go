@@ -34,19 +34,22 @@ func (p *PT) Completion(response CompletionResponse) error {
 	var result *Command
 	if result, err = p.ReadResponseWithTimeout(30 * time.Second); err != nil {
 		if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
-			p.Status()
-			if result, err = p.ReadResponse(); err != nil {
+			if err := p.Status(); err != nil {
 				return err
 			}
-			if result != nil && result.Data.BMPOBJs != nil &&
-				len(result.Data.BMPOBJs) > 0 &&
-				result.Data.BMPOBJs[0].ID == 0x27 {
-				errCode := result.Data.BMPOBJs[0].Data[0]
+			statusEnquiryResult, err := p.ReadResponse()
+			if err != nil {
+				return err
+			}
+			if statusEnquiryResult != nil && statusEnquiryResult.Data.BMPOBJs != nil &&
+				len(statusEnquiryResult.Data.BMPOBJs) > 0 &&
+				statusEnquiryResult.Data.BMPOBJs[0].ID == 0x27 {
+				errCode := statusEnquiryResult.Data.BMPOBJs[0].Data[0]
 				message, ok := messages.ErrorMessage[errCode]
 				if ok {
 					Logger.Info(fmt.Sprintf("PT: '%s'", message))
 				} else {
-					Logger.Error(fmt.Sprintf("06 0F: unmapped error message code %0X", result.Data.Data[0]))
+					Logger.Error(fmt.Sprintf("06 0F: unmapped error message code %0X", statusEnquiryResult.Data.Data[0]))
 				}
 			}
 			p.SendACK()
