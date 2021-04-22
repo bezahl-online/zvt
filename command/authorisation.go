@@ -32,7 +32,7 @@ func (p *PT) Authorisation(config *AuthConfig) error {
 		return err
 	}
 	response, err := PaymentTerminal.ReadResponse()
-	if err == nil {
+	if err != nil {
 		return err
 	}
 	return response.IsAck()
@@ -143,13 +143,13 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 		case 0xFF:
 			if result.Data.Data != nil && len(result.Data.Data) > 0 {
 				r.Status = result.Data.Data[0]
-			}
-			var ok bool
-			r.Message, ok = messages.IntermediateStatus[result.Data.Data[0]]
-			if ok {
-				Logger.Info(fmt.Sprintf("PT: '%s'", r.Message))
-			} else {
-				Logger.Error(fmt.Sprintf("04 FF: unmapped intermediate status code %0X", result.Data.Data[0]))
+				var ok bool
+				r.Message, ok = messages.IntermediateStatus[result.Data.Data[0]]
+				if ok {
+					Logger.Info(fmt.Sprintf("PT: '%s'", r.Message))
+				} else {
+					Logger.Error(fmt.Sprintf("04 FF: unmapped intermediate status code %0X", result.Data.Data[0]))
+				}
 			}
 			r.Transaction.Data.FromTLV(r, result.Data.TLVContainer.Objects)
 		default:
@@ -210,6 +210,7 @@ func (r *AuthResultData) FromOBJs(ar *AuthorisationResponse, objs []bmp.OBJ) (er
 			case 0x6C:
 				ar.Transaction.Result = Result_Abort
 			default:
+				ar.Status = obj.Data[0]
 				var ok bool
 				ar.Message, ok = messages.ErrorMessage[obj.Data[0]]
 				if !ok {

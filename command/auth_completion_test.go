@@ -11,6 +11,9 @@ import (
 func TestAuthorisationCompletion(t *testing.T) {
 	skipShort(t)
 	TestAuthorisation(t)
+	if t.Failed() {
+		return
+	}
 	for {
 		got := AuthorisationResponse{}
 		err := PaymentTerminal.Completion(&got)

@@ -5,6 +5,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/bezahl-online/zvt/apdu"
+	"github.com/bezahl-online/zvt/instr"
 	"github.com/bezahl-online/zvt/messages"
 )
 
@@ -32,7 +34,7 @@ const (
 func (p *PT) Completion(response CompletionResponse) error {
 	var err error
 	var result *Command
-	if result, err = p.ReadResponseWithTimeout(3 * time.Second); err != nil {
+	if result, err = p.ReadResponseWithTimeout(30 * time.Second); err != nil {
 		if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
 			if err := p.Status(); err != nil {
 				return err
@@ -52,8 +54,14 @@ func (p *PT) Completion(response CompletionResponse) error {
 					Logger.Error(fmt.Sprintf("06 0F: unmapped error message code %0X", statusEnquiryResult.Data.Data[0]))
 				}
 			}
-			p.SendACK()
-			return nil
+			// p.SendACK()
+			result = &Command{
+				CtrlField: instr.Map["StatusInformation"],
+				Data: apdu.DataUnit{
+					Data:    []byte{},
+					BMPOBJs: statusEnquiryResult.Data.BMPOBJs,
+				},
+			}
 		} else {
 			return err
 		}
