@@ -32,7 +32,7 @@ const (
 func (p *PT) Completion(response CompletionResponse) error {
 	var err error
 	var result *Command
-	if result, err = p.ReadResponseWithTimeout(30 * time.Second); err != nil {
+	if result, err = p.ReadResponseWithTimeout(3 * time.Second); err != nil {
 		if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
 			if err := p.Status(); err != nil {
 				return err
