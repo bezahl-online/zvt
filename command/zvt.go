@@ -34,7 +34,7 @@ type PT struct {
 }
 
 // stanard timeout for read from and write to PT
-const defaultTimeout = 5 * time.Minute
+const defaultTimeout = 5 * time.Second
 
 func init() {
 	PaymentTerminal.Logger = getLogger()
@@ -76,12 +76,14 @@ func (p *PT) Open() error {
 func (p *PT) reconnectIfLost() error {
 	if p.conn == nil {
 		go p.Connect()
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		if p.conn != nil {
 			// seems to be connected again
+			p.SendACK()
 			return nil
 		}
 		err := fmt.Errorf("lost connection to PT")
+		time.Sleep(defaultTimeout)
 		return err
 	}
 	return nil
@@ -102,7 +104,10 @@ func (p *PT) send(c Command) error {
 	p.conn.SetDeadline(time.Now().Add(defaultTimeout))
 	_, err = p.conn.Write(b)
 	if err != nil {
-		p.Logger.Error(err.Error())
+		if p.conn != nil {
+			p.conn.Close()
+			p.conn = nil // we probably lost connection - lets reconnect
+		}
 		return err
 	}
 	data, err := c.Data.Marshal()
@@ -168,7 +173,10 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	n, err := p.conn.Read(cf)
 	_ = n
 	if err != nil {
-		// p.Logger.Error(err.Error())
+		if p.conn != nil {
+			p.conn.Close()
+			p.conn = nil // we probably lost connection - lets reconnect
+		}
 		return resp, err
 	}
 	i := instr.Find(&cf)

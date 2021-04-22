@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"net"
-	"time"
 
 	"github.com/bezahl-online/zvt/messages"
 )
@@ -32,10 +31,10 @@ const (
 func (p *PT) Completion(response CompletionResponse) error {
 	var err error
 	var result *Command
-	if result, err = p.ReadResponseWithTimeout(30 * time.Second); err != nil {
-		if err.(net.Error).Timeout() {
+	if result, err = p.ReadResponse(); err != nil {
+		if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
 			p.Status()
-			if result, err = p.ReadResponseWithTimeout(5 * time.Second); err != nil {
+			if result, err = p.ReadResponse(); err != nil {
 				return err
 			}
 			if result != nil && result.Data.BMPOBJs != nil &&
