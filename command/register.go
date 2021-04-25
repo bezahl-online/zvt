@@ -190,6 +190,8 @@ func (r *RegisterResultData) FromOBJs(objs []bmp.OBJ) (result string, error stri
 			switch obj.Data[0] {
 			case 0x6C:
 				result = Result_Abort
+			case 0xF0:
+				result = Result_Need_EoD
 			default:
 				Logger.Error(fmt.Sprintf("0x6C: no path for status %0X", obj.Data[0]))
 			}

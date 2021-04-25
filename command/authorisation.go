@@ -86,10 +86,11 @@ type AuthResultData struct {
 }
 
 const (
-	Result_Pending = "pending"
-	Result_Success = "success"
-	Result_Abort   = "abort"
-	Result_Timeout = "timeout"
+	Result_Pending  = "pending"
+	Result_Success  = "success"
+	Result_Abort    = "abort"
+	Result_Timeout  = "timeout"
+	Result_Need_EoD = "need_end_of_day"
 )
 
 type AuthResult struct {
@@ -209,6 +210,8 @@ func (r *AuthResultData) FromOBJs(ar *AuthorisationResponse, objs []bmp.OBJ) (er
 			switch obj.Data[0] {
 			case 0x6C:
 				ar.Transaction.Result = Result_Abort
+			case 0xF0:
+				ar.Transaction.Result = Result_Need_EoD
 			default:
 				ar.Status = obj.Data[0]
 				var ok bool

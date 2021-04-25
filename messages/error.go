@@ -65,6 +65,7 @@ func init() {
 	ErrorMessage[0x66] = "processing-error"
 	ErrorMessage[0x67] = "function not permitted for ec-and Maestro-cards"
 	ErrorMessage[0x68] = "function not permitted for credit-and tank-cards"
+
 	ErrorMessage[0x6A] = "turnover-file full"
 	ErrorMessage[0x6B] = "function deactivated (PT not registered)"
 	ErrorMessage[0x6C] = "abort via timeoutor abort-key"
