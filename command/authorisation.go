@@ -86,11 +86,12 @@ type AuthResultData struct {
 }
 
 const (
-	Result_Pending  = "pending"
-	Result_Success  = "success"
-	Result_Abort    = "abort"
-	Result_Timeout  = "timeout"
-	Result_Need_EoD = "need_end_of_day"
+	Result_Pending        = "pending"
+	Result_Success        = "success"
+	Result_Abort          = "abort"
+	Result_Timeout        = "timeout"
+	Result_Need_EoD       = "need_end_of_day"
+	Result_SoftwareUpdate = "software_update"
 )
 
 type AuthResult struct {

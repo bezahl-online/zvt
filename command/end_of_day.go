@@ -116,6 +116,8 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 		case 0x0F:
 			Logger.Info("Transaktion erfolgreich")
 			r.Transaction.Result = Result_Success
+			// result could be changed next
+			r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
 			return nil
 		case 0xD3:
 			r.Transaction.Data = &EoDResultData{
@@ -193,6 +195,8 @@ func (r *EoDResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 			switch obj.Data[0] {
 			case 0x6C:
 				result = Result_Abort
+			case 0xE0:
+				result = Result_SoftwareUpdate
 			}
 		case 0x60:
 			r.Totals = &SingleTotals{}
