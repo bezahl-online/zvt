@@ -194,7 +194,7 @@ func (r *EoDResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 			// Error and Result in AuthResult
 			switch obj.Data[0] {
 			case 0x6C:
-				result = Result_Abort
+				// result = Result_Abort // just don't
 			case 0xE0:
 				result = Result_SoftwareUpdate
 			}

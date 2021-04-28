@@ -189,7 +189,7 @@ func (r *RegisterResultData) FromOBJs(objs []bmp.OBJ) (result string, error stri
 			// Error and Result in AuthResult
 			switch obj.Data[0] {
 			case 0x6C:
-				result = Result_Abort
+				// result = Result_Abort // just don't
 			case 0xF0:
 				result = Result_Need_EoD
 			default:

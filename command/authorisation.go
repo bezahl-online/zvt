@@ -213,7 +213,7 @@ func (r *AuthResultData) FromOBJs(ar *AuthorisationResponse, objs []bmp.OBJ) (er
 			// Error and Result in AuthResult
 			switch obj.Data[0] {
 			case 0x6C:
-				ar.Transaction.Result = Result_Abort
+				// ar.Transaction.Result = Result_Abort // just don't!
 			case 0xF0:
 				ar.Transaction.Result = Result_Need_EoD
 			default:
