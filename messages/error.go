@@ -68,7 +68,7 @@ func init() {
 
 	ErrorMessage[0x6A] = "turnover-file full"
 	ErrorMessage[0x6B] = "function deactivated (PT not registered)"
-	ErrorMessage[0x6C] = "abort via timeoutor abort-key"
+	ErrorMessage[0x6C] = "abort via timeout or abort-key"
 
 	ErrorMessage[0x6E] = "card in blocked-list"
 	ErrorMessage[0x6F] = "wrong currency"

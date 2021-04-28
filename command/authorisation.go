@@ -112,6 +112,9 @@ func (r *AuthorisationResponse) Process(result *Command) error {
 			Result: Result_Pending,
 		}
 	}
+	if r.Transaction.Result == "" {
+		r.Transaction.Result = Result_Pending
+	}
 	switch result.CtrlField.Class {
 	case 0x06:
 		switch result.CtrlField.Instr {
