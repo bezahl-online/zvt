@@ -153,7 +153,7 @@ func TestAuthProcess040f(t *testing.T) {
 	want := AuthorisationResponse{
 		Transaction: &AuthResult{
 			Error:  "",
-			Result: "abort",
+			Result: "pending",
 			Data:   &AuthResultData{},
 		},
 	}
