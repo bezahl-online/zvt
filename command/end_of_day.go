@@ -111,6 +111,9 @@ func (r *EndOfDayResponse) Process(result *Command) error {
 			case 0x6C:
 				Logger.Info("Transaktion abgebrochen")
 				r.Transaction.Result = Result_Abort
+			case 0x77:
+				Logger.Info("not possible")
+				r.Transaction.Result = Result_Abort
 			}
 			return nil
 		case 0x0F:
