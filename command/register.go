@@ -43,6 +43,7 @@ func (p *PT) Register() error {
 	config := configure()
 	p.Logger.Info("Register (06 00)")
 	i := instr.Map["Registration"]
+	p.conn.Close()
 	return p.send(Command{
 		CtrlField: i,
 		Data:      config.CompileConfig(),
