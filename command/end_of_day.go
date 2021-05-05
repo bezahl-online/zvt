@@ -81,7 +81,7 @@ type EndOfDayResponse struct {
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) EndOfDay() error {
 	Logger.Info("END OF DAY")
-	p.conn.Close()
+	p.flushPipe()
 	if err := p.send(Command{
 		CtrlField: instr.Map["EndOfDay"],
 		Data: apdu.DataUnit{

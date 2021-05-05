@@ -13,7 +13,7 @@ func (p *PT) Abort() error {
 	}
 	response, err := PaymentTerminal.ReadResponse()
 	if err != nil {
-		p.conn.Close()
+		p.flushPipe()
 		p.conn = nil
 		p.reconnectIfLost()
 		return p.logResponseError(err)

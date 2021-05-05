@@ -27,7 +27,7 @@ type AuthConfig struct {
 func (p *PT) Authorisation(config *AuthConfig) error {
 	Logger.Info(fmt.Sprintf("ECR: AUTHORISATION amount: %5.2f", float64(config.Amount)/100))
 	ctrlField := instr.Map["Authorisation"]
-	p.conn.Close()
+	p.flushPipe()
 	err := p.send(Command{ctrlField, config.marshal()})
 	if err != nil {
 		return p.logSendError(err)

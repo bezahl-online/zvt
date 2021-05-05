@@ -125,6 +125,19 @@ func (p *PT) send(c Command) error {
 	return nil
 }
 
+func (p *PT) flushPipe() {
+	if p.conn != nil {
+		var b []byte = make([]byte, 1024)
+		n, err := p.conn.Read(b)
+		if err != nil {
+			p.conn = nil
+		}
+		if n > 0 {
+			Logger.Debug(fmt.Sprint("flushed: % 2X", b[:n]))
+		}
+	}
+}
+
 func (p *PT) logSendError(err error) error {
 	p.Logger.Error("error while sending command to PT",
 		zap.Error(err))
