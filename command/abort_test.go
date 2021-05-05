@@ -7,7 +7,9 @@ import (
 )
 
 func TestAbort(t *testing.T) {
-	skipShort(t)
+	if skipShort(t) {
+		return
+	}
 	err := PaymentTerminal.Abort()
 	assert.NoError(t, err)
 }

@@ -14,7 +14,9 @@ import (
 )
 
 func TestAuthorisation(t *testing.T) {
-	skipShort(t)
+	if skipShort(t) {
+		return
+	}
 	t.Cleanup(func() {
 		time.Sleep(time.Second)
 		// PaymentTerminal.Abort()
@@ -26,7 +28,9 @@ func TestAuthorisation(t *testing.T) {
 	assert.NoError(t, err)
 }
 func TestAuthorisationCompletion(t *testing.T) {
-	skipShort(t)
+	if skipShort(t) {
+		return
+	}
 	TestAuthorisation(t)
 	if t.Failed() {
 		return
@@ -86,6 +90,51 @@ func TestAuthorisationProcess(t *testing.T) {
 					SeqNr: 0,
 				},
 			},
+		},
+	}
+	got := AuthorisationResponse{}
+	got.Process(&c)
+	assert.EqualValues(t, want, got)
+}
+
+func TestAuthorisationProcess1(t *testing.T) {
+	testBytes, err := util.Load("testdata/1617177992186PT.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	c := Command{}
+	c.Unmarshal(&testBytes)
+	want := AuthorisationResponse{
+		TransactionResponse: TransactionResponse{
+			Status:  0,
+			Message: "",
+		},
+		Transaction: &AuthResult{
+			Error:  "",
+			Result: "pending",
+			Data:   &AuthResultData{},
+		},
+	}
+	got := AuthorisationResponse{}
+	got.Process(&c)
+	assert.EqualValues(t, want, got)
+}
+
+func TestAuthorisationProcess2(t *testing.T) {
+	testBytes, err := util.Load("testdata/1620217579741PT.hex")
+	if !assert.NoError(t, err) {
+		return
+	}
+	c := Command{}
+	c.Unmarshal(&testBytes)
+	want := AuthorisationResponse{
+		TransactionResponse: TransactionResponse{
+			Status:  0,
+			Message: "abort via timeout or abort-key",
+		},
+		Transaction: &AuthResult{
+			Error:  "",
+			Result: "abort",
 		},
 	}
 	got := AuthorisationResponse{}

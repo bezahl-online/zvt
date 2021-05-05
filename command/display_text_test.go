@@ -10,7 +10,9 @@ import (
 )
 
 func TestDisplayText(t *testing.T) {
-	skipShort(t)
+	if skipShort(t) {
+		return
+	}
 	i := instr.Map["ACK"]
 	want := Command{
 		CtrlField: i,

@@ -10,7 +10,6 @@ import (
 	"github.com/bezahl-online/zvt/config"
 	"github.com/bezahl-online/zvt/instr"
 	"github.com/bezahl-online/zvt/messages"
-	"github.com/bezahl-online/zvt/util"
 )
 
 // Config is the config struct
@@ -128,29 +127,8 @@ func (r *RegisterResponse) Process(result *Command) error {
 			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
 				result.CtrlField.Instr))
 		}
-	case 0x04:
-		switch result.CtrlField.Instr {
-		case 0x0F:
-			r.Transaction.Data = &RegisterResultData{}
-			r.Transaction.Data.FromOBJs(result.Data.BMPOBJs)
-			r.Transaction.Result = Result_Pending
-			return nil
-		case 0xFF:
-			if result.Data.Data != nil && len(result.Data.Data) > 0 {
-				r.Status = result.Data.Data[0]
-			}
-			for _, obj := range result.Data.TLVContainer.Objects {
-				if obj.TAG[0] == byte(0x24) {
-					r.Message = util.GetPureText(string(obj.Data))
-				}
-			}
-			if len(r.Message) == 0 {
-				r.Message = messages.IntermediateStatus[r.Status]
-			}
-		default:
-			Logger.Error(fmt.Sprintf("PT command '04 %02X' not handled",
-				result.CtrlField.Instr))
-		}
+	case 0x80:
+		// got ACK from PT
 	default:
 		Logger.Error(fmt.Sprintf("PT command '%02X %02X' not handled",
 			result.CtrlField.Class, result.CtrlField.Instr))

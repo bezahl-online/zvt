@@ -13,10 +13,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func skipShort(t *testing.T) {
+var dontstartTest = false
+
+func skipShort(t *testing.T) bool {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
+	if dontstartTest {
+		fmt.Println("skipping test")
+		return true
+	}
+	return false
 }
 
 // PaymentTerminal represents the driver

@@ -13,7 +13,9 @@ import (
 )
 
 func TestEndOfDay(t *testing.T) {
-	skipShort(t)
+	if skipShort(t) {
+		return
+	}
 	// t.Cleanup(func() {
 	// 	PaymentTerminal.Abort()
 	// })
@@ -23,7 +25,9 @@ func TestEndOfDay(t *testing.T) {
 }
 
 func TestEndOfDayCompletion(t *testing.T) {
-	skipShort(t)
+	if skipShort(t) {
+		return
+	}
 	TestEndOfDay(t)
 	for {
 		got := EndOfDayResponse{}

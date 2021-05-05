@@ -67,6 +67,8 @@ func (r *StatusResponse) Process(result *Command) error {
 			Logger.Error(fmt.Sprintf("PT command '06 %02X' not handled",
 				result.CtrlField.Instr))
 		}
+	case 0x80:
+		// got ACK from PT
 	default:
 		Logger.Error(fmt.Sprintf("PT command '%02X %02X' not handled",
 			result.CtrlField.Class, result.CtrlField.Instr))
