@@ -13,7 +13,9 @@ func TestStatus(t *testing.T) {
 		return
 	}
 	err := PaymentTerminal.Status()
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		log.Fatal(err)
+	}
 }
 
 func TestStatusCompletion(t *testing.T) {

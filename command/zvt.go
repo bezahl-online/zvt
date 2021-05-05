@@ -215,7 +215,7 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	}
 	i.Length.Unmarshal(lenBuf)
 	if i.Length.Value == 0 {
-		message := fmt.Sprintf("PT => ECR [% 02X]", cf[:2])
+		message := fmt.Sprintf("PT => ECR [% 02X] (  0)", cf[:2])
 		p.Logger.Debug(message)
 		log.Print(message)
 		return &Command{
