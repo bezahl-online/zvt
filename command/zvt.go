@@ -128,6 +128,8 @@ func (p *PT) send(c Command) error {
 func (p *PT) flushPipe() {
 	if p.conn != nil {
 		var b []byte = make([]byte, 1024)
+		dl := time.Now().Add(time.Second)
+		p.conn.SetReadDeadline(dl)
 		n, err := p.conn.Read(b)
 		if err != nil {
 			p.conn = nil
