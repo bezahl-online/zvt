@@ -42,7 +42,7 @@ func (p *PT) Completion(response CompletionResponse) error {
 			err := p.Status()
 			p.Lock() // because of defer
 			if err != nil {
-				// return err // FIXME well maybe next time?
+				return err
 			}
 			statusEnquiryResult, err := p.ReadResponse()
 			if err != nil {

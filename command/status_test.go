@@ -22,8 +22,8 @@ func TestStatusCompletion(t *testing.T) {
 	if skipShort(t) {
 		return
 	}
+	TestStatus(t)
 	for {
-		TestStatus(t)
 		got := StatusResponse{}
 		err := PaymentTerminal.Completion(&got)
 		if err != nil {

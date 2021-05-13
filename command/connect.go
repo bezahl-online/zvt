@@ -16,10 +16,7 @@ func (p *PT) Connect() {
 		return
 	}
 	connecting = true
-	// var mutex *sync.RWMutex = (*p).lock
-	// if mutex == nil {
-	// 	mutex = &sync.RWMutex{}
-	// }
+
 	var pause delay = delay{
 		dur: 1 * time.Second,
 	}
