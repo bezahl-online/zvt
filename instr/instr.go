@@ -111,6 +111,12 @@ func init() {
 		Length:        blen.Length{Kind: blen.BINARY, Size: 0, Value: 0},
 		RawDataLength: 0,
 	}
+	Map["NAK"] = CtrlField{
+		Class:         byte(0x84),
+		Instr:         byte(0x9C),
+		Length:        blen.Length{Kind: blen.BINARY, Size: 0, Value: 0},
+		RawDataLength: 0,
+	}
 
 	// mostly from PT
 	Map["Intermediate"] = CtrlField{
