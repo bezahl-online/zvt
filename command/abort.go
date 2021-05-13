@@ -8,12 +8,5 @@ import (
 // ECR can instruct the PT to abort execution of a command
 func (p *PT) Abort() error {
 	Logger.Info("ABORT")
-	if err := p.send(Command{CtrlField: instr.Map["Abort"]}); err != nil {
-		return p.logSendError(err)
-	}
-	response, err := PaymentTerminal.ReadResponse()
-	if err != nil {
-		return p.logResponseError(err)
-	}
-	return response.IsAck()
+	return p.SendCommand(Command{CtrlField: instr.Map["Abort"]})
 }

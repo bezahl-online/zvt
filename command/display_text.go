@@ -8,9 +8,8 @@ import (
 
 // DisplayText implements instr 06 E0
 func (p *PT) DisplayText(text []string) error {
-	i := instr.Map["DisplayText"]
-	return p.send(Command{
-		CtrlField: i,
+	return p.SendCommand(Command{
+		CtrlField: instr.Map["DisplayText"],
 		Data:      compileText(text),
 	})
 }

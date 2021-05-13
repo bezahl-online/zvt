@@ -81,19 +81,12 @@ type EndOfDayResponse struct {
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) EndOfDay() error {
 	Logger.Info("END OF DAY")
-	if err := p.send(Command{
+	return p.SendCommand(Command{
 		CtrlField: instr.Map["EndOfDay"],
 		Data: apdu.DataUnit{
 			Data: []byte(fixedPassword[:]),
 		},
-	}); err != nil {
-		return err
-	}
-	response, err := PaymentTerminal.ReadResponse()
-	if err == nil {
-		return err
-	}
-	return response.IsAck()
+	})
 }
 
 func (r *EndOfDayResponse) Process(result *Command) error {

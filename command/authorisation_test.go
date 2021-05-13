@@ -31,29 +31,29 @@ func TestAuthorisationCompletion(t *testing.T) {
 	if skipShort(t) {
 		return
 	}
-	for i := 3; i > 0; i-- {
-		TestAuthorisation(t)
-		if t.Failed() {
-			return
-		}
-		for {
-			got := AuthorisationResponse{}
-			err := PaymentTerminal.Completion(&got)
-			if err != nil {
-				log.Println(err.Error())
-				assert.NoError(t, err)
-				break
-			}
-			if got.Transaction != nil && got.Transaction.Result != Result_Pending {
-				if got.Transaction.Result == Result_Success {
-					// TODO assert result values
-					_ = 0
-				}
-				break
-			}
-		}
-		// assert.EqualValues(t, want, got)
+	// for i := 3; i > 0; i-- {
+	TestAuthorisation(t)
+	if t.Failed() {
+		return
 	}
+	for {
+		got := AuthorisationResponse{}
+		err := PaymentTerminal.Completion(&got)
+		if err != nil {
+			log.Println(err.Error())
+			assert.NoError(t, err)
+			break
+		}
+		if got.Transaction != nil && got.Transaction.Result != Result_Pending {
+			if got.Transaction.Result == Result_Success {
+				// TODO assert result values
+				_ = 0
+			}
+			break
+		}
+	}
+	// assert.EqualValues(t, want, got)
+	// }
 }
 
 func TestAuthorisationProcess(t *testing.T) {

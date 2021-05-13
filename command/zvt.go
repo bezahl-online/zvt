@@ -96,6 +96,17 @@ func (p *PT) reconnectIfLost() error {
 	return nil
 }
 
+func (p *PT) SendCommand(command Command) error {
+	if err := p.send(command); err != nil {
+		return p.logSendError(err)
+	}
+	response, err := PaymentTerminal.ReadResponse()
+	if err != nil {
+		return p.logResponseError(err)
+	}
+	return response.IsAck()
+}
+
 func (p *PT) send(c Command) error {
 	var err error
 	if err = p.reconnectIfLost(); err != nil {

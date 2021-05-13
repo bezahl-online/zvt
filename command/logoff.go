@@ -7,8 +7,7 @@ import "github.com/bezahl-online/zvt/instr"
 // the PT resets the Registrationconfig-byte to ‘86’
 // and the PT may not send any more TLV-containers
 func (p *PT) LogOff() error {
-	i := instr.Map["LogOff"]
-	return p.send(Command{
-		CtrlField: i,
+	return p.SendCommand(Command{
+		CtrlField: instr.Map["LogOff"],
 	})
 }

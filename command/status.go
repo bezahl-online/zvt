@@ -32,18 +32,11 @@ func (p *PT) Status() error {
 	Logger.Info("STATUS")
 	d := []byte(fixedPassword[:])
 	d = append(d, 0x03, 0x07) // send TLV
-	if err := p.send(Command{CtrlField: instr.Map["Status"],
+	return p.SendCommand(Command{CtrlField: instr.Map["Status"],
 		Data: apdu.DataUnit{
 			Data: d,
 		},
-	}); err != nil {
-		return err
-	}
-	response, err := PaymentTerminal.ReadResponse()
-	if err != nil {
-		return p.logResponseError(err)
-	}
-	return response.IsAck()
+	})
 }
 
 func (r *StatusResponse) Process(result *Command) error {

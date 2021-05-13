@@ -42,18 +42,10 @@ type RegisterResponse struct {
 func (p *PT) Register() error {
 	config := configure()
 	p.Logger.Info("Register (06 00)")
-	i := instr.Map["Registration"]
-	if err := p.send(Command{
-		CtrlField: i,
+	return p.SendCommand(Command{
+		CtrlField: instr.Map["Registration"],
 		Data:      config.CompileConfig(),
-	}); err != nil {
-		return p.logSendError(err)
-	}
-	response, err := PaymentTerminal.ReadResponse()
-	if err != nil {
-		return p.logResponseError(err)
-	}
-	return response.IsAck()
+	})
 }
 
 func configure() Config {
@@ -143,26 +135,6 @@ func (r *RegisterResponse) Process(result *Command) error {
 	return nil
 }
 
-// func (r *EoDResultData) FromTLV(objs []tlv.DataObject) {
-// 	for _, obj := range objs {
-// 		switch obj.TAG[0] {
-// 		case 0x1F:
-// 			switch obj.TAG[1] {
-// 			case 7: // receipt-type
-// 				r.PrintOut.Type = obj.Data[0]
-// 			default:
-// 				Logger.Error(fmt.Sprintf("TLV TAG '1F %0X' not handled",
-// 					obj.TAG[1]))
-// 			}
-// 		case 0x25:
-// 			r.PrintOut.Text = util.GetPureText(string(obj.Data))
-// 		default:
-// 			Logger.Error(fmt.Sprintf("TLV TAG '% 0X' not handled",
-// 				obj.TAG))
-// 		}
-// 	}
-
-// }
 func (r *RegisterResultData) FromOBJs(objs []bmp.OBJ) (result string, error string) {
 	for _, obj := range objs {
 		switch obj.ID {

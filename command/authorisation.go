@@ -26,16 +26,7 @@ type AuthConfig struct {
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) Authorisation(config *AuthConfig) error {
 	Logger.Info(fmt.Sprintf("ECR: AUTHORISATION amount: %5.2f", float64(config.Amount)/100))
-	ctrlField := instr.Map["Authorisation"]
-	err := p.send(Command{ctrlField, config.marshal()})
-	if err != nil {
-		return p.logSendError(err)
-	}
-	response, err := PaymentTerminal.ReadResponse()
-	if err != nil {
-		return p.logResponseError(err)
-	}
-	return response.IsAck()
+	return p.SendCommand(Command{instr.Map["Authorisation"], config.marshal()})
 }
 
 func (a *AuthConfig) marshal() apdu.DataUnit {
