@@ -72,20 +72,42 @@ func (p *PT) Open() error {
 	return nil
 }
 
+// Close closes the connection to the PT
+func (p *PT) ReConnect() error {
+	defer p.Unlock()
+	p.Lock()
+	if p.conn != nil {
+		err := p.conn.Close()
+		if err != nil {
+			return err
+		}
+		p.conn = nil
+	}
+	p.tryConnect()
+	return nil
+}
+
 func (p *PT) reconnectIfLost() error {
 	if p.conn == nil {
-		go p.Connect()
-		time.Sleep(100 * time.Millisecond)
-		if p.conn != nil {
-			// seems to be connected again
-			//p.SendACK()
-			return nil
+		// seems to be connected again
+		//p.SendACK()
+		err := p.tryConnect()
+		if err != nil {
+			err = fmt.Errorf("lost connection to PT")
+			time.Sleep(defaultTimeout)
 		}
-		err := fmt.Errorf("lost connection to PT")
-		time.Sleep(defaultTimeout)
 		return err
 	}
 	return nil
+}
+
+func (p *PT) tryConnect() error {
+	go p.Connect()
+	time.Sleep(100 * time.Millisecond)
+	if p.conn != nil {
+		return nil
+	}
+	return fmt.Errorf("not connected yet")
 }
 
 // SendACK send ACK and return the response or error
