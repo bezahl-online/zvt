@@ -43,10 +43,17 @@ func (p *PT) Register() error {
 	config := configure()
 	p.Logger.Info("Register (06 00)")
 	i := instr.Map["Registration"]
-	return p.send(Command{
+	if err := p.send(Command{
 		CtrlField: i,
 		Data:      config.CompileConfig(),
-	})
+	}); err != nil {
+		return p.logSendError(err)
+	}
+	response, err := PaymentTerminal.ReadResponse()
+	if err != nil {
+		return p.logResponseError(err)
+	}
+	return response.IsAck()
 }
 
 func configure() Config {
