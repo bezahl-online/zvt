@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -130,11 +131,16 @@ func (p *PT) send(c Command) error {
 	p.conn.SetDeadline(time.Now().Add(defaultTimeout))
 	_, err = p.conn.Write(b)
 	if err != nil {
-		if p.conn != nil {
-			p.conn.Close()
-			p.conn = nil // we probably lost connection - lets reconnect
+		if errors.Is(err, net.ErrClosed) {
+			p.conn = nil // we lost connection - lets reconnect
+			if err = p.reconnectIfLost(); err != nil {
+				p.Logger.Error(err.Error())
+				_, err = p.conn.Write(b)
+				if err != nil {
+					return err
+				}
+			}
 		}
-		return err
 	}
 	data, err := c.Data.Marshal()
 	if err != nil {
@@ -211,11 +217,16 @@ func (p *PT) ReadResponseWithTimeout(timeout time.Duration) (*Command, error) {
 	n, err := p.conn.Read(cf)
 	_ = n
 	if err != nil {
-		if p.conn != nil {
-			p.conn.Close()
-			p.conn = nil // we probably lost connection - lets reconnect
+		if errors.Is(err, net.ErrClosed) {
+			p.conn = nil // we lost connection - lets reconnect
+			if err = p.reconnectIfLost(); err != nil {
+				p.Logger.Error(err.Error())
+				n, err = p.conn.Read(cf)
+				if err != nil {
+					return nil, err
+				}
+			}
 		}
-		return resp, err
 	}
 	i := instr.Find(&cf) // FIXME: not tested from here to end
 	if i == nil {
