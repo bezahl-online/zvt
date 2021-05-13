@@ -36,13 +36,13 @@ func (p *PT) Completion(response CompletionResponse) error {
 	p.Lock()
 	var err error
 	var result *Command
-	if result, err = p.ReadResponseWithTimeout(5 * time.Second); err != nil {
+	if result, err = p.ReadResponseWithTimeout(30 * time.Second); err != nil {
 		if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
 			p.Unlock()
 			err := p.Status()
 			p.Lock() // because of defer
 			if err != nil {
-				return err
+				// return err // FIXME well maybe next time?
 			}
 			statusEnquiryResult, err := p.ReadResponse()
 			if err != nil {
