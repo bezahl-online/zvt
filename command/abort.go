@@ -8,7 +8,9 @@ import (
 // ECR can instruct the PT to abort execution of a command
 func (p *PT) Abort() error {
 	Logger.Info("ABORT")
-	p.conn.Close()
-	p.conn = nil
+	if p.conn != nil {
+		p.conn.Close()
+		p.conn = nil
+	}
 	return p.SendCommand(Command{CtrlField: instr.Map["Abort"]})
 }

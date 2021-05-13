@@ -32,11 +32,16 @@ const (
 // Completion implements slave mode of ECR
 // ECR can instruct the PT to abort execution of the command
 func (p *PT) Completion(response CompletionResponse) error {
+	defer p.Unlock()
+	p.Lock()
 	var err error
 	var result *Command
-	if result, err = p.ReadResponseWithTimeout(30 * time.Second); err != nil {
+	if result, err = p.ReadResponseWithTimeout(5 * time.Second); err != nil {
 		if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
-			if err := p.Status(); err != nil {
+			p.Unlock()
+			err := p.Status()
+			p.Lock() // because of defer
+			if err != nil {
 				return err
 			}
 			statusEnquiryResult, err := p.ReadResponse()
@@ -54,7 +59,6 @@ func (p *PT) Completion(response CompletionResponse) error {
 					Logger.Error(fmt.Sprintf("06 0F: unmapped error message code %0X", statusEnquiryResult.Data.Data[0]))
 				}
 			}
-			// p.SendACK()
 			result = &Command{
 				CtrlField: instr.Map["StatusInformation"],
 				Data: apdu.DataUnit{
@@ -69,7 +73,10 @@ func (p *PT) Completion(response CompletionResponse) error {
 	if err = response.Process(result); err != nil {
 		return err
 	}
-	if err = p.SendACK(); err != nil {
+	p.Unlock() // befor sending
+	err = p.SendACK()
+	p.Lock() // because of defer
+	if err != nil {
 		return err
 	}
 	return nil

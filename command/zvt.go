@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -27,7 +28,9 @@ func skipShort(t *testing.T) bool {
 }
 
 // PaymentTerminal represents the driver
-var PaymentTerminal PT = PT{}
+var PaymentTerminal PT = PT{
+	RWMutex: sync.RWMutex{},
+}
 
 // EUR currency code
 const EUR = 978
@@ -36,6 +39,7 @@ var Logger *zap.Logger
 
 // PT is the class
 type PT struct {
+	sync.RWMutex
 	Logger *zap.Logger
 	conn   net.Conn
 }
@@ -46,19 +50,6 @@ const defaultTimeout = 5 * time.Second
 func init() {
 	PaymentTerminal.Logger = getLogger()
 	Logger = PaymentTerminal.Logger
-}
-
-// SendACK send ACK and return the response or error
-func (p *PT) SendACK() error {
-	p.Logger.Info("ECR: 'ACK'")
-	i := instr.Map["ACK"]
-	err := p.send(Command{
-		CtrlField: i,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // TODO: create comm interface!
@@ -86,7 +77,7 @@ func (p *PT) reconnectIfLost() error {
 		time.Sleep(100 * time.Millisecond)
 		if p.conn != nil {
 			// seems to be connected again
-			p.SendACK()
+			//p.SendACK()
 			return nil
 		}
 		err := fmt.Errorf("lost connection to PT")
@@ -96,7 +87,24 @@ func (p *PT) reconnectIfLost() error {
 	return nil
 }
 
+// SendACK send ACK and return the response or error
+func (p *PT) SendACK() error {
+	defer p.Unlock()
+	p.Lock()
+	p.Logger.Info("ECR: 'ACK'")
+	i := instr.Map["ACK"]
+	err := p.send(Command{
+		CtrlField: i,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (p *PT) SendCommand(command Command) error {
+	defer p.Unlock()
+	p.Lock()
 	if err := p.send(command); err != nil {
 		return p.logSendError(err)
 	}
