@@ -6,3 +6,4 @@ needed to run the minimal functionalty
 to work as a conduit for a cash register 
 project.
 
+git at ds share
