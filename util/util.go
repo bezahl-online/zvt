@@ -50,6 +50,9 @@ func ENVFilePath(envName string, fileName string) string {
 	}
 	filePath = strings.TrimRight(filePath, "/")
 	filePath += "/" + fileName
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		os.Mkdir(filePath, os.ModePerm)
+	}
 	return filePath
 }
 
