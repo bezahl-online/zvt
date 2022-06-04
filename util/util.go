@@ -45,14 +45,14 @@ func ENVFilePath(envName string, fileName string) string {
 	var filePath string
 	if v := os.Getenv(envName); len(v) > 0 {
 		filePath = v
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			os.Mkdir(filePath, os.ModePerm)
+		}
 	} else {
 		log.Fatalf("please set environment varibalbe '%s'", envName)
 	}
 	filePath = strings.TrimRight(filePath, "/")
 	filePath += "/" + fileName
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		os.Mkdir(filePath, os.ModePerm)
-	}
 	return filePath
 }
 
